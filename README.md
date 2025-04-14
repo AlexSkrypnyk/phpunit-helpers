@@ -23,7 +23,7 @@
 
 | Name                                                    | Source                                         | Description                                                        |
 |---------------------------------------------------------|------------------------------------------------|--------------------------------------------------------------------|
-| [`UnitTestBase`](#unittestbase)                         | [src](src/UnitTestBase.php)                    | Base test class that includes essential traits for PHPUnit testing |
+| [`UnitTestCase`](#UnitTestCase)                         | [src](src/UnitTestCase.php)                    | Base test class that includes essential traits for PHPUnit testing |
 | [`AssertArrayTrait`](#assertarraytrait)                 | [src](src/Traits/AssertArrayTrait.php)         | Custom assertions for arrays                                       |
 | [`EnvTrait`](#envtrait)                                 | [src](src/Traits/EnvTrait.php)                 | Manage environment variables during tests                          |
 | [`LocationsTrait`](#locationstrait)                     | [src](src/Traits/LocationsTrait.php)           | Manage file system locations and directories for tests             |
@@ -42,15 +42,15 @@ This package provides a collection of traits that can be used in your PHPUnit
 tests to make testing easier. Below is a description of each trait and how to
 use it.
 
-### `UnitTestBase`
+### `UnitTestCase`
 
-The `UnitTestBase` class is the base class for unit tests. It includes the
+The `UnitTestCase` class is the base class for unit tests. It includes the
 `ReflectionTrait` and `LocationsTrait` to provide useful methods for testing.
 
 ```php
-use AlexSkrypnyk\PhpunitHelpers\UnitTestBase;
+use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
 
-class MyTest extends UnitTestBase {
+class MyTest extends UnitTestCase {
   public function testExample() {
     // Test implementation that benefits from included traits.
   }
@@ -384,14 +384,14 @@ class MyCombinedTest extends TestCase {
 }
 ```
 
-Or simply extend the `UnitTestBase` class which already includes some of the
+Or simply extend the `UnitTestCase` class which already includes some of the
 most useful traits:
 
 ```php
-use AlexSkrypnyk\PhpunitHelpers\UnitTestBase;
+use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
 use AlexSkrypnyk\PhpunitHelpers\Traits\EnvTrait;
 
-class MyTest extends UnitTestBase {
+class MyTest extends UnitTestCase {
   use EnvTrait; // Add additional traits as needed.
 
   // Your test methods will have access to all traits.

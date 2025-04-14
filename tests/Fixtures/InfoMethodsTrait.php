@@ -7,7 +7,7 @@ namespace AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures;
 /**
  * Trait InfoMethodsTrait.
  *
- * A fixture trait to test the UnitTestBase info() method.
+ * A fixture trait to test the UnitTestCase info() method.
  */
 trait InfoMethodsTrait {
 
