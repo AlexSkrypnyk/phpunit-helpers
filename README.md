@@ -21,19 +21,16 @@
 
 ## Features
 
-- [`UnitTestBase`](#unittestbase)([src](src/UnitTestBase.php)) - Base test class that includes
-  essential traits for PHPUnit testing
-- Traits:
-  - [`AssertArrayTrait`](#assertarraytrait)([src](src/Traits/AssertArrayTrait.php)) - Custom assertions
-    for arrays
-  - [`EnvTrait`](#envtrait)([src](src/Traits/EnvTrait.php)) - Manage environment variables during
-    tests
-  - [`LocationsTrait`](#locationstrait)([src](src/Traits/LocationsTrait.php)) - Manage file system
-    locations and directories for tests
-  - [`ReflectionTrait`](#reflectiontrait)([src](src/Traits/ReflectionTrait.php)) - Access
-    protected/private methods and properties
-  - [`SerializableClosureTrait`](#serializableclosuretrait)([src](src/Traits/SerializableClosureTrait.php)) - Make closures
-    serializable for use in data providers
+| Name                                                    | Source                                         | Description                                                        |
+|---------------------------------------------------------|------------------------------------------------|--------------------------------------------------------------------|
+| [`UnitTestBase`](#unittestbase)                         | [src](src/UnitTestBase.php)                    | Base test class that includes essential traits for PHPUnit testing |
+| [`AssertArrayTrait`](#assertarraytrait)                 | [src](src/Traits/AssertArrayTrait.php)         | Custom assertions for arrays                                       |
+| [`EnvTrait`](#envtrait)                                 | [src](src/Traits/EnvTrait.php)                 | Manage environment variables during tests                          |
+| [`LocationsTrait`](#locationstrait)                     | [src](src/Traits/LocationsTrait.php)           | Manage file system locations and directories for tests             |
+| [`ProcessTrait`](#processtrait)                         | [src](src/Traits/ProcessTrait.php)             | Run and assert on command line processes during tests              |
+| [`ReflectionTrait`](#reflectiontrait)                   | [src](src/Traits/ReflectionTrait.php)          | Access protected/private methods and properties                    |
+| [`SerializableClosureTrait`](#serializableclosuretrait) | [src](src/Traits/SerializableClosureTrait.php) | Make closures serializable for use in data providers               |
+| [`TuiTrait`](#tuitrait)                                 | [src](src/Traits/TuiTrait.php)                 | Interact with and test Textual User Interfaces                     |
 
 ## Installation
 
@@ -131,7 +128,7 @@ class MyLocationsTest extends TestCase {
   protected function setUp(): void {
     // Initialize test directories.
     self::locationsInit();
-    
+
     // Now you can use the predefined directory properties:
     echo self::$root;      // Root directory of the project
     echo self::$fixtures;  // Path to fixtures directory
@@ -139,7 +136,7 @@ class MyLocationsTest extends TestCase {
     echo self::$repo;      // Source directory for operations
     echo self::$sut;       // System Under Test directory where tests run
     echo self::$tmp;       // Temporary files directory
-    
+
     // You can also print all locations with:
     echo self::locationsInfo();
   }
@@ -155,16 +152,86 @@ class MyLocationsTest extends TestCase {
 
     // Copy files to the SUT directory.
     $files = self::locationsCopyFilesToSut(['file1.txt', 'file2.txt']);
-    
+
     // Files will be available in self::$sut directory
     $this->assertFileExists(self::$sut . '/file1.txt1234'); // Note: random suffix added by default
   }
 }
 ```
 
+### `ProcessTrait`
+
+The `ProcessTrait` provides methods to run command line processes and assert on
+their output and exit codes. It integrates with the Symfony Process component
+for
+safe and controlled command execution.
+
+```php
+use AlexSkrypnyk\PhpunitHelpers\Traits\ProcessTrait;
+use PHPUnit\Framework\TestCase;
+
+class MyProcessTest extends TestCase {
+  use ProcessTrait;
+
+  protected function setUp(): void {
+    // Configure process behavior.
+    $this->processCwd = NULL; // Current working directory (NULL for current PHP process dir).
+    $this->processShowOutput = FALSE; // Whether to show output during process execution.
+  }
+
+  protected function tearDown(): void {
+    // Stop any running processes.
+    $this->processTearDown();
+  }
+
+  public function testCommandExecution() {
+    // Run a command with arguments, inputs, environment variables, and timeouts.
+    // The method validates command safety and ensures all arguments are scalar values.
+    $process = $this->processRun(
+      'echo',                        // Command to execute
+      ['Hello', 'World'],            // Command arguments
+      ['Input1', 'Input2'],          // Interactive process inputs
+      ['ENV_VAR' => 'value'],        // Environment variables
+      60,                            // Process timeout in seconds
+      30                             // Process idle timeout in seconds
+    );
+
+    // Assert that the process executed successfully.
+    $this->assertProcessSuccessful();
+
+    // Assert that the process failed.
+    $this->assertProcessFailed();
+
+    // Assert that the process output contains string(s).
+    $this->assertProcessOutputContains('Hello World');
+    $this->assertProcessOutputContains(['Hello', 'World']); // Can check for multiple strings
+
+    // Assert that the process output does not contain string(s).
+    $this->assertProcessOutputNotContains('Error');
+    $this->assertProcessOutputNotContains(['Error1', 'Error2']); // Can check multiple strings
+
+    // Assert that the process error output contains string(s).
+    $this->assertProcessErrorOutputContains('Warning');
+    $this->assertProcessErrorOutputContains(['Warning1', 'Warning2']); // Can check multiple strings
+
+    // Assert that the process error output does not contain string(s).
+    $this->assertProcessErrorOutputNotContains('Critical');
+    $this->assertProcessErrorOutputNotContains(['Critical1', 'Critical2']); // Can check multiple strings
+
+    // Assert in one call - prefix with '---' for strings that should NOT be present.
+    $this->assertProcessOutputContainsOrNot(['Hello', '---Error']);
+    $this->assertProcessErrorOutputContainsOrNot(['Warning', '---Critical']);
+
+    // Get debug info about the process (output, error output).
+    echo $this->processInfo();
+  }
+}
+```
+
 ### `SerializableClosureTrait`
 
-The `SerializableClosureTrait` makes closures serializable so they can be used in
+The `SerializableClosureTrait` makes closures serializable so they can be used
+in
 data providers. It works with both traditional closures and arrow functions.
 
 ```php
@@ -225,6 +292,75 @@ class MyReflectionTest extends TestCase {
 }
 ```
 
+### `TuiTrait`
+
+The `TuiTrait` provides constants and methods for interacting with a Textual
+User Interface (TUI) during tests, handling keystroke simulation and input
+entries. It supports both full-string input and character-by-character input
+simulation.
+
+```php
+use AlexSkrypnyk\PhpunitHelpers\Traits\TuiTrait;
+use PHPUnit\Framework\TestCase;
+
+class MyTuiTest extends TestCase {
+  use TuiTrait;
+
+  public function testTuiInteraction() {
+    // Define default entries for all sets.
+    $default_entries = [
+      'answer1' => 'value1',
+      'answer2' => self::TUI_DEFAULT, // Use default value (empty string by default)
+      'answer3' => 'value3',
+      'answer4' => 'value4',
+    ];
+
+    // First entry set: use default for 'answer1'.
+    $entries_set1 = ['answer1' => self::TUI_DEFAULT] + $default_entries;
+    $processed_entries = self::tuiEntries($entries_set1);
+
+    // Process entries with a custom default value instead of empty string
+    $processed_entries = self::tuiEntries($entries_set1, 'custom_default');
+
+    // Second entry set: skip 'answer2' (will not be included in the output).
+    $entries_set2 = ['answer2' => self::TUI_SKIP] + $default_entries;
+    $processed_entries = self::tuiEntries($entries_set2);
+
+    // Convert entries to keystrokes for testing character-by-character input.
+    // This is useful for testing TUIs that accept input one character at a time.
+    $keystrokes = self::tuiKeystrokes($entries_set1);
+
+    // Advanced keystroke conversion with options
+    $keystrokes = self::tuiKeystrokes(
+      $entries_set1,           // Entries to convert
+      3,                       // Number of characters to clear before entering new text
+      self::KEYS['TAB'],       // Custom accept key (Enter key by default)
+      self::KEYS['BACKSPACE']  // Custom clear key (Backspace by default)
+    );
+
+    // Special keys are available via constants for simulating keyboard interaction.
+    // Some examples of available special keys:
+    $up_key = self::KEYS['UP'];
+    $enter_key = self::KEYS['ENTER'];
+    $tab_key = self::KEYS['TAB'];
+    $esc_key = self::KEYS['ESCAPE'];
+    $ctrl_c = self::KEYS['CTRL_C'];
+    $backspace = self::KEYS['BACKSPACE'];
+
+    // Arrow keys are supported in multiple formats for compatibility
+    $up_arrow = self::KEYS['UP_ARROW']; // Alternative up arrow format
+
+    // Yes/No entries are predefined for convenience.
+    $yes = self::$tuiYes; // 'y' by default
+    $no = self::$tuiNo;   // 'n' by default
+
+    // Check if a value is a special key.
+    $is_key = self::tuiIsKey($enter_key); // Returns true
+    $is_key = self::tuiIsKey('not_a_key'); // Returns false
+  }
+}
+```
+
 ### Using Multiple Traits
 
 You can combine multiple traits in a single test class:
@@ -232,13 +368,17 @@ You can combine multiple traits in a single test class:
 ```php
 use AlexSkrypnyk\PhpunitHelpers\Traits\AssertArrayTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\EnvTrait;
+use AlexSkrypnyk\PhpunitHelpers\Traits\ProcessTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\ReflectionTrait;
+use AlexSkrypnyk\PhpunitHelpers\Traits\TuiTrait;
 use PHPUnit\Framework\TestCase;
 
 class MyCombinedTest extends TestCase {
   use AssertArrayTrait;
   use EnvTrait;
+  use ProcessTrait;
   use ReflectionTrait;
+  use TuiTrait;
 
   // Your test methods.
 }
