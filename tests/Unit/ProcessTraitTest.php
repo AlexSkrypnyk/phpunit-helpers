@@ -6,7 +6,7 @@ namespace AlexSkrypnyk\PhpunitHelpers\Tests\Unit;
 
 use PHPUnit\Framework\ExpectationFailedException;
 use AlexSkrypnyk\PhpunitHelpers\Traits\ProcessTrait;
-use AlexSkrypnyk\PhpunitHelpers\UnitTestBase;
+use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 
@@ -14,7 +14,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
  * Tests for ProcessTrait.
  */
 #[CoversClass(ProcessTrait::class)]
-class ProcessTraitTest extends UnitTestBase {
+class ProcessTraitTest extends UnitTestCase {
 
   use ProcessTrait;
 

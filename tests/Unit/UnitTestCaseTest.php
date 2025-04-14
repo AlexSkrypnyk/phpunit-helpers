@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace AlexSkrypnyk\PhpunitHelpers\Tests\Unit;
 
 use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\InfoMethodsTrait;
-use AlexSkrypnyk\PhpunitHelpers\UnitTestBase;
+use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
- * Tests for UnitTestBase.
+ * Tests for UnitTestCase.
  */
-#[CoversClass(UnitTestBase::class)]
-class UnitTestBaseTest extends UnitTestBase {
+#[CoversClass(UnitTestCase::class)]
+class UnitTestCaseTest extends UnitTestCase {
 
   use InfoMethodsTrait;
 

@@ -17,7 +17,7 @@ use PHPUnit\Framework\TestStatus\Failure;
  *
  * Use DEBUG=1 to prevent cleanup of the temp directories
  */
-abstract class UnitTestBase extends TestCase {
+abstract class UnitTestCase extends TestCase {
 
   use ReflectionTrait;
   use LocationsTrait;
