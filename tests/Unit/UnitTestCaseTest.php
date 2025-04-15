@@ -28,15 +28,15 @@ class UnitTestCaseTest extends UnitTestCase {
   }
 
   public function testInfo(): void {
-    $info = self::info();
+    $info = $this->info();
 
     $this->assertStringContainsString('Additional information:', $info);
     $this->assertStringContainsString('First info value', $info);
     $this->assertStringContainsString('42', $info);
     $this->assertStringContainsString('"one","two","three"', $info);
+    $this->assertStringContainsString('This non-static info method should be included', $info);
 
     $this->assertStringNotContainsString('This should not be included', $info);
-    $this->assertStringNotContainsString('This non-static method should not be included', $info);
     $this->assertStringNotContainsString('This is a test fixture info method that should not be included', $info);
   }
 

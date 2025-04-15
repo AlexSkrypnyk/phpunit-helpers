@@ -316,11 +316,11 @@ trait LocationsTrait {
   protected static function locationsRealpath(string $path): string {
     $path = realpath($path);
 
-    // @codeCoverIgnoreStart
+    // @codeCoverageIgnoreStart
     if ($path === FALSE) {
       throw new \RuntimeException(sprintf('Path "%s" does not exist.', $path));
     }
-    // @codeCoverIgnoreEnd
+    // @codeCoverageIgnoreEnd
     return $path;
   }
 
