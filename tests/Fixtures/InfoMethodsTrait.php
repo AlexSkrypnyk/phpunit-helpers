@@ -23,7 +23,7 @@ trait InfoMethodsTrait {
   }
 
   public function instanceInfo(): string {
-    return 'This non-static method should not be included';
+    return 'This non-static info method should be included';
   }
 
   public function testFixtureInfo(): string {

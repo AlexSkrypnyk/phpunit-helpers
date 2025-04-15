@@ -25,6 +25,7 @@
 |---------------------------------------------------------|------------------------------------------------|--------------------------------------------------------------------|
 | [`UnitTestCase`](#UnitTestCase)                         | [src](src/UnitTestCase.php)                    | Base test class that includes essential traits for PHPUnit testing |
 | [`AssertArrayTrait`](#assertarraytrait)                 | [src](src/Traits/AssertArrayTrait.php)         | Custom assertions for arrays                                       |
+| [`ApplicationTrait`](#applicationtrait)                 | [src](src/Traits/ApplicationTrait.php)         | Test Symfony Console applications with assertions                  |
 | [`EnvTrait`](#envtrait)                                 | [src](src/Traits/EnvTrait.php)                 | Manage environment variables during tests                          |
 | [`LocationsTrait`](#locationstrait)                     | [src](src/Traits/LocationsTrait.php)           | Manage file system locations and directories for tests             |
 | [`ProcessTrait`](#processtrait)                         | [src](src/Traits/ProcessTrait.php)             | Run and assert on command line processes during tests              |
@@ -73,6 +74,71 @@ class MyAssertArrayTest extends TestCase {
 
     // Assert that a string is present in an array.
     $this->assertArrayContainsString('test', $array);
+  }
+}
+```
+
+### `ApplicationTrait`
+
+The `ApplicationTrait` provides methods to test Symfony Console applications and their commands with comprehensive assertions.
+
+```php
+use AlexSkrypnyk\PhpunitHelpers\Traits\ApplicationTrait;
+use PHPUnit\Framework\TestCase;
+
+class MyApplicationTest extends TestCase {
+  use ApplicationTrait;
+
+  protected function setUp(): void {
+    // Configure application behavior
+    $this->applicationCwd = NULL; // Current working directory (NULL for current PHP process dir)
+    $this->applicationShowOutput = FALSE; // Whether to show output during execution
+  }
+
+  protected function tearDown(): void {
+    // Clean up application resources
+    $this->applicationTearDown();
+  }
+
+  public function testConsoleApplication() {
+    // Initialize application from a loader file
+    $this->applicationInitFromLoader('/path/to/application_loader.php');
+    
+    // Or initialize from a command class
+    $this->applicationInitFromCommand(MyCommand::class, TRUE); // TRUE for making it the default command
+    
+    // Run the application with input arguments and options
+    $output = $this->applicationRun(
+      ['argument1', '--option1=value1'],  // Input arguments and options
+      ['capture_stderr_separately' => TRUE], // Application tester options
+      FALSE // Whether a failure is expected (default: FALSE)
+    );
+    
+    // Assert that the application executed successfully
+    $this->assertApplicationSuccessful();
+    
+    // Or assert that the application failed
+    $this->assertApplicationFailed();
+    
+    // Assert that the application output contains string(s)
+    $this->assertApplicationOutputContains('Expected output');
+    $this->assertApplicationOutputContains(['String1', 'String2']); // Can check multiple strings
+    
+    // Assert that the application output does not contain string(s)
+    $this->assertApplicationOutputNotContains('Unexpected output');
+    
+    // Assert that the application error output contains string(s)
+    $this->assertApplicationErrorOutputContains('Expected error');
+    
+    // Assert that the application error output does not contain string(s)
+    $this->assertApplicationErrorOutputNotContains('Unexpected error');
+    
+    // Assert in one call - prefix with '---' for strings that should NOT be present
+    $this->assertApplicationOutputContainsOrNot(['Expected', '---Unexpected']);
+    $this->assertApplicationErrorOutputContainsOrNot(['Expected error', '---Unexpected error']);
+    
+    // Get debug info about the application (output, error output)
+    echo $this->applicationInfo();
   }
 }
 ```
@@ -367,6 +433,7 @@ You can combine multiple traits in a single test class:
 
 ```php
 use AlexSkrypnyk\PhpunitHelpers\Traits\AssertArrayTrait;
+use AlexSkrypnyk\PhpunitHelpers\Traits\ApplicationTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\EnvTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\ProcessTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\ReflectionTrait;
@@ -375,6 +442,7 @@ use PHPUnit\Framework\TestCase;
 
 class MyCombinedTest extends TestCase {
   use AssertArrayTrait;
+  use ApplicationTrait;
   use EnvTrait;
   use ProcessTrait;
   use ReflectionTrait;

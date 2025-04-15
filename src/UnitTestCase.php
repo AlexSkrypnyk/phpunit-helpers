@@ -44,7 +44,7 @@ abstract class UnitTestCase extends TestCase {
   protected function onNotSuccessfulTest(\Throwable $t): never {
     // @codeCoverageIgnoreStart
     fwrite(STDERR, PHP_EOL . PHP_EOL . 'Error: ' . $t->getMessage() . PHP_EOL);
-    fwrite(STDERR, static::info());
+    fwrite(STDERR, $this->info());
     parent::onNotSuccessfulTest($t);
     // @codeCoverageIgnoreEnd
   }
@@ -52,10 +52,20 @@ abstract class UnitTestCase extends TestCase {
   /**
    * Additional information about the test.
    */
-  public static function info(): string {
+  public function info(): string {
     // Collect all methods of the class that end with 'Info'.
     $methods = array_filter(get_class_methods(static::class), fn($m): bool => !str_starts_with($m, 'test') && str_ends_with($m, 'Info'));
-    $info = implode(PHP_EOL, array_map(fn($method): mixed => is_callable([static::class, $method]) ? static::{$method}() : '', $methods)) . PHP_EOL;
+
+    $info = '';
+    foreach ($methods as $method) {
+      $reflection = new \ReflectionMethod(static::class, $method);
+      if ($reflection->isStatic()) {
+        $info .= static::{$method}() . PHP_EOL;
+      }
+      else {
+        $info .= $this->{$method}() . PHP_EOL;
+      }
+    }
 
     $lines = [];
     if (!empty(trim($info))) {
