@@ -8,9 +8,6 @@ use AlexSkrypnyk\PhpunitHelpers\Traits\EnvTrait;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-/**
- * Tests for EnvTrait.
- */
 #[CoversClass(EnvTrait::class)]
 class EnvTraitTest extends TestCase {
 

@@ -10,9 +10,6 @@ use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 
-/**
- * Tests for ProcessTrait.
- */
 #[CoversClass(ProcessTrait::class)]
 class ProcessTraitTest extends UnitTestCase {
 
@@ -218,9 +215,6 @@ class ProcessTraitTest extends UnitTestCase {
     $this->assertStringContainsString('PROCESS: Not initialized', $info);
   }
 
-  /**
-   * Tests that an exception is thrown when an invalid command is provided.
-   */
   public function testProcessRunWithInvalidCommand(): void {
     $this->expectException(\InvalidArgumentException::class);
     $this->expectExceptionMessage('Invalid command: invalid$command. Only alphanumeric characters, dashes, underscores, and slashes are allowed.');
@@ -228,9 +222,6 @@ class ProcessTraitTest extends UnitTestCase {
     $this->processRun('invalid$command');
   }
 
-  /**
-   * Tests that an exception is thrown when a non-scalar argument is provided.
-   */
   public function testProcessRunWithInvalidArgument(): void {
     $this->expectException(\InvalidArgumentException::class);
     $this->expectExceptionMessage('All arguments must be scalar values.');
@@ -238,12 +229,6 @@ class ProcessTraitTest extends UnitTestCase {
     $this->processRun('echo', [['non-scalar', 'argument']]);
   }
 
-  /**
-   * Tests exception for non-scalar environment variable.
-   *
-   * Tests that an exception is thrown when a non-scalar environment variable
-   * is provided.
-   */
   public function testProcessRunWithInvalidEnvironmentVariable(): void {
     $this->expectException(\InvalidArgumentException::class);
     $this->expectExceptionMessage('All environment variables must be scalar values.');
@@ -251,9 +236,6 @@ class ProcessTraitTest extends UnitTestCase {
     $this->processRun('echo', [], [], ['ENV1' => ['non-scalar', 'value']]);
   }
 
-  /**
-   * Test assertProcessSuccessful when process is null.
-   */
   public function testAssertProcessSuccessfulWhenNull(): void {
     $this->process = NULL;
 
@@ -263,9 +245,6 @@ class ProcessTraitTest extends UnitTestCase {
     $this->assertProcessSuccessful();
   }
 
-  /**
-   * Test assertProcessFailed when process is null.
-   */
   public function testAssertProcessFailedWhenNull(): void {
     $this->process = NULL;
 
@@ -275,9 +254,6 @@ class ProcessTraitTest extends UnitTestCase {
     $this->assertProcessFailed();
   }
 
-  /**
-   * Test assertProcessOutputContains when process is null.
-   */
   public function testAssertProcessOutputContainsWhenNull(): void {
     $this->process = NULL;
 
@@ -287,9 +263,6 @@ class ProcessTraitTest extends UnitTestCase {
     $this->assertProcessOutputContains('test');
   }
 
-  /**
-   * Test assertProcessOutputNotContains when process is null.
-   */
   public function testAssertProcessOutputNotContainsWhenNull(): void {
     $this->process = NULL;
 
@@ -299,9 +272,6 @@ class ProcessTraitTest extends UnitTestCase {
     $this->assertProcessOutputNotContains('test');
   }
 
-  /**
-   * Test assertProcessErrorOutputContains when process is null.
-   */
   public function testAssertProcessErrorOutputContainsWhenNull(): void {
     $this->process = NULL;
 
@@ -311,9 +281,6 @@ class ProcessTraitTest extends UnitTestCase {
     $this->assertProcessErrorOutputContains('test');
   }
 
-  /**
-   * Test assertProcessErrorOutputNotContains when process is null.
-   */
   public function testAssertProcessErrorOutputNotContainsWhenNull(): void {
     $this->process = NULL;
 
@@ -323,9 +290,6 @@ class ProcessTraitTest extends UnitTestCase {
     $this->assertProcessErrorOutputNotContains('test');
   }
 
-  /**
-   * Test assertProcessOutputContainsOrNot when process is null.
-   */
   public function testAssertProcessOutputContainsOrNotWhenNull(): void {
     $this->process = NULL;
 
@@ -335,9 +299,6 @@ class ProcessTraitTest extends UnitTestCase {
     $this->assertProcessOutputContainsOrNot('test');
   }
 
-  /**
-   * Test assertProcessErrorOutputContainsOrNot when process is null.
-   */
   public function testAssertProcessErrorOutputContainsOrNotWhenNull(): void {
     $this->process = NULL;
 

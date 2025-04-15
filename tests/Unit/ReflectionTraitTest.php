@@ -8,51 +8,24 @@ use AlexSkrypnyk\PhpunitHelpers\Traits\ReflectionTrait;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-/**
- * Tests for ReflectionTrait.
- */
 #[CoversClass(ReflectionTrait::class)]
 class ReflectionTraitTest extends TestCase {
 
   use ReflectionTrait;
 
-  /**
-   * Test object instance.
-   */
   protected object $testObject;
 
   protected function setUp(): void {
     $this->testObject = new class() {
 
-      /**
-       * A static protected method for testing.
-       *
-       * @param string $arg
-       *   Test argument.
-       *
-       * @return string
-       *   Test result.
-       */
       protected static function staticProtectedMethod(string $arg): string {
         return 'Static: ' . $arg;
       }
 
-      /**
-       * A protected method for testing.
-       *
-       * @param string $arg
-       *   Test argument.
-       *
-       * @return string
-       *   Test result.
-       */
       protected function protectedMethod(string $arg): string {
         return 'Instance: ' . $arg;
       }
 
-      /**
-       * A protected property for testing.
-       */
       protected string $protectedProperty = 'initial value';
     };
   }

@@ -9,17 +9,11 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-/**
- * Tests for TuiTrait.
- */
 #[CoversClass(TuiTrait::class)]
 class TuiTraitTest extends TestCase {
 
   use TuiTrait;
 
-  /**
-   * Tests tuiEntries method.
-   */
   #[DataProvider('dataProviderTuiEntries')]
   public function testTuiEntries(array $entries, string $default, array $expected): void {
     $processed = static::tuiEntries($entries, $default);
@@ -35,9 +29,6 @@ class TuiTraitTest extends TestCase {
     }
   }
 
-  /**
-   * Data provider for testTuiEntries.
-   */
   public static function dataProviderTuiEntries(): array {
     return [
       'with_defaults' => [
@@ -106,9 +97,6 @@ class TuiTraitTest extends TestCase {
     ];
   }
 
-  /**
-   * Tests tuiKeystrokes method.
-   */
   #[DataProvider('dataProviderTuiKeystrokes')]
   public function testTuiKeystrokes(
     array $entries,
@@ -121,9 +109,6 @@ class TuiTraitTest extends TestCase {
     $this->assertEquals($expected, $keystrokes);
   }
 
-  /**
-   * Data provider for testTuiKeystrokes.
-   */
   public static function dataProviderTuiKeystrokes(): array {
     return [
       'basic_usage' => [
@@ -201,17 +186,11 @@ class TuiTraitTest extends TestCase {
     ];
   }
 
-  /**
-   * Tests tuiIsKey method.
-   */
   #[DataProvider('dataProviderTuiIsKey')]
   public function testTuiIsKey(string $value, bool $expected): void {
     $this->assertEquals($expected, static::tuiIsKey($value));
   }
 
-  /**
-   * Data provider for testTuiIsKey.
-   */
   public static function dataProviderTuiIsKey(): array {
     return [
       'enter_key' => [self::KEYS['ENTER'], TRUE],
@@ -227,9 +206,6 @@ class TuiTraitTest extends TestCase {
     ];
   }
 
-  /**
-   * Tests exception thrown when non-scalar value is provided to tuiEntries.
-   */
   public function testTuiEntriesNonScalarException(): void {
     $this->expectException(\InvalidArgumentException::class);
     $this->expectExceptionMessage('TUI entry "invalid_entry" must be a scalar value. Got: array');

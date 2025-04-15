@@ -24,7 +24,7 @@
     </rule>
 
     <!-- Allow missing function names in tests. -->
-    <rule ref="Drupal.Commenting.FunctionComment.Missing">
+    <rule ref="Drupal.Commenting">
         <exclude-pattern>*.Test\.php</exclude-pattern>
         <exclude-pattern>*.TestCase\.php</exclude-pattern>
         <exclude-pattern>*.test</exclude-pattern>

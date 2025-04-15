@@ -9,9 +9,6 @@ use AlexSkrypnyk\PhpunitHelpers\Traits\AssertArrayTrait;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-/**
- * Tests for AssertArrayTrait.
- */
 #[CoversClass(AssertArrayTrait::class)]
 class AssertArrayTraitTest extends TestCase {
 

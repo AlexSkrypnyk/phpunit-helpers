@@ -9,9 +9,6 @@ use Laravel\SerializableClosure\SerializableClosure;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-/**
- * Tests for ClosureWrapperTrait.
- */
 #[CoversClass(SerializableClosureTrait::class)]
 class SerializableClosureTraitTest extends TestCase {
 
