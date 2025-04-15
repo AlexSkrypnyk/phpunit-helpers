@@ -10,27 +10,15 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
 
-/**
- * Tests for LocationsTrait.
- */
 #[CoversClass(LocationsTrait::class)]
 class LocationsTraitTest extends TestCase {
 
   use LocationsTrait;
 
-  /**
-   * Temporary test directory.
-   */
   protected string $testTmp;
 
-  /**
-   * Test current working directory.
-   */
   protected string $testCwd;
 
-  /**
-   * Test fixtures directory.
-   */
   protected string $testFixtures;
 
   protected function setUp(): void {
