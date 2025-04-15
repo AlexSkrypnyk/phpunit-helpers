@@ -29,30 +29,28 @@ trait SerializableClosureTrait {
    * @param callable $callable
    *   The closure to wrap.
    *
-   * @return mixed
-   *   The serialized closure if it is a closure, otherwise the original
-   *   callable.
+   * @return \Laravel\SerializableClosure\SerializableClosure
+   *   The serialized closure class instance.
    */
-  public static function cw(callable $callable): mixed {
+  public static function cw(callable $callable): SerializableClosure {
     if (!$callable instanceof \Closure) {
-      throw new \InvalidArgumentException('The provided callable is not a closure.');
+      $callable = \Closure::fromCallable($callable);
     }
 
     return new SerializableClosure($callable);
   }
 
   /**
-   * Unwrap serialized closure back to a callable.
+   * Unwrap serialized closure.
    *
-   * @param mixed $serialized
+   * @param \Laravel\SerializableClosure\SerializableClosure $serialized
    *   The serialized closure to unwrap.
    *
-   * @return mixed
-   *   The unwrapped closure if it is a serialized closure, otherwise the
-   *   original value.
+   * @return \Closure
+   *   The unwrapped closure.
    */
-  public static function cu(mixed $serialized): mixed {
-    return $serialized instanceof SerializableClosure ? $serialized->getClosure() : $serialized;
+  public static function cu(SerializableClosure $serialized): \Closure {
+    return $serialized->getClosure();
   }
 
 }
