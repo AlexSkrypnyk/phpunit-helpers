@@ -183,6 +183,22 @@ class TuiTraitTest extends TestCase {
           self::KEYS['ENTER'],
         ],
       ],
+
+      'multiple_characters' => [
+        [
+          'answer1' => self::KEYS['DOWN'],
+          'answer2' => 'y' . self::KEYS['DOWN'] . 'n' . self::KEYS['ENTER'],
+          'answer3' => self::KEYS['DOWN'] . 'n' . self::KEYS['ENTER'],
+        ],
+        0,
+        NULL,
+        NULL,
+        [
+          self::KEYS['DOWN'],
+          'y', self::KEYS['DOWN'], 'n', self::KEYS['ENTER'],
+          self::KEYS['DOWN'], 'n', self::KEYS['ENTER'],
+        ],
+      ],
     ];
   }
 
