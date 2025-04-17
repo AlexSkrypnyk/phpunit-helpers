@@ -178,22 +178,23 @@ trait TuiTrait {
         continue;
       }
 
-      // Preserve the entry as-is if it is a special key.
-      if (self::tuiIsKey($entry)) {
-        $keystrokes[] = $entry;
-        continue;
-      }
+      $entry_keystrokes = [];
+
+      // If an entry has a special key - we consider that any additional
+      // functionality like clearing the existing entry or appending an accept
+      // key is handled by the consumer.
+      $skip_additional_processing = static::tuiHasKey($entry);
 
       // Clear the existing TUI value, if any, one character at a time.
-      if ($clear_size > 0) {
-        $keystrokes = array_merge($keystrokes, array_fill(0, $clear_size, $clear_key));
+      if (!$skip_additional_processing && $clear_size > 0) {
+        $entry_keystrokes = array_fill(0, $clear_size, $clear_key);
       }
 
-      // Enter the entry, one character at a time.
-      $entry_keystrokes = extension_loaded('mbstring') ? mb_str_split($entry) : str_split($entry);
+      $split_entry = self::tuiEntryToKeystroke($entry);
+      $entry_keystrokes = array_merge($entry_keystrokes, $split_entry);
 
       // Add the accept key at the end of the entry if it is not already there.
-      if (end($entry_keystrokes) !== $accept_key) {
+      if (!$skip_additional_processing && end($entry_keystrokes) !== $accept_key) {
         $entry_keystrokes[] = $accept_key;
       }
 
@@ -201,6 +202,69 @@ trait TuiTrait {
     }
 
     return $keystrokes;
+  }
+
+  /**
+   * Convert a TUI entry to keystrokes.
+   *
+   * @param string $entry
+   *   The TUI entry to convert.
+   *
+   * @return array
+   *   The converted keystrokes.
+   */
+  protected static function tuiEntryToKeystroke(string $entry): array {
+    $keystrokes = [];
+
+    $keys = static::tuiKeysFlattened();
+
+    // Sort by length to match longer sequences first.
+    usort($keys, fn($a, $b): int => strlen($b) <=> strlen($a));
+
+    $entry_length = strlen($entry);
+
+    $offset = 0;
+    while ($offset < $entry_length) {
+      $matched = FALSE;
+
+      foreach ($keys as $key) {
+        $key_length = strlen($key);
+        if (substr($entry, $offset, $key_length) === $key) {
+          $keystrokes[] = $key;
+          $offset += $key_length;
+          $matched = TRUE;
+          break;
+        }
+      }
+
+      if (!$matched) {
+        $keystrokes[] = $entry[$offset];
+        $offset++;
+      }
+    }
+
+    return $keystrokes;
+  }
+
+  /**
+   * Check if the given value contains a special key.
+   *
+   * @param string $value
+   *   The value to check.
+   *
+   * @return bool
+   *   TRUE if the value contains a special key, FALSE otherwise.
+   */
+  public static function tuiHasKey(string $value): bool {
+    $flattened_keys = static::tuiKeysFlattened();
+
+    foreach ($flattened_keys as $key_seq) {
+      if (str_contains($value, $key_seq)) {
+        return TRUE;
+      }
+    }
+
+    return FALSE;
   }
 
   /**
@@ -213,6 +277,16 @@ trait TuiTrait {
    *   TRUE if the value is a special key, FALSE otherwise.
    */
   protected static function tuiIsKey(string $value): bool {
+    return in_array($value, static::tuiKeysFlattened(), TRUE);
+  }
+
+  /**
+   * Flatten the TUI keys array.
+   *
+   * @return array
+   *   Flattened array of TUI keys.
+   */
+  protected static function tuiKeysFlattened(): array {
     $flattened_keys = [];
     foreach (static::KEYS as $seq) {
       if (is_array($seq)) {
@@ -222,7 +296,7 @@ trait TuiTrait {
         $flattened_keys[] = $seq;
       }
     }
-    return in_array($value, $flattened_keys, TRUE);
+    return $flattened_keys;
   }
 
 }
