@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace AlexSkrypnyk\PhpunitHelpers\Tests\Unit;
 
 use AlexSkrypnyk\PhpunitHelpers\Traits\ReflectionTrait;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversTrait;
 use PHPUnit\Framework\TestCase;
 
-#[CoversClass(ReflectionTrait::class)]
+#[CoversTrait(ReflectionTrait::class)]
 class ReflectionTraitTest extends TestCase {
 
   use ReflectionTrait;

@@ -6,10 +6,10 @@ namespace AlexSkrypnyk\PhpunitHelpers\Tests\Unit;
 
 use PHPUnit\Framework\AssertionFailedError;
 use AlexSkrypnyk\PhpunitHelpers\Traits\AssertArrayTrait;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversTrait;
 use PHPUnit\Framework\TestCase;
 
-#[CoversClass(AssertArrayTrait::class)]
+#[CoversTrait(AssertArrayTrait::class)]
 class AssertArrayTraitTest extends TestCase {
 
   use AssertArrayTrait;
