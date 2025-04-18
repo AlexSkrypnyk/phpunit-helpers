@@ -18,11 +18,20 @@ on:
 
 jobs:
   test-php:
+    name: Test PHP ${{ matrix.php-versions }}, PHPUnit ${{ matrix.phpunit-versions }}
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
         php-versions: ['8.2', '8.3', '8.4', '8.5']
+        phpunit-versions: ['11']
+        include:
+          - php-versions: '8.3'
+            phpunit-versions: '12'
+          - php-versions: '8.4'
+            phpunit-versions: '12'
+          - php-versions: '8.5'
+            phpunit-versions: '12'
 
     steps:
       - name: Checkout code
@@ -40,6 +49,11 @@ jobs:
           php-version: ${{ matrix.php-versions }}
           coverage: pcov
           ini-values: pcov.directory=.
+
+      - name: Modify composer.json for PHPUnit version
+        run: |
+          PHPUNIT_CONSTRAINT="^${{ matrix.phpunit-versions || '10' }}"
+          composer require --no-update "phpunit/phpunit:${PHPUNIT_CONSTRAINT}"
 
       - name: Install dependencies
         run: composer install ${{ matrix.php-versions == '8.5' && '--ignore-platform-reqs' || '' }}
@@ -60,7 +74,7 @@ jobs:
       - name: Upload coverage report as an artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{github.job}}-code-coverage-report-${{ matrix.php-versions }}
+          name: ${{github.job}}-code-coverage-report-php-${{ matrix.php-versions }}-phpunit-${{ matrix.phpunit-versions }}
           path: .logs
           include-hidden-files: true
           if-no-files-found: error

@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace AlexSkrypnyk\PhpunitHelpers\Tests\Unit;
 
 use AlexSkrypnyk\PhpunitHelpers\Traits\LocationsTrait;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversTrait;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
 
-#[CoversClass(LocationsTrait::class)]
+#[CoversTrait(LocationsTrait::class)]
 class LocationsTraitTest extends TestCase {
 
   use LocationsTrait;

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AlexSkrypnyk\PhpunitHelpers\Tests\Unit;
 
+use PHPUnit\Framework\Attributes\CoversTrait;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\InputInterface;
@@ -14,11 +15,10 @@ use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\Application\Command\GreetingComma
 use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\Application\Command\ErrorOutputCommand;
 use AlexSkrypnyk\PhpunitHelpers\Traits\ApplicationTrait;
 use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
-use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\ExpectationFailedException;
 
-#[CoversClass(ApplicationTrait::class)]
+#[CoversTrait(ApplicationTrait::class)]
 class ApplicationTraitTest extends UnitTestCase {
 
   use ApplicationTrait;
