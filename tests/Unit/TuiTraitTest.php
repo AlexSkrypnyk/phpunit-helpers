@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace AlexSkrypnyk\PhpunitHelpers\Tests\Unit;
 
 use AlexSkrypnyk\PhpunitHelpers\Traits\TuiTrait;
-use PHPUnit\Framework\Attributes\CoversTrait;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-#[CoversTrait(TuiTrait::class)]
+#[CoversClass(TuiTrait::class)]
 class TuiTraitTest extends TestCase {
 
   use TuiTrait;
