@@ -18,20 +18,33 @@ on:
 
 jobs:
   test-php:
-    name: Test PHP ${{ matrix.php-versions }}, PHPUnit ${{ matrix.phpunit-versions }}
+    name: Test PHP ${{ matrix.php-versions }}, PHPUnit ${{ matrix.phpunit-versions }}, Deps ${{ matrix.dependency-preference }}
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
         php-versions: ['8.2', '8.3', '8.4', '8.5']
         phpunit-versions: ['11']
+        dependency-preference: ['normal', 'lowest']
         include:
           - php-versions: '8.3'
             phpunit-versions: '12'
+            dependency-preference: 'normal'
+          - php-versions: '8.3'
+            phpunit-versions: '12'
+            dependency-preference: 'lowest'
           - php-versions: '8.4'
             phpunit-versions: '12'
+            dependency-preference: 'normal'
+          - php-versions: '8.4'
+            phpunit-versions: '12'
+            dependency-preference: 'lowest'
           - php-versions: '8.5'
             phpunit-versions: '12'
+            dependency-preference: 'normal'
+          - php-versions: '8.5'
+            phpunit-versions: '12'
+            dependency-preference: 'lowest'
 
     steps:
       - name: Checkout code
@@ -56,7 +69,12 @@ jobs:
           composer require --no-update "phpunit/phpunit:${PHPUNIT_CONSTRAINT}"
 
       - name: Install dependencies
-        run: composer install ${{ matrix.php-versions == '8.5' && '--ignore-platform-reqs' || '' }}
+        run: |
+          if [[ "${{ matrix.dependency-preference }}" == "lowest" ]]; then
+            composer update --prefer-lowest --prefer-stable ${{ matrix.php-versions == '8.5' && '--ignore-platform-reqs' || '' }}
+          else
+            composer install ${{ matrix.php-versions == '8.5' && '--ignore-platform-reqs' || '' }}
+          fi
 
       - name: Validate composer.json
         run: |
@@ -64,24 +82,32 @@ jobs:
           composer normalize --dry-run
 
       - name: Check coding standards
+        if: matrix.php-versions == '8.3' && matrix.dependency-preference == 'normal'
         run: composer lint
         continue-on-error: ${{ vars.CI_LINT_IGNORE_FAILURE == '1' }}
 
-      - name: Run tests
+      - name: Run tests with coverage
+        if: matrix.phpunit-versions == '11'
         run: composer test-coverage
         continue-on-error: ${{ vars.CI_TEST_IGNORE_FAILURE == '1' }}
 
+      - name: Run tests without coverage
+        if: matrix.phpunit-versions != '11'
+        run: composer test
+        continue-on-error: ${{ vars.CI_TEST_IGNORE_FAILURE == '1' }}
+
       - name: Upload coverage report as an artifact
+        if: matrix.phpunit-versions == '11'
         uses: actions/upload-artifact@v4
         with:
-          name: ${{github.job}}-code-coverage-report-php-${{ matrix.php-versions }}-phpunit-${{ matrix.phpunit-versions }}
+          name: ${{github.job}}-code-coverage-report-php-${{ matrix.php-versions }}-phpunit-${{ matrix.phpunit-versions }}-deps-${{ matrix.dependency-preference }}
           path: .logs
           include-hidden-files: true
           if-no-files-found: error
 
       - name: Upload test results to Codecov
+        if: matrix.phpunit-versions == '11' && env.CODECOV_TOKEN != ''
         uses: codecov/test-results-action@v1
-        if: ${{ env.CODECOV_TOKEN != '' }}
         with:
           files: .logs/junit.xml
           fail_ci_if_error: true
@@ -89,8 +115,8 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload coverage report to Codecov
+        if: matrix.phpunit-versions == '11' && env.CODECOV_TOKEN != ''
         uses: codecov/codecov-action@v5
-        if: ${{ env.CODECOV_TOKEN != '' }}
         with:
           files: .logs/cobertura.xml
           fail_ci_if_error: true

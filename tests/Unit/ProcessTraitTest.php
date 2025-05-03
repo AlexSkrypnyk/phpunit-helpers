@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace AlexSkrypnyk\PhpunitHelpers\Tests\Unit;
 
-use PHPUnit\Framework\Attributes\CoversTrait;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\ExpectationFailedException;
 use AlexSkrypnyk\PhpunitHelpers\Traits\ProcessTrait;
 use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
-#[CoversTrait(ProcessTrait::class)]
+#[CoversClass(ProcessTrait::class)]
 class ProcessTraitTest extends UnitTestCase {
 
   use ProcessTrait;

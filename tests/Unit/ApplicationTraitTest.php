@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AlexSkrypnyk\PhpunitHelpers\Tests\Unit;
 
-use PHPUnit\Framework\Attributes\CoversTrait;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\InputInterface;
@@ -18,7 +18,7 @@ use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\ExpectationFailedException;
 
-#[CoversTrait(ApplicationTrait::class)]
+#[CoversClass(ApplicationTrait::class)]
 class ApplicationTraitTest extends UnitTestCase {
 
   use ApplicationTrait;
@@ -194,8 +194,6 @@ class ApplicationTraitTest extends UnitTestCase {
     // Create a test command that throws an exception
     $command = new class() extends Command {
 
-      protected static string $defaultName = 'test:exception';
-
       protected function configure(): void {
         $this->setName('test:exception');
       }
@@ -223,8 +221,6 @@ class ApplicationTraitTest extends UnitTestCase {
     // Create a test command that returns a non-zero exit code
     $command = new class() extends Command {
 
-      protected static string $defaultName = 'test:exit-code';
-
       protected function configure(): void {
         $this->setName('test:exit-code');
       }
@@ -247,8 +243,6 @@ class ApplicationTraitTest extends UnitTestCase {
   public function testApplicationRunWithNonZeroExitCodeAndExpectedFailure(): void {
     // Create a test command that returns a non-zero exit code
     $command = new class() extends Command {
-
-      protected static string $defaultName = 'test:exit-code';
 
       protected function configure(): void {
         $this->setName('test:exit-code');
@@ -274,8 +268,6 @@ class ApplicationTraitTest extends UnitTestCase {
   public function testAssertApplicationFailed(): void {
     // Create a test command that returns a non-zero exit code
     $command = new class() extends Command {
-
-      protected static string $defaultName = 'test:exit-code';
 
       protected function configure(): void {
         $this->setName('test:exit-code');
