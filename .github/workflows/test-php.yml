@@ -97,7 +97,7 @@ jobs:
           # Remove Covers annotations from tests to avoid issues with PHPUnit 11
           find ./tests -name '*.php' -exec sed -i '/#\[.*Covers.*\]/d' {} \;
           # And remove coverage section from phpunit.xml to avoid issues with PHPUnit 11
-          sed -i '/<coverage/,/<\/coverage>/d' phpunit.xml
+          sed -i 's/requireCoverageMetadata="true"/requireCoverageMetadata="false"/' phpunit.xml
           composer test
         continue-on-error: ${{ vars.CI_TEST_IGNORE_FAILURE == '1' }}
 
