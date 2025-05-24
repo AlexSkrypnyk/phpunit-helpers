@@ -87,17 +87,22 @@ jobs:
         continue-on-error: ${{ vars.CI_LINT_IGNORE_FAILURE == '1' }}
 
       - name: Run tests with coverage
-        if: matrix.phpunit-versions == '11'
+        if: matrix.phpunit-versions == '12'
         run: composer test-coverage
         continue-on-error: ${{ vars.CI_TEST_IGNORE_FAILURE == '1' }}
 
       - name: Run tests without coverage
-        if: matrix.phpunit-versions != '11'
-        run: composer test
+        if: matrix.phpunit-versions != '12'
+        run: |
+          # Remove Covers annotations from tests to avoid issues with PHPUnit 11
+          find ./tests -name '*.php' -exec sed -i '/#\[.*Covers.*\]/d' {} \;
+          # And remove coverage section from phpunit.xml to avoid issues with PHPUnit 11
+          sed -i '/<coverage/,/<\/coverage>/d' phpunit.xml
+          composer test
         continue-on-error: ${{ vars.CI_TEST_IGNORE_FAILURE == '1' }}
 
       - name: Upload coverage report as an artifact
-        if: matrix.phpunit-versions == '11'
+        if: matrix.phpunit-versions == '12'
         uses: actions/upload-artifact@v4
         with:
           name: ${{github.job}}-code-coverage-report-php-${{ matrix.php-versions }}-phpunit-${{ matrix.phpunit-versions }}-deps-${{ matrix.dependency-preference }}
@@ -106,7 +111,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload test results to Codecov
-        if: matrix.phpunit-versions == '11' && env.CODECOV_TOKEN != ''
+        if: matrix.phpunit-versions == '12' && env.CODECOV_TOKEN != ''
         uses: codecov/test-results-action@v1
         with:
           files: .logs/junit.xml
@@ -115,7 +120,7 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload coverage report to Codecov
-        if: matrix.phpunit-versions == '11' && env.CODECOV_TOKEN != ''
+        if: matrix.phpunit-versions == '12' && env.CODECOV_TOKEN != ''
         uses: codecov/codecov-action@v5
         with:
           files: .logs/cobertura.xml

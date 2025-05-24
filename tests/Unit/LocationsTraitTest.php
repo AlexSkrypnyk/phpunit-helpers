@@ -411,4 +411,28 @@ class LocationsTraitTest extends TestCase {
     ];
   }
 
+  public function testLocationGetters(): void {
+    $this->locationsInit($this->testCwd);
+
+    // Test all getter methods return the same values as direct property access
+    $this->assertSame(static::$root, static::locationsRoot());
+    $this->assertSame(static::$fixtures, static::locationsFixtures());
+    $this->assertSame(static::$workspace, static::locationsWorkspace());
+    $this->assertSame(static::$repo, static::locationsRepo());
+    $this->assertSame(static::$sut, static::locationsSut());
+    $this->assertSame(static::$tmp, static::locationsTmp());
+
+    // Test that getters return expected directory types
+    $this->assertDirectoryExists(static::locationsRoot());
+    $this->assertDirectoryExists(static::locationsWorkspace());
+    $this->assertDirectoryExists(static::locationsRepo());
+    $this->assertDirectoryExists(static::locationsSut());
+    $this->assertDirectoryExists(static::locationsTmp());
+
+    // Test fixtures getter specifically (can be null)
+    if (static::locationsFixtures() !== NULL) {
+      $this->assertDirectoryExists(static::locationsFixtures());
+    }
+  }
+
 }
