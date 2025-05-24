@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace AlexSkrypnyk\PhpunitHelpers\Tests\Unit;
 
 use AlexSkrypnyk\PhpunitHelpers\Traits\EnvTrait;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversTrait;
 use PHPUnit\Framework\TestCase;
 
-#[CoversClass(EnvTrait::class)]
+#[CoversTrait(EnvTrait::class)]
 class EnvTraitTest extends TestCase {
 
   use EnvTrait;

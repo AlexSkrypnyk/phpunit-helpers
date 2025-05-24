@@ -34,6 +34,19 @@ trait ProcessTrait {
   protected bool $processShowOutput = FALSE;
 
   /**
+   * Gets the currently running process.
+   *
+   * @return \Symfony\Component\Process\Process
+   *   The currently running process.
+   */
+  public function processGet(): Process {
+    if (!$this->process instanceof Process) {
+      throw new \RuntimeException('Process is not initialized');
+    }
+    return $this->process;
+  }
+
+  /**
    * Tears down the process.
    *
    * Stops the currently running process and resets the process variable.
@@ -64,7 +77,7 @@ trait ProcessTrait {
    * @return \Symfony\Component\Process\Process
    *   The completed process.
    */
-  protected function processRun(
+  public function processRun(
     string $command,
     array $arguments = [],
     array $inputs = [],
@@ -128,7 +141,7 @@ trait ProcessTrait {
    * Checks if the process completed with a successful exit code and provides
    * detailed error output if it failed.
    */
-  protected function assertProcessSuccessful(): void {
+  public function assertProcessSuccessful(): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
     $this->assertTrue($this->process->isSuccessful(), sprintf(
       'Process failed with exit code %d: %s%sOutput:%s%s',
@@ -146,7 +159,7 @@ trait ProcessTrait {
    * Checks if the process failed and provides detailed output if it
    * unexpectedly succeeded.
    */
-  protected function assertProcessFailed(): void {
+  public function assertProcessFailed(): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
     $this->assertFalse($this->process->isSuccessful(), sprintf(
       'Process succeeded when failure was expected.%sOutput:%s%s',
@@ -162,7 +175,7 @@ trait ProcessTrait {
    * @param array|string $expected
    *   Expected string or array of strings to check for in the process output.
    */
-  protected function assertProcessOutputContains(array|string $expected): void {
+  public function assertProcessOutputContains(array|string $expected): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
     $output = $this->process->getOutput();
 
@@ -187,7 +200,7 @@ trait ProcessTrait {
    * @param array|string $expected
    *   String or array of strings that should not be in the process output.
    */
-  protected function assertProcessOutputNotContains(array|string $expected): void {
+  public function assertProcessOutputNotContains(array|string $expected): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
     $output = $this->process->getOutput();
 
@@ -212,7 +225,7 @@ trait ProcessTrait {
    * @param string $expected
    *   Expected string to check for in the process error output.
    */
-  protected function assertProcessErrorOutputContains(array|string $expected): void {
+  public function assertProcessErrorOutputContains(array|string $expected): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
     $output = $this->process->getErrorOutput();
 
@@ -237,7 +250,7 @@ trait ProcessTrait {
    * @param string $expected
    *   String that should not be in the process error output.
    */
-  protected function assertProcessErrorOutputNotContains(array|string $expected): void {
+  public function assertProcessErrorOutputNotContains(array|string $expected): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
     $output = $this->process->getErrorOutput();
 
@@ -265,7 +278,7 @@ trait ProcessTrait {
    *   String or array of strings to check in the process output.
    *   Prefix with '---' for strings that should not be present.
    */
-  protected function assertProcessOutputContainsOrNot(string|array $expected): void {
+  public function assertProcessOutputContainsOrNot(string|array $expected): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
     $output = $this->process->getOutput();
 
@@ -305,7 +318,7 @@ trait ProcessTrait {
    *   String or array of strings to check in the process error output.
    *   Prefix with '---' for strings that should not be present.
    */
-  protected function assertProcessErrorOutputContainsOrNot(string|array $expected): void {
+  public function assertProcessErrorOutputContainsOrNot(string|array $expected): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
     $output = $this->process->getErrorOutput();
 
@@ -341,7 +354,7 @@ trait ProcessTrait {
    * @return string
    *   The locations' info.
    */
-  protected function processInfo(): string {
+  public function processInfo(): string {
     if (!$this->process instanceof Process) {
       return 'PROCESS: Not initialized' . PHP_EOL;
     }

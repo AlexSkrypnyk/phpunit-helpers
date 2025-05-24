@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace AlexSkrypnyk\PhpunitHelpers\Tests\Unit;
 
 use AlexSkrypnyk\PhpunitHelpers\Traits\LocationsTrait;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversTrait;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
 
-#[CoversClass(LocationsTrait::class)]
+#[CoversTrait(LocationsTrait::class)]
 class LocationsTraitTest extends TestCase {
 
   use LocationsTrait;
@@ -55,7 +55,7 @@ class LocationsTraitTest extends TestCase {
     $this->assertDirectoryExists(static::$tmp);
 
     $this->assertNotEmpty(static::$fixtures);
-    $this->assertSame(static::locationsRealpath($this->testFixtures), static::locationsRealpath(static::$fixtures));
+    $this->assertSame(static::locationsRealpath($this->testFixtures), static::locationsRealpath(static::$fixtures ?? ''));
 
     $after_called = FALSE;
     $after = function () use (&$after_called): void {
@@ -182,7 +182,9 @@ class LocationsTraitTest extends TestCase {
     $this->assertNotEmpty($expected);
     $this->assertStringContainsString($this->testCwd, $fixture_dir);
     $this->assertStringContainsString('locations_fixture_dir_name_with_data_set_names', $fixture_dir);
-    $this->assertStringEndsWith($expected, $fixture_dir);
+    if ($expected !== '') {
+      $this->assertStringEndsWith($expected, $fixture_dir);
+    }
   }
 
   public static function dataProviderLocationsFixtureDirTestNameWithDataSetNames(): array {
@@ -220,7 +222,9 @@ class LocationsTraitTest extends TestCase {
     foreach ($copied_files as $copied_file) {
       $this->assertFileExists($copied_file);
       $this->assertNotEmpty(static::$sut);
-      $this->assertStringStartsWith(static::$sut, $copied_file);
+      if (static::$sut !== '') {
+        $this->assertStringStartsWith(static::$sut, $copied_file);
+      }
       $filename = basename($copied_file);
       $this->assertContains($filename, ['file1.txt', 'file2.txt'], 'No random suffix was added');
     }
