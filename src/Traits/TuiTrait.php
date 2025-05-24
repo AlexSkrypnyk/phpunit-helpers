@@ -104,7 +104,7 @@ trait TuiTrait {
    *
    * @var string
    */
-  protected static $tuiYes = 'y';
+  public static $tuiYes = 'y';
 
   /**
    * The "No" entry.
@@ -113,7 +113,7 @@ trait TuiTrait {
    *
    * @var string
    */
-  protected static $tuiNo = 'n';
+  public static $tuiNo = 'n';
 
   /**
    * Process TUI entries.
@@ -127,7 +127,7 @@ trait TuiTrait {
    * @return array
    *   The processed TUI entries.
    */
-  protected static function tuiEntries(array $entries, string $default = ''): array {
+  public static function tuiEntries(array $entries, string $default = ''): array {
     foreach ($entries as $key => $value) {
       if (!is_scalar($value)) {
         throw new \InvalidArgumentException(sprintf('TUI entry "%s" must be a scalar value. Got: %s', $key, gettype($value)));
@@ -159,7 +159,7 @@ trait TuiTrait {
    * @return array
    *   The processed TUI entries as keystrokes.
    */
-  protected static function tuiKeystrokes(array $entries, int $clear_size = 0, ?string $accept_key = NULL, ?string $clear_key = NULL): array {
+  public static function tuiKeystrokes(array $entries, int $clear_size = 0, ?string $accept_key = NULL, ?string $clear_key = NULL): array {
     $accept_key = $accept_key ?? static::KEYS['ENTER'];
     $clear_key = $clear_key ?? static::KEYS['BACKSPACE'];
 
@@ -213,7 +213,7 @@ trait TuiTrait {
    * @return array
    *   The converted keystrokes.
    */
-  protected static function tuiEntryToKeystroke(string $entry): array {
+  public static function tuiEntryToKeystroke(string $entry): array {
     $keystrokes = [];
 
     $keys = static::tuiKeysFlattened();
@@ -276,7 +276,7 @@ trait TuiTrait {
    * @return bool
    *   TRUE if the value is a special key, FALSE otherwise.
    */
-  protected static function tuiIsKey(string $value): bool {
+  public static function tuiIsKey(string $value): bool {
     return in_array($value, static::tuiKeysFlattened(), TRUE);
   }
 

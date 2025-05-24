@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 namespace AlexSkrypnyk\PhpunitHelpers\Tests\Unit;
 
-use PHPUnit\Framework\Attributes\CoversClass;
-use Symfony\Component\Console\Command\Command;
+use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\Application\Command\ErrorOutputCommand;
+use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\Application\Command\GreetingCommand;
+use AlexSkrypnyk\PhpunitHelpers\Traits\ApplicationTrait;
+use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
+use PHPUnit\Framework\AssertionFailedError;
+use PHPUnit\Framework\Attributes\CoversTrait;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\ExpectationFailedException;
 use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\ApplicationTester;
-use PHPUnit\Framework\AssertionFailedError;
-use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\Application\Command\GreetingCommand;
-use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\Application\Command\ErrorOutputCommand;
-use AlexSkrypnyk\PhpunitHelpers\Traits\ApplicationTrait;
-use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
-use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\ExpectationFailedException;
 
-#[CoversClass(ApplicationTrait::class)]
+#[CoversTrait(ApplicationTrait::class)]
 class ApplicationTraitTest extends UnitTestCase {
 
   use ApplicationTrait;

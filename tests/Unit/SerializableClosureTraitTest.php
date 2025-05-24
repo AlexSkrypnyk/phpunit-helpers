@@ -6,10 +6,10 @@ namespace AlexSkrypnyk\PhpunitHelpers\Tests\Unit;
 
 use AlexSkrypnyk\PhpunitHelpers\Traits\SerializableClosureTrait;
 use Laravel\SerializableClosure\SerializableClosure;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversTrait;
 use PHPUnit\Framework\TestCase;
 
-#[CoversClass(SerializableClosureTrait::class)]
+#[CoversTrait(SerializableClosureTrait::class)]
 class SerializableClosureTraitTest extends TestCase {
 
   use SerializableClosureTrait;

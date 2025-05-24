@@ -78,7 +78,7 @@ trait LocationsTrait {
    * @return string
    *   The fixtures directory path relative to the repository root.
    */
-  protected static function locationsFixturesDir(): string {
+  public static function locationsFixturesDir(): string {
     return 'tests/Fixtures';
   }
 
@@ -92,7 +92,7 @@ trait LocationsTrait {
    *   Closure to run after initialization. Closure will be bound to the test
    *   class where this trait is used.
    */
-  protected function locationsInit(?string $cwd = NULL, ?\Closure $after = NULL): void {
+  public function locationsInit(?string $cwd = NULL, ?\Closure $after = NULL): void {
     static::$root = static::locationsRealpath($cwd ?? (string) getcwd());
     static::$workspace = static::locationsMkdir(rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'workspace-' . microtime(TRUE));
     static::$repo = static::locationsMkdir(static::$workspace . DIRECTORY_SEPARATOR . 'repo');
@@ -114,7 +114,7 @@ trait LocationsTrait {
    *
    * Will be skipped if the DEBUG environment variable is set.
    */
-  protected function locationsTearDown(): void {
+  public function locationsTearDown(): void {
     (new Filesystem())->remove(static::$workspace);
   }
 
@@ -132,7 +132,7 @@ trait LocationsTrait {
    * @return string
    *   The fixtures directory path.
    */
-  protected function locationsFixtureDir(?string $name = NULL): string {
+  public function locationsFixtureDir(?string $name = NULL): string {
     $fixtures_dir = static::$root . DIRECTORY_SEPARATOR . static::locationsFixturesDir();
     if (!is_dir($fixtures_dir)) {
       throw new \RuntimeException(sprintf('Fixtures directory "%s" does not exist.', $fixtures_dir));
@@ -176,7 +176,7 @@ trait LocationsTrait {
    * @return string
    *   The locations' info.
    */
-  protected static function locationsInfo(): string {
+  public static function locationsInfo(): string {
     $lines[] = 'LOCATIONS';
     $lines[] = 'Root       : ' . static::$root;
     $lines[] = 'Fixtures   : ' . (static::$fixtures ?? 'Not set');
@@ -206,7 +206,7 @@ trait LocationsTrait {
    * @return array<int, string>
    *   An array of created file paths.
    */
-  protected static function locationsCopy(string $src, string $dst, array $include = [], array $exclude = [], ?callable $before = NULL): array {
+  public static function locationsCopy(string $src, string $dst, array $include = [], array $exclude = [], ?callable $before = NULL): array {
     $created = [];
 
     $exclusions = array_merge([
@@ -274,7 +274,7 @@ trait LocationsTrait {
    * @return array<int, string>
    *   The list of created file paths.
    */
-  protected static function locationsCopyFilesToSut(array $files, ?string $basedir = NULL, bool $append_rand = TRUE): array {
+  public static function locationsCopyFilesToSut(array $files, ?string $basedir = NULL, bool $append_rand = TRUE): array {
     $basedir = $basedir ?: getcwd();
     if (!$basedir || !is_dir($basedir)) {
       throw new \RuntimeException(sprintf('The base directory "%s" does not exist.', $basedir));
@@ -293,7 +293,7 @@ trait LocationsTrait {
    * @return string
    *   The real path of the created or existing directory.
    */
-  protected static function locationsMkdir(string $path): string {
+  public static function locationsMkdir(string $path): string {
     if (!is_dir($path)) {
       (new Filesystem())->mkdir($path);
     }
@@ -313,7 +313,7 @@ trait LocationsTrait {
    * @throws \RuntimeException
    *   If the path does not exist.
    */
-  protected static function locationsRealpath(string $path): string {
+  public static function locationsRealpath(string $path): string {
     $path = realpath($path);
 
     // @codeCoverageIgnoreStart
@@ -322,6 +322,66 @@ trait LocationsTrait {
     }
     // @codeCoverageIgnoreEnd
     return $path;
+  }
+
+  /**
+   * Get the root directory path.
+   *
+   * @return string
+   *   The root directory path.
+   */
+  public static function locationsRoot(): string {
+    return static::$root;
+  }
+
+  /**
+   * Get the fixtures directory path.
+   *
+   * @return string|null
+   *   The fixtures directory path or NULL if not set.
+   */
+  public static function locationsFixtures(): ?string {
+    return static::$fixtures;
+  }
+
+  /**
+   * Get the workspace directory path.
+   *
+   * @return string
+   *   The workspace directory path.
+   */
+  public static function locationsWorkspace(): string {
+    return static::$workspace;
+  }
+
+  /**
+   * Get the repo directory path.
+   *
+   * @return string
+   *   The repo directory path.
+   */
+  public static function locationsRepo(): string {
+    return static::$repo;
+  }
+
+  /**
+   * Get the SUT directory path.
+   *
+   * @return string
+   *   The SUT directory path.
+   */
+  public static function locationsSut(): string {
+    return static::$sut;
+  }
+
+  /**
+   * Get the temp directory path.
+   *
+   * @return string
+   *   The temp directory path.
+   */
+  public static function locationsTmp(): string {
+    return static::$tmp;
   }
 
 }

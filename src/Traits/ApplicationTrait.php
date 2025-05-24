@@ -44,6 +44,35 @@ trait ApplicationTrait {
   protected bool $applicationShowOutput = FALSE;
 
   /**
+   * Get the application instance.
+   *
+   * @return \Symfony\Component\Console\Application
+   *   The application instance.
+   */
+  public function applicationGet(): Application {
+    if ($this->application === NULL) {
+      throw new \RuntimeException('Application is not initialized. Call applicationInit* first.');
+    }
+    return $this->application;
+  }
+
+  /**
+   * Get the application tester.
+   *
+   * @return \Symfony\Component\Console\Tester\ApplicationTester
+   *   The application tester.
+   *
+   * @throws \RuntimeException
+   *   If the application tester is not initialized.
+   */
+  public function applicationGetTester(): ApplicationTester {
+    if ($this->applicationTester === NULL) {
+      throw new \RuntimeException('Application tester is not initialized. Call applicationInit* first.');
+    }
+    return $this->applicationTester;
+  }
+
+  /**
    * Tears down the application.
    *
    * Resets the application and tester variables.
@@ -62,7 +91,7 @@ trait ApplicationTrait {
    * @return \Symfony\Component\Console\Tester\ApplicationTester
    *   The initialized application tester.
    */
-  protected function applicationInitFromLoader(string $loader_path): ApplicationTester {
+  public function applicationInitFromLoader(string $loader_path): ApplicationTester {
     if (!file_exists($loader_path)) {
       throw new \InvalidArgumentException(sprintf('Loader file not found: %s', $loader_path));
     }
@@ -105,7 +134,7 @@ trait ApplicationTrait {
    * @return \Symfony\Component\Console\Tester\ApplicationTester
    *   The initialized application tester.
    */
-  protected function applicationInitFromCommand(string|object $object_or_class, bool $is_single_command = TRUE): ApplicationTester {
+  public function applicationInitFromCommand(string|object $object_or_class, bool $is_single_command = TRUE): ApplicationTester {
     $this->application = new Application();
 
     $instance = is_object($object_or_class) ? $object_or_class : new $object_or_class();
@@ -160,7 +189,7 @@ trait ApplicationTrait {
    * @return string
    *   Application output.
    */
-  protected function applicationRun(array $input = [], array $options = [], bool $expect_fail = FALSE): string {
+  public function applicationRun(array $input = [], array $options = [], bool $expect_fail = FALSE): string {
     if ($this->applicationTester === NULL) {
       throw new \RuntimeException('Application is not initialized. Call applicationInit* first.');
     }
@@ -204,7 +233,7 @@ trait ApplicationTrait {
   /**
    * Asserts that the application executed successfully.
    */
-  protected function assertApplicationSuccessful(): void {
+  public function assertApplicationSuccessful(): void {
     $this->assertNotNull($this->applicationTester, 'Application is not initialized');
     $this->assertSame(0, $this->applicationTester->getStatusCode(), sprintf(
       'Application failed with exit code %d: %s%sOutput:%s%s',
@@ -219,7 +248,7 @@ trait ApplicationTrait {
   /**
    * Asserts that the application failed to execute.
    */
-  protected function assertApplicationFailed(): void {
+  public function assertApplicationFailed(): void {
     $this->assertNotNull($this->applicationTester, 'Application is not initialized');
     $this->assertNotSame(0, $this->applicationTester->getStatusCode(), sprintf(
       'Application succeeded when failure was expected.%sOutput:%s%s',
@@ -235,7 +264,7 @@ trait ApplicationTrait {
    * @param array|string $expected
    *   Expected string or strings to check for in the application output.
    */
-  protected function assertApplicationOutputContains(array|string $expected): void {
+  public function assertApplicationOutputContains(array|string $expected): void {
     $this->assertNotNull($this->applicationTester, 'Application is not initialized');
     $output = $this->applicationTester->getDisplay();
 
@@ -260,7 +289,7 @@ trait ApplicationTrait {
    * @param array|string $expected
    *   String or array of strings that should not be in the application output.
    */
-  protected function assertApplicationOutputNotContains(array|string $expected): void {
+  public function assertApplicationOutputNotContains(array|string $expected): void {
     $this->assertNotNull($this->applicationTester, 'Application is not initialized');
     $output = $this->applicationTester->getDisplay();
 
@@ -285,7 +314,7 @@ trait ApplicationTrait {
    * @param array|string $expected
    *   Expected string to check for in the application error output.
    */
-  protected function assertApplicationErrorOutputContains(array|string $expected): void {
+  public function assertApplicationErrorOutputContains(array|string $expected): void {
     $this->assertNotNull($this->applicationTester, 'Application is not initialized');
     $output = $this->applicationTester->getErrorOutput();
 
@@ -310,7 +339,7 @@ trait ApplicationTrait {
    * @param array|string $expected
    *   String that should not be in the error output.
    */
-  protected function assertApplicationErrorOutputNotContains(array|string $expected): void {
+  public function assertApplicationErrorOutputNotContains(array|string $expected): void {
     $this->assertNotNull($this->applicationTester, 'Application is not initialized');
     $output = $this->applicationTester->getErrorOutput();
 
@@ -338,7 +367,7 @@ trait ApplicationTrait {
    *   String or array of strings to check in the application output.
    *   Prefix with '---' for strings that should not be present.
    */
-  protected function assertApplicationOutputContainsOrNot(string|array $expected): void {
+  public function assertApplicationOutputContainsOrNot(string|array $expected): void {
     $this->assertNotNull($this->applicationTester, 'Application is not initialized');
     $output = $this->applicationTester->getDisplay();
 
@@ -378,7 +407,7 @@ trait ApplicationTrait {
    *   String or array of strings to check in the application error output.
    *   Prefix with '---' for strings that should not be present.
    */
-  protected function assertApplicationErrorOutputContainsOrNot(string|array $expected): void {
+  public function assertApplicationErrorOutputContainsOrNot(string|array $expected): void {
     $this->assertNotNull($this->applicationTester, 'Application is not initialized');
     $output = $this->applicationTester->getErrorOutput();
 
@@ -414,7 +443,7 @@ trait ApplicationTrait {
    * @return string
    *   The application info.
    */
-  protected function applicationInfo(): string {
+  public function applicationInfo(): string {
     if ($this->applicationTester === NULL) {
       return 'APPLICATION: Not initialized' . PHP_EOL;
     }
