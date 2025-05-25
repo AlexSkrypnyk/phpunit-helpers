@@ -239,6 +239,31 @@ class LocationsTraitTest extends TestCase {
     $this->assertDirectoryDoesNotExist(static::$workspace, 'Workspace should be removed.');
   }
 
+  public function testLocationsTearDownWithRestrictedPermissions(): void {
+    // Create a workspace directory with restricted permissions to test chmod
+    // handling.
+    static::$workspace = $this->testTmp . DIRECTORY_SEPARATOR . 'test_workspace_restricted_' . uniqid();
+    mkdir(static::$workspace, 0777, TRUE);
+
+    // Create a subdirectory structure with files.
+    $subdir = static::$workspace . DIRECTORY_SEPARATOR . 'subdir';
+    mkdir($subdir, 0777, TRUE);
+    touch($subdir . DIRECTORY_SEPARATOR . 'test_file.txt');
+
+    // Make the subdirectory read-only to simulate permission issues.
+    chmod($subdir, 0555);
+
+    // Verify the directory is read-only.
+    $this->assertFalse(is_writable($subdir), 'Subdirectory should be read-only.');
+
+    // locationsTearDown should handle the chmod and remove the directory
+    // successfully.
+    $this->locationsTearDown();
+
+    // Verify the workspace was completely removed.
+    $this->assertDirectoryDoesNotExist(static::$workspace, 'Workspace with restricted permissions should be removed.');
+  }
+
   #[DataProvider('dataProviderLocationsCopy')]
   public function testLocationsCopy(
     array $source_files,

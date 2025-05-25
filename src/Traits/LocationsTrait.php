@@ -115,7 +115,15 @@ trait LocationsTrait {
    * Will be skipped if the DEBUG environment variable is set.
    */
   public function locationsTearDown(): void {
-    (new Filesystem())->remove(static::$workspace);
+    $fs = new Filesystem();
+    try {
+      $fs->chmod(static::$workspace, 0777, 0000, TRUE);
+    }
+    catch (\Exception $exception) {
+      // Ignore errors if the directory is not writable.
+    }
+
+    $fs->remove(static::$workspace);
   }
 
   /**
