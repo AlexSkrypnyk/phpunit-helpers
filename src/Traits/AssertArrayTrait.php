@@ -35,4 +35,27 @@ trait AssertArrayTrait {
     $this->fail(sprintf('Failed asserting that string "%s" is present in array %s.', $needle, print_r($haystack, TRUE)));
   }
 
+  /**
+   * Assert that a string is not present in an array.
+   *
+   * @param string $needle
+   *   The string to search for.
+   * @param array $haystack
+   *   The array to search in.
+   *
+   * @throws \PHPUnit\Framework\AssertionFailedError
+   *   If the string is present in the array.
+   */
+  public function assertArrayNotContainsString(string $needle, array $haystack): void {
+    foreach ($haystack as $hay) {
+      if (is_object($hay)) {
+        continue;
+      }
+      if (str_contains((string) $hay, $needle)) {
+        $this->fail(sprintf('Failed asserting that string "%s" is not present in array %s.', $needle, print_r($haystack, TRUE)));
+      }
+    }
+    $this->addToAssertionCount(1);
+  }
+
 }
