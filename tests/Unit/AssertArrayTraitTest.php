@@ -48,4 +48,35 @@ class AssertArrayTraitTest extends TestCase {
     $this->assertArrayContainsString($needle, $haystack);
   }
 
+  public function testAssertArrayNotContainsStringNotFound(): void {
+    $haystack = ['foo', 'bar', 'baz'];
+    $needle = 'xyz';
+
+    $this->assertArrayNotContainsString($needle, $haystack);
+  }
+
+  public function testAssertArrayNotContainsStringFound(): void {
+    $haystack = ['foo', 'bar', 'baz'];
+    $needle = 'ba';
+
+    $this->expectException(AssertionFailedError::class);
+    $this->expectExceptionMessage('Failed asserting that string "ba" is not present in array');
+
+    $this->assertArrayNotContainsString($needle, $haystack);
+  }
+
+  public function testAssertArrayNotContainsStringWithMixedTypes(): void {
+    $haystack = ['foo', 123, NULL, FALSE, new \stdClass()];
+    $needle = 'xyz';
+
+    $this->assertArrayNotContainsString($needle, $haystack);
+  }
+
+  public function testAssertArrayNotContainsStringWithEmptyArray(): void {
+    $haystack = [];
+    $needle = 'foo';
+
+    $this->assertArrayNotContainsString($needle, $haystack);
+  }
+
 }
