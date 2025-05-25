@@ -105,7 +105,7 @@ trait LocationsTrait {
     }
 
     if ($after instanceof \Closure) {
-      \Closure::bind($after, $this, self::class)();
+      \Closure::bind($after, $this, static::class)();
     }
   }
 
@@ -157,8 +157,8 @@ trait LocationsTrait {
     // data provider with named data sets.
     $data_name = $this->dataName();
     if (!empty($data_name) && !is_numeric($data_name)) {
-      if ($data_name === self::BASELINE_DATASET) {
-        $path_suffix = self::BASELINE_DIR;
+      if ($data_name === static::BASELINE_DATASET) {
+        $path_suffix = static::BASELINE_DIR;
       }
       else {
         // Convert the data name to a snake case string.

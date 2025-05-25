@@ -190,7 +190,7 @@ trait TuiTrait {
         $entry_keystrokes = array_fill(0, $clear_size, $clear_key);
       }
 
-      $split_entry = self::tuiEntryToKeystroke($entry);
+      $split_entry = static::tuiEntryToKeystroke($entry);
       $entry_keystrokes = array_merge($entry_keystrokes, $split_entry);
 
       // Add the accept key at the end of the entry if it is not already there.

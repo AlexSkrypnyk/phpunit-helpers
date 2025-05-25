@@ -26,7 +26,7 @@ abstract class UnitTestCase extends TestCase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
-    self::locationsInit();
+    static::locationsInit();
   }
 
   /**
@@ -34,7 +34,7 @@ abstract class UnitTestCase extends TestCase {
    */
   protected function tearDown(): void {
     if (!$this->status() instanceof Failure && !$this->status() instanceof Error && !static::isDebug()) {
-      self::locationsTearDown();
+      static::locationsTearDown();
     }
   }
 

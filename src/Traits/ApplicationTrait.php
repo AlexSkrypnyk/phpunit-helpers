@@ -146,7 +146,7 @@ trait ApplicationTrait {
 
     $name = $instance->getName();
     if (empty($name)) {
-      $ret = self::getProtectedValue($instance, 'defaultName');
+      $ret = static::getProtectedValue($instance, 'defaultName');
       if (empty($ret) || !is_string($ret)) {
         throw new \InvalidArgumentException('The provided object does not have a valid name');
       }
