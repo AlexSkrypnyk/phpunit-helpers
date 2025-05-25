@@ -58,4 +58,106 @@ trait AssertArrayTrait {
     $this->addToAssertionCount(1);
   }
 
+  /**
+   * Assert that an array contains all elements from a sub-array.
+   *
+   * @param array $array
+   *   The main array to search in.
+   * @param array $subArray
+   *   The sub-array to search for.
+   *
+   * @throws \PHPUnit\Framework\AssertionFailedError
+   *   If any element from the sub-array is not found in the main array.
+   */
+  public function assertArrayContainsArray(array $array, array $subArray): void {
+    foreach ($subArray as $value) {
+      if (is_array($value)) {
+        $found = FALSE;
+
+        // Check if value exists as a direct value in array.
+        if (in_array($value, $array, TRUE)) {
+          $found = TRUE;
+        }
+        else {
+          // Check each element in array.
+          foreach ($array as $item) {
+            if (is_array($item)) {
+              // Check if this item is exactly the value.
+              if ($item === $value) {
+                $found = TRUE;
+                break;
+              }
+              // Recursively search within this item.
+              try {
+                $this->assertArrayContainsArray($item, [$value]);
+                $found = TRUE;
+                break;
+              }
+              catch (\Throwable $e) {
+                // Continue searching.
+              }
+            }
+          }
+        }
+
+        $this->assertTrue($found, 'Expected sub-array not found.');
+      }
+      else {
+        $this->assertContains($value, $array, sprintf("Value '%s' not found in array.", $value));
+      }
+    }
+  }
+
+  /**
+   * Assert that an array does not contain any elements from a sub-array.
+   *
+   * @param array $array
+   *   The main array to search in.
+   * @param array $subArray
+   *   The sub-array to search for.
+   *
+   * @throws \PHPUnit\Framework\AssertionFailedError
+   *   If any element from the sub-array is found in the main array.
+   */
+  public function assertArrayNotContainsArray(array $array, array $subArray): void {
+    // Empty subArray against empty array should pass (both are empty)
+    // Empty subArray against non-empty array should fail (empty set is subset)
+    if (empty($subArray)) {
+      if (!empty($array)) {
+        $this->fail('Empty sub-array is a subset of any non-empty array.');
+      }
+      return;
+    }
+
+    // Check that NONE of the elements in subArray are found in array.
+    foreach ($subArray as $value) {
+      if (is_array($value)) {
+        // Check if value exists as a direct value in array.
+        if (in_array($value, $array, TRUE)) {
+          $this->fail('Unexpected sub-array found.');
+        }
+
+        // Check each element in array.
+        foreach ($array as $item) {
+          if (is_array($item)) {
+            // Check if this item is exactly the value.
+            if ($item === $value) {
+              $this->fail('Unexpected sub-array found.');
+            }
+            // Recursively search within this item.
+            try {
+              $this->assertArrayNotContainsArray($item, [$value]);
+            }
+            catch (\Throwable $e) {
+              $this->fail('Unexpected sub-array found.');
+            }
+          }
+        }
+      }
+      else {
+        $this->assertNotContains($value, $array, sprintf("Unexpected value '%s' found in array.", $value));
+      }
+    }
+  }
+
 }
