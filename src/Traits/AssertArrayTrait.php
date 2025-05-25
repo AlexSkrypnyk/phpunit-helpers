@@ -63,14 +63,14 @@ trait AssertArrayTrait {
    *
    * @param array $array
    *   The main array to search in.
-   * @param array $subArray
+   * @param array $sub_array
    *   The sub-array to search for.
    *
    * @throws \PHPUnit\Framework\AssertionFailedError
    *   If any element from the sub-array is not found in the main array.
    */
-  public function assertArrayContainsArray(array $array, array $subArray): void {
-    foreach ($subArray as $value) {
+  public function assertArrayContainsArray(array $array, array $sub_array): void {
+    foreach ($sub_array as $value) {
       if (is_array($value)) {
         $found = FALSE;
 
@@ -113,16 +113,16 @@ trait AssertArrayTrait {
    *
    * @param array $array
    *   The main array to search in.
-   * @param array $subArray
+   * @param array $sub_array
    *   The sub-array to search for.
    *
    * @throws \PHPUnit\Framework\AssertionFailedError
    *   If any element from the sub-array is found in the main array.
    */
-  public function assertArrayNotContainsArray(array $array, array $subArray): void {
+  public function assertArrayNotContainsArray(array $array, array $sub_array): void {
     // Empty subArray against empty array should pass (both are empty)
     // Empty subArray against non-empty array should fail (empty set is subset)
-    if (empty($subArray)) {
+    if (empty($sub_array)) {
       if (!empty($array)) {
         $this->fail('Empty sub-array is a subset of any non-empty array.');
       }
@@ -130,7 +130,7 @@ trait AssertArrayTrait {
     }
 
     // Check that NONE of the elements in subArray are found in array.
-    foreach ($subArray as $value) {
+    foreach ($sub_array as $value) {
       if (is_array($value)) {
         // Check if value exists as a direct value in array.
         if (in_array($value, $array, TRUE)) {

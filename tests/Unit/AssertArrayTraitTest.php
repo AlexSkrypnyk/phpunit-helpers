@@ -85,21 +85,21 @@ class AssertArrayTraitTest extends TestCase {
    *
    * @param array<mixed> $array
    *   The main array to search in.
-   * @param array<mixed> $subArray
+   * @param array<mixed> $sub_array
    *   The sub-array to search for.
    * @param bool $should_pass
    *   Whether the assertion should pass or fail.
    */
   #[DataProvider('providerAssertArrayContainsArray')]
-  public function testAssertArrayContainsArray(array $array, array $subArray, bool $should_pass): void {
+  public function testAssertArrayContainsArray(array $array, array $sub_array, bool $should_pass): void {
     if ($should_pass) {
-      $this->assertArrayContainsArray($array, $subArray);
+      $this->assertArrayContainsArray($array, $sub_array);
       // If we get here without exception, the test passed as expected
       $this->addToAssertionCount(1);
     }
     else {
       $this->expectException(AssertionFailedError::class);
-      $this->assertArrayContainsArray($array, $subArray);
+      $this->assertArrayContainsArray($array, $sub_array);
     }
   }
 
@@ -120,7 +120,7 @@ class AssertArrayTraitTest extends TestCase {
         ['banana'],
         TRUE,
       ],
-      // Empty subArray - should pass (empty set is subset of any set)
+      // Empty sub_array - should pass (empty set is subset of any set)
       'empty_subarray_success' => [
         ['x', 'y', 'z'],
         [],
@@ -195,21 +195,21 @@ class AssertArrayTraitTest extends TestCase {
    *
    * @param array<mixed> $array
    *   The main array to search in.
-   * @param array<mixed> $subArray
+   * @param array<mixed> $sub_array
    *   The sub-array to search for.
    * @param bool $should_pass
    *   Whether the assertion should pass or fail.
    */
   #[DataProvider('providerAssertArrayNotContainsArray')]
-  public function testAssertArrayNotContainsArray(array $array, array $subArray, bool $should_pass): void {
+  public function testAssertArrayNotContainsArray(array $array, array $sub_array, bool $should_pass): void {
     if ($should_pass) {
-      $this->assertArrayNotContainsArray($array, $subArray);
+      $this->assertArrayNotContainsArray($array, $sub_array);
       // If we get here without exception, the test passed as expected
       $this->addToAssertionCount(1);
     }
     else {
       $this->expectException(AssertionFailedError::class);
-      $this->assertArrayNotContainsArray($array, $subArray);
+      $this->assertArrayNotContainsArray($array, $sub_array);
     }
   }
 
@@ -217,7 +217,7 @@ class AssertArrayTraitTest extends TestCase {
    * Data provider for testAssertArrayNotContainsArray().
    *
    * @return array<string, array<mixed>>
-   *   Test data with array, subArray, and expected result.
+   *   Test data with array, sub_array, and expected result.
    */
   public static function providerAssertArrayNotContainsArray(): array {
     return [
@@ -242,7 +242,7 @@ class AssertArrayTraitTest extends TestCase {
         [['a', 'b']],
         TRUE,
       ],
-      // Empty subArray against empty array - should pass
+      // Empty sub_array against empty array - should pass
       'empty_both_success' => [
         [],
         [],
@@ -281,7 +281,7 @@ class AssertArrayTraitTest extends TestCase {
         [['name' => 'John', 'age' => 30]],
         FALSE,
       ],
-      // Empty subArray against non-empty array - should fail
+      // Empty sub_array against non-empty array - should fail
       'empty_subarray_failure' => [
         ['a', 'b', 'c'],
         [],
