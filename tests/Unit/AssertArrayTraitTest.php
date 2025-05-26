@@ -15,382 +15,468 @@ class AssertArrayTraitTest extends TestCase {
 
   use AssertArrayTrait;
 
-  public function testAssertArrayContainsStringFound(): void {
-    $haystack = ['foo', 'bar', 'baz'];
-    $needle = 'ba';
+  /**
+   * Test assertArrayContainsString method.
+   */
+  #[DataProvider('dataProviderAssertArrayContainsString')]
+  public function testAssertArrayContainsString(string $needle, array $haystack, bool $should_pass, ?string $expected_exception = NULL): void {
+    if (!$should_pass) {
+      $this->expectException(AssertionFailedError::class);
+      if ($expected_exception) {
+        $this->expectExceptionMessage($expected_exception);
+      }
+    }
 
     $this->assertArrayContainsString($needle, $haystack);
+
+    if ($should_pass) {
+      $this->addToAssertionCount(1);
+    }
   }
 
-  public function testAssertArrayContainsStringNotFound(): void {
-    $haystack = ['foo', 'bar', 'baz'];
-    $needle = 'xyz';
+  /**
+   * Data provider for assertArrayContainsString tests.
+   */
+  public static function dataProviderAssertArrayContainsString(): array {
+    return [
+      // Success cases
+      'basic_string_match' => [
+        'needle' => 'bar',
+        'haystack' => ['foo', 'bar', 'baz'],
+        'should_pass' => TRUE,
+      ],
+      'partial_string_match' => [
+        'needle' => 'ba',
+        'haystack' => ['foo', 'bar', 'baz'],
+        'should_pass' => TRUE,
+      ],
+      'numeric_conversion' => [
+        'needle' => '12',
+        'haystack' => ['foo', 123, NULL, FALSE],
+        'should_pass' => TRUE,
+      ],
+      'empty_string_match' => [
+        'needle' => '',
+        'haystack' => ['', 'non-empty'],
+        'should_pass' => TRUE,
+      ],
+      'boolean_false_conversion' => [
+        'needle' => '',
+        'haystack' => [FALSE, TRUE, 'test'],
+        'should_pass' => TRUE,
+      ],
+      'boolean_true_conversion' => [
+        'needle' => '1',
+        'haystack' => [FALSE, TRUE, 'test'],
+        'should_pass' => TRUE,
+      ],
+      'null_conversion' => [
+        'needle' => '',
+        'haystack' => [NULL, 'test'],
+        'should_pass' => TRUE,
+      ],
+      'mixed_types_with_objects' => [
+        'needle' => '0',
+        'haystack' => [0, new \stdClass(), 'test'],
+        'should_pass' => TRUE,
+      ],
 
-    $this->expectException(AssertionFailedError::class);
-    $this->expectExceptionMessage('Failed asserting that string "xyz" is present in array');
-
-    $this->assertArrayContainsString($needle, $haystack);
+      // Failure cases
+      'string_not_found' => [
+        'needle' => 'xyz',
+        'haystack' => ['foo', 'bar', 'baz'],
+        'should_pass' => FALSE,
+        'expected_exception' => 'Failed asserting that string "xyz" is present in array',
+      ],
+      'empty_array' => [
+        'needle' => 'foo',
+        'haystack' => [],
+        'should_pass' => FALSE,
+        'expected_exception' => 'Failed asserting that string "foo" is present in array',
+      ],
+      'no_partial_match' => [
+        'needle' => 'xyz',
+        'haystack' => ['abc', 'def', 'ghi'],
+        'should_pass' => FALSE,
+      ],
+    ];
   }
 
-  public function testAssertArrayContainsStringWithMixedTypes(): void {
-    $haystack = ['foo', 123, NULL, FALSE, new \stdClass()];
-    $needle = '12';
-
-    $this->assertArrayContainsString($needle, $haystack);
-  }
-
-  public function testAssertArrayContainsStringWithEmptyArray(): void {
-    $haystack = [];
-    $needle = 'foo';
-
-    $this->expectException(AssertionFailedError::class);
-    $this->expectExceptionMessage('Failed asserting that string "foo" is present in array');
-
-    $this->assertArrayContainsString($needle, $haystack);
-  }
-
-  public function testAssertArrayNotContainsStringNotFound(): void {
-    $haystack = ['foo', 'bar', 'baz'];
-    $needle = 'xyz';
+  /**
+   * Test assertArrayNotContainsString method.
+   */
+  #[DataProvider('dataProviderAssertArrayNotContainsString')]
+  public function testAssertArrayNotContainsString(string $needle, array $haystack, bool $should_pass, ?string $expected_exception = NULL): void {
+    if (!$should_pass) {
+      $this->expectException(AssertionFailedError::class);
+      if ($expected_exception) {
+        $this->expectExceptionMessage($expected_exception);
+      }
+    }
 
     $this->assertArrayNotContainsString($needle, $haystack);
+
+    if ($should_pass) {
+      $this->addToAssertionCount(1);
+    }
   }
 
-  public function testAssertArrayNotContainsStringFound(): void {
-    $haystack = ['foo', 'bar', 'baz'];
-    $needle = 'ba';
+  /**
+   * Data provider for assertArrayNotContainsString tests.
+   */
+  public static function dataProviderAssertArrayNotContainsString(): array {
+    return [
+      // Success cases
+      'string_not_found' => [
+        'needle' => 'xyz',
+        'haystack' => ['foo', 'bar', 'baz'],
+        'should_pass' => TRUE,
+      ],
+      'empty_array' => [
+        'needle' => 'foo',
+        'haystack' => [],
+        'should_pass' => TRUE,
+      ],
+      'mixed_types_no_match' => [
+        'needle' => 'xyz',
+        'haystack' => ['foo', 123, NULL, FALSE],
+        'should_pass' => TRUE,
+      ],
+      'objects_skipped' => [
+        'needle' => 'property',
+        'haystack' => ['string', new \stdClass(), 123],
+        'should_pass' => TRUE,
+      ],
 
-    $this->expectException(AssertionFailedError::class);
-    $this->expectExceptionMessage('Failed asserting that string "ba" is not present in array');
-
-    $this->assertArrayNotContainsString($needle, $haystack);
-  }
-
-  public function testAssertArrayNotContainsStringWithMixedTypes(): void {
-    $haystack = ['foo', 123, NULL, FALSE, new \stdClass()];
-    $needle = 'xyz';
-
-    $this->assertArrayNotContainsString($needle, $haystack);
-  }
-
-  public function testAssertArrayNotContainsStringWithEmptyArray(): void {
-    $haystack = [];
-    $needle = 'foo';
-
-    $this->assertArrayNotContainsString($needle, $haystack);
+      // Failure cases
+      'string_found' => [
+        'needle' => 'ba',
+        'haystack' => ['foo', 'bar', 'baz'],
+        'should_pass' => FALSE,
+        'expected_exception' => 'Failed asserting that string "ba" is not present in array',
+      ],
+      'partial_match_found' => [
+        'needle' => 'oo',
+        'haystack' => ['foo', 'bar'],
+        'should_pass' => FALSE,
+      ],
+    ];
   }
 
   /**
    * Test assertArrayContainsArray method.
-   *
-   * @param array<mixed> $array
-   *   The main array to search in.
-   * @param array<mixed> $sub_array
-   *   The sub-array to search for.
-   * @param bool $should_pass
-   *   Whether the assertion should pass or fail.
    */
-  #[DataProvider('providerAssertArrayContainsArray')]
-  public function testAssertArrayContainsArray(array $array, array $sub_array, bool $should_pass): void {
-    if ($should_pass) {
-      $this->assertArrayContainsArray($array, $sub_array);
-      // If we get here without exception, the test passed as expected
-      $this->addToAssertionCount(1);
-    }
-    else {
+  #[DataProvider('dataProviderAssertArrayContainsArray')]
+  public function testAssertArrayContainsArray(array $array, array $sub_array, bool $should_pass, ?string $expected_exception = NULL): void {
+    if (!$should_pass) {
       $this->expectException(AssertionFailedError::class);
-      $this->assertArrayContainsArray($array, $sub_array);
+      if ($expected_exception) {
+        $this->expectExceptionMessage($expected_exception);
+      }
+    }
+
+    $this->assertArrayContainsArray($array, $sub_array);
+
+    if ($should_pass) {
+      $this->addToAssertionCount(1);
     }
   }
 
   /**
-   * Data provider for testAssertArrayContainsArray().
+   * Data provider for assertArrayContainsArray tests.
    */
-  public static function providerAssertArrayContainsArray(): array {
+  public static function dataProviderAssertArrayContainsArray(): array {
     return [
-      // Simple array containment - should pass
+      // Success cases
       'simple_contains_success' => [
-        ['a', 'b', 'c'],
-        ['a', 'b'],
-        TRUE,
+        'array' => ['a', 'b', 'c'],
+        'sub_array' => ['a', 'b'],
+        'should_pass' => TRUE,
       ],
-      // Single element containment - should pass
       'single_element_success' => [
-        ['apple', 'banana', 'cherry'],
-        ['banana'],
-        TRUE,
+        'array' => ['apple', 'banana', 'cherry'],
+        'sub_array' => ['banana'],
+        'should_pass' => TRUE,
       ],
-      // Empty sub_array - should pass (empty set is subset of any set)
       'empty_subarray_success' => [
-        ['x', 'y', 'z'],
-        [],
-        TRUE,
+        'array' => ['x', 'y', 'z'],
+        'sub_array' => [],
+        'should_pass' => TRUE,
       ],
-      // Numeric arrays - should pass
       'numeric_arrays_success' => [
-        [1, 2, 3, 4, 5],
-        [2, 4],
-        TRUE,
+        'array' => [1, 2, 3, 4, 5],
+        'sub_array' => [2, 4],
+        'should_pass' => TRUE,
       ],
-      // Mixed types - should pass
       'mixed_types_success' => [
-        ['string', 123, TRUE, NULL],
-        [123, 'string'],
-        TRUE,
+        'array' => ['string', 123, TRUE, NULL],
+        'sub_array' => [123, 'string'],
+        'should_pass' => TRUE,
       ],
-      // Nested arrays - should pass
       'nested_arrays_success' => [
-        [
+        'array' => [
           'level1' => ['a', 'b'],
           'level2' => ['c', 'd'],
           'simple' => 'value',
         ],
-        [['a', 'b']],
-        TRUE,
+        'sub_array' => [['a', 'b']],
+        'should_pass' => TRUE,
       ],
-      // Complex nested structure - should pass
       'complex_nested_success' => [
-        [
+        'array' => [
           ['name' => 'John', 'age' => 30],
           ['name' => 'Jane', 'age' => 25],
           'simple_value',
         ],
-        [['name' => 'John', 'age' => 30]],
-        TRUE,
+        'sub_array' => [['name' => 'John', 'age' => 30]],
+        'should_pass' => TRUE,
       ],
-      // Element not in array - should fail
+      'deep_recursive_search' => [
+        'array' => [
+          'users' => [
+            ['id' => 1, 'name' => 'Alice', 'preferences' => ['theme' => 'dark']],
+            ['id' => 2, 'name' => 'Bob', 'preferences' => ['theme' => 'light']],
+          ],
+          'settings' => ['app_name' => 'Test App'],
+        ],
+        'sub_array' => [['id' => 1, 'name' => 'Alice', 'preferences' => ['theme' => 'dark']]],
+        'should_pass' => TRUE,
+      ],
+      'direct_array_element' => [
+        'array' => [
+          'other',
+          ['exact', 'match'],
+          'more',
+        ],
+        'sub_array' => [['exact', 'match']],
+        'should_pass' => TRUE,
+      ],
+      'nested_wrapper_structure' => [
+        'array' => [
+          'wrapper' => [
+            ['nested', 'target'],
+          ],
+        ],
+        'sub_array' => [['nested', 'target']],
+        'should_pass' => TRUE,
+      ],
+
+      // Failure cases
       'element_not_found_failure' => [
-        ['a', 'b', 'c'],
-        ['d'],
-        FALSE,
+        'array' => ['a', 'b', 'c'],
+        'sub_array' => ['d'],
+        'should_pass' => FALSE,
+        'expected_exception' => "Value 'd' not found in array",
       ],
-      // Partial match failure - should fail
       'partial_match_failure' => [
-        ['a', 'b', 'c'],
-        ['a', 'b', 'd'],
-        FALSE,
+        'array' => ['a', 'b', 'c'],
+        'sub_array' => ['a', 'b', 'd'],
+        'should_pass' => FALSE,
       ],
-      // Nested array not found - should fail
       'nested_not_found_failure' => [
-        [
+        'array' => [
           ['x', 'y'],
           ['z', 'w'],
         ],
-        [['a', 'b']],
-        FALSE,
+        'sub_array' => [['a', 'b']],
+        'should_pass' => FALSE,
+        'expected_exception' => 'Expected sub-array not found',
       ],
-      // Different order in nested array - should fail
-      'nested_different_order_failure' => [
-        [
+      'different_order_failure' => [
+        'array' => [
           ['name' => 'John', 'age' => 30],
         ],
-        [['age' => 30, 'name' => 'John']],
-        FALSE,
+        'sub_array' => [['age' => 30, 'name' => 'John']],
+        'should_pass' => FALSE,
       ],
     ];
   }
 
   /**
    * Test assertArrayNotContainsArray method.
-   *
-   * @param array<mixed> $array
-   *   The main array to search in.
-   * @param array<mixed> $sub_array
-   *   The sub-array to search for.
-   * @param bool $should_pass
-   *   Whether the assertion should pass or fail.
    */
-  #[DataProvider('providerAssertArrayNotContainsArray')]
-  public function testAssertArrayNotContainsArray(array $array, array $sub_array, bool $should_pass): void {
-    if ($should_pass) {
-      $this->assertArrayNotContainsArray($array, $sub_array);
-      // If we get here without exception, the test passed as expected
-      $this->addToAssertionCount(1);
-    }
-    else {
+  #[DataProvider('dataProviderAssertArrayNotContainsArray')]
+  public function testAssertArrayNotContainsArray(array $array, array $sub_array, bool $should_pass, ?string $expected_exception = NULL): void {
+    if (!$should_pass) {
       $this->expectException(AssertionFailedError::class);
-      $this->assertArrayNotContainsArray($array, $sub_array);
+      if ($expected_exception) {
+        $this->expectExceptionMessage($expected_exception);
+      }
+    }
+
+    $this->assertArrayNotContainsArray($array, $sub_array);
+
+    if ($should_pass) {
+      $this->addToAssertionCount(1);
     }
   }
 
   /**
-   * Data provider for testAssertArrayNotContainsArray().
-   *
-   * @return array<string, array<mixed>>
-   *   Test data with array, sub_array, and expected result.
+   * Data provider for assertArrayNotContainsArray tests.
    */
-  public static function providerAssertArrayNotContainsArray(): array {
+  public static function dataProviderAssertArrayNotContainsArray(): array {
     return [
-      // Element not in array - should pass
+      // Success cases
       'element_not_found_success' => [
-        ['a', 'b', 'c'],
-        ['d'],
-        TRUE,
+        'array' => ['a', 'b', 'c'],
+        'sub_array' => ['d'],
+        'should_pass' => TRUE,
       ],
-      // Completely different arrays - should pass
       'different_arrays_success' => [
-        ['x', 'y', 'z'],
-        ['a', 'b', 'c'],
-        TRUE,
+        'array' => ['x', 'y', 'z'],
+        'sub_array' => ['a', 'b', 'c'],
+        'should_pass' => TRUE,
       ],
-      // Nested array not found - should pass
       'nested_not_found_success' => [
-        [
+        'array' => [
           ['x', 'y'],
           ['z', 'w'],
         ],
-        [['a', 'b']],
-        TRUE,
+        'sub_array' => [['a', 'b']],
+        'should_pass' => TRUE,
       ],
-      // Empty sub_array against empty array - should pass
       'empty_both_success' => [
-        [],
-        [],
-        TRUE,
+        'array' => [],
+        'sub_array' => [],
+        'should_pass' => TRUE,
       ],
-      // Different types - should pass
       'different_types_success' => [
-        ['string', 123],
-        [456, 'other'],
-        TRUE,
+        'array' => ['string', 123],
+        'sub_array' => [456, 'other'],
+        'should_pass' => TRUE,
       ],
-      // Partial match with some missing - should fail (because 'a' exists)
+      'similar_but_different_nested' => [
+        'array' => [['name' => 'John', 'age' => 30]],
+        'sub_array' => [['name' => 'John', 'age' => 31]],
+        'should_pass' => TRUE,
+      ],
+      'extra_elements_different' => [
+        'array' => [['a', 'b']],
+        'sub_array' => [['a', 'b', 'c']],
+        'should_pass' => TRUE,
+      ],
+
+      // Failure cases
       'partial_with_missing_failure' => [
-        ['a', 'b'],
-        ['a', 'c'],
-        FALSE,
+        'array' => ['a', 'b'],
+        'sub_array' => ['a', 'c'],
+        'should_pass' => FALSE,
+        'expected_exception' => "Unexpected value 'a' found in array",
       ],
-      // Simple containment - should fail
       'simple_contains_failure' => [
-        ['a', 'b', 'c'],
-        ['a', 'b'],
-        FALSE,
+        'array' => ['a', 'b', 'c'],
+        'sub_array' => ['a', 'b'],
+        'should_pass' => FALSE,
       ],
-      // Single element found - should fail
       'single_element_failure' => [
-        ['apple', 'banana', 'cherry'],
-        ['banana'],
-        FALSE,
+        'array' => ['apple', 'banana', 'cherry'],
+        'sub_array' => ['banana'],
+        'should_pass' => FALSE,
       ],
-      // Nested array found - should fail
       'nested_found_failure' => [
-        [
+        'array' => [
           ['name' => 'John', 'age' => 30],
           'simple_value',
         ],
-        [['name' => 'John', 'age' => 30]],
-        FALSE,
+        'sub_array' => [['name' => 'John', 'age' => 30]],
+        'should_pass' => FALSE,
+        'expected_exception' => 'Unexpected sub-array found',
       ],
-      // Empty sub_array against non-empty array - should fail
       'empty_subarray_failure' => [
-        ['a', 'b', 'c'],
-        [],
-        FALSE,
+        'array' => ['a', 'b', 'c'],
+        'sub_array' => [],
+        'should_pass' => FALSE,
+        'expected_exception' => 'Empty sub-array is a subset of any non-empty array',
       ],
-    ];
-  }
-
-  /**
-   * Test edge cases for assertArrayContainsArray.
-   */
-  public function testAssertArrayContainsArrayEdgeCases(): void {
-    // Test with NULL values
-    $this->assertArrayContainsArray([NULL, 'a', 'b'], [NULL]);
-
-    // Test with boolean values
-    $this->assertArrayContainsArray([TRUE, FALSE, 'test'], [TRUE, FALSE]);
-
-    // Test with numeric strings vs integers
-    $this->assertArrayContainsArray(['1', '2', 3], ['1']);
-
-    // Test deeply nested arrays
-    $complex = [
-      'level1' => [
-        'level2' => [
-          'level3' => ['deep_value'],
+      'recursive_match_failure' => [
+        'array' => [
+          'level1' => [
+            'level2' => [
+              ['target', 'found'],
+            ],
+          ],
         ],
-      ],
-      'simple' => 'value',
-    ];
-    $this->assertArrayContainsArray($complex, [['level2' => ['level3' => ['deep_value']]]]);
-  }
-
-  /**
-   * Test edge cases for assertArrayNotContainsArray.
-   */
-  public function testAssertArrayNotContainsArrayEdgeCases(): void {
-    // Test that similar but not identical arrays are correctly identified as
-    // different.
-    $this->assertArrayNotContainsArray(
-      [['name' => 'John', 'age' => 30]],
-      [['name' => 'John', 'age' => 31]]
-    );
-
-    // Test that extra elements make arrays different
-    $this->assertArrayNotContainsArray(
-      [['a', 'b']],
-      [['a', 'b', 'c']]
-    );
-
-    // Test with different array structures
-    $this->assertArrayNotContainsArray(
-      ['flat', 'array'],
-      [['nested', 'array']]
-    );
-
-    // If we reach here, all assertions passed
-    $this->addToAssertionCount(1);
-  }
-
-  /**
-   * Test error messages are meaningful.
-   */
-  public function testErrorMessages(): void {
-    // Test that error message includes the missing value
-    try {
-      $this->assertArrayContainsArray(['a', 'b'], ['c']);
-      $this->fail('Expected exception was not thrown');
-    }
-    catch (AssertionFailedError $assertionFailedError) {
-      $this->assertStringContainsString("Value 'c' not found in array", $assertionFailedError->getMessage());
-    }
-
-    // Test that error message for unexpected value is clear
-    try {
-      $this->assertArrayNotContainsArray(['a', 'b'], ['a']);
-      $this->fail('Expected exception was not thrown');
-    }
-    catch (AssertionFailedError $assertionFailedError) {
-      $this->assertStringContainsString("Unexpected value 'a' found in array", $assertionFailedError->getMessage());
-    }
-  }
-
-  /**
-   * Test recursive behavior with deeply nested structures.
-   */
-  public function testRecursiveBehavior(): void {
-    $nested_structure = [
-      'users' => [
-        ['id' => 1, 'name' => 'Alice', 'preferences' => ['theme' => 'dark']],
-        ['id' => 2, 'name' => 'Bob', 'preferences' => ['theme' => 'light']],
-      ],
-      'settings' => [
-        'app_name' => 'Test App',
-        'version' => '1.0.0',
+        'sub_array' => [['target', 'found']],
+        'should_pass' => FALSE,
+        'expected_exception' => 'Unexpected sub-array found',
       ],
     ];
+  }
 
-    // Test finding a deeply nested array
-    $this->assertArrayContainsArray(
-      $nested_structure,
-      [['id' => 1, 'name' => 'Alice', 'preferences' => ['theme' => 'dark']]]
-    );
+  /**
+   * Test edge cases and special scenarios.
+   */
+  #[DataProvider('dataProviderEdgeCases')]
+  public function testEdgeCases(string $method, array $args, bool $should_pass, ?string $expected_exception = NULL): void {
+    if (!$should_pass) {
+      $this->expectException(AssertionFailedError::class);
+      if ($expected_exception) {
+        $this->expectExceptionMessage($expected_exception);
+      }
+    }
 
-    // Test that a slightly different nested array is not found
-    $this->assertArrayNotContainsArray(
-      $nested_structure,
-      [['id' => 1, 'name' => 'Alice', 'preferences' => ['theme' => 'blue']]]
-    );
+    // Use match statement for type-safe method calls
+    match ($method) {
+      'assertArrayContainsArray' => $this->assertArrayContainsArray($args[0], $args[1]),
+      'assertArrayNotContainsString' => $this->assertArrayNotContainsString($args[0], $args[1]),
+      default => throw new \InvalidArgumentException('Unknown method: ' . $method),
+    };
+
+    if ($should_pass) {
+      $this->addToAssertionCount(1);
+    }
+  }
+
+  /**
+   * Data provider for edge cases.
+   */
+  public static function dataProviderEdgeCases(): array {
+    $object = new \stdClass();
+    $object->property = 'test';
+
+    return [
+      // assertArrayContainsArray edge cases
+      'null_values_in_contains' => [
+        'method' => 'assertArrayContainsArray',
+        'args' => [[NULL, 'a', 'b'], [NULL]],
+        'should_pass' => TRUE,
+      ],
+      'boolean_values_in_contains' => [
+        'method' => 'assertArrayContainsArray',
+        'args' => [[TRUE, FALSE, 'test'], [TRUE, FALSE]],
+        'should_pass' => TRUE,
+      ],
+      'numeric_strings_vs_integers' => [
+        'method' => 'assertArrayContainsArray',
+        'args' => [['1', '2', 3], ['1']],
+        'should_pass' => TRUE,
+      ],
+      'very_deep_nesting' => [
+        'method' => 'assertArrayContainsArray',
+        'args' => [
+          [
+            'a' => [
+              'b' => [
+                'c' => [
+                  'd' => [
+                    'e' => ['deep_target'],
+                  ],
+                ],
+              ],
+            ],
+          ],
+          [['deep_target']],
+        ],
+        'should_pass' => TRUE,
+      ],
+
+      // assertArrayNotContainsString with objects
+      'objects_ignored_in_not_contains_string' => [
+        'method' => 'assertArrayNotContainsString',
+        'args' => ['property', ['string', $object, 123]],
+        'should_pass' => TRUE,
+      ],
+    ];
   }
 
 }
