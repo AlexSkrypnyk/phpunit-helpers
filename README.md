@@ -103,40 +103,40 @@ class MyApplicationTest extends TestCase {
   public function testConsoleApplication() {
     // Initialize application from a loader file
     $this->applicationInitFromLoader('/path/to/application_loader.php');
-    
+
     // Or initialize from a command class
     $this->applicationInitFromCommand(MyCommand::class, TRUE); // TRUE for making it the default command
-    
+
     // Run the application with input arguments and options
     $output = $this->applicationRun(
       ['argument1', '--option1=value1'],  // Input arguments and options
       ['capture_stderr_separately' => TRUE], // Application tester options
       FALSE // Whether a failure is expected (default: FALSE)
     );
-    
+
     // Assert that the application executed successfully
     $this->assertApplicationSuccessful();
-    
+
     // Or assert that the application failed
     $this->assertApplicationFailed();
-    
+
     // Assert that the application output contains string(s)
     $this->assertApplicationOutputContains('Expected output');
     $this->assertApplicationOutputContains(['String1', 'String2']); // Can check multiple strings
-    
+
     // Assert that the application output does not contain string(s)
     $this->assertApplicationOutputNotContains('Unexpected output');
-    
+
     // Assert that the application error output contains string(s)
     $this->assertApplicationErrorOutputContains('Expected error');
-    
+
     // Assert that the application error output does not contain string(s)
     $this->assertApplicationErrorOutputNotContains('Unexpected error');
-    
+
     // Assert in one call - prefix with '---' for strings that should NOT be present
     $this->assertApplicationOutputContainsOrNot(['Expected', '---Unexpected']);
     $this->assertApplicationErrorOutputContainsOrNot(['Expected error', '---Unexpected error']);
-    
+
     // Get debug info about the application (output, error output)
     echo $this->applicationInfo();
   }
@@ -242,7 +242,7 @@ class MyProcessTest extends TestCase {
   protected function setUp(): void {
     // Configure process behavior.
     $this->processCwd = NULL; // Current working directory (NULL for current PHP process dir).
-    $this->processShowOutput = FALSE; // Whether to show output during process execution.
+    $this->processStreamOutput = FALSE; // Whether to stream an output during process execution.
   }
 
   protected function tearDown(): void {

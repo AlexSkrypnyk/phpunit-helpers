@@ -29,9 +29,39 @@ trait ProcessTrait {
   protected ?string $processCwd = NULL;
 
   /**
-   * Show output of the process.
+   * Stream output of the process while it is running.
    */
-  protected bool $processShowOutput = FALSE;
+  protected bool $processStreamOutput = FALSE;
+
+  /**
+   * Characters to prefix streaming standard output.
+   */
+  protected static string $processStreamingStandardOutputChars = '>> ';
+
+  /**
+   * Characters to prefix streaming error output.
+   */
+  protected static string $processStreamingErrorOutputChars = 'XX ';
+
+  /**
+   * Standard output header for formatted output.
+   */
+  protected static string $processStandardOutputHeader = 'vvvvvvvvvvvv Standard output vvvvvvvvvvvv';
+
+  /**
+   * Standard output footer for formatted output.
+   */
+  protected static string $processStandardOutputFooter = '^^^^^^^^^^^^ Standard output ^^^^^^^^^^^^';
+
+  /**
+   * Error output header for formatted output.
+   */
+  protected static string $processErrorOutputHeader = 'vvvvvvvvvvvv Error output vvvvvvvvvvvv';
+
+  /**
+   * Error output footer for formatted output.
+   */
+  protected static string $processErrorOutputFooter = '^^^^^^^^^^^ Error output ^^^^^^^^^^^^';
 
   /**
    * Gets the currently running process.
@@ -86,7 +116,7 @@ trait ProcessTrait {
     int $idle_timeout = 30,
   ): Process {
     if (preg_match('/[^a-zA-Z0-9_\-\.\/]/', $command)) {
-      throw new \InvalidArgumentException(sprintf('Invalid command: %s. Only alphanumeric characters, dashes, underscores, and slashes are allowed.', $command));
+      throw new \InvalidArgumentException(sprintf('Invalid command: %s. Only alphanumeric characters, dashes, underscores, and slashes are allowed. Check that you did not pass multiple commands.', $command));
     }
 
     foreach ($arguments as $arg) {
@@ -105,6 +135,11 @@ trait ProcessTrait {
 
     $inputs = empty($inputs) ? NULL : implode(PHP_EOL, $inputs) . PHP_EOL;
 
+    if ($this->process instanceof Process) {
+      $this->process->stop();
+      $this->process = NULL;
+    }
+
     $this->process = new Process(
       $cmd,
       $this->processCwd,
@@ -116,13 +151,7 @@ trait ProcessTrait {
     $this->process->setIdleTimeout($idle_timeout);
 
     try {
-      $this->process->run(function ($type, $buffer): void {
-        // @codeCoverageIgnoreStart
-        if ($this->processShowOutput) {
-          fwrite(STDOUT, $buffer);
-        }
-        // @codeCoverageIgnoreEnd
-      });
+      $this->process->run($this->processStreamOutput ? $this->processStreamingOutputCallback() : NULL);
     }
     // @codeCoverageIgnoreStart
     catch (ProcessTimedOutException $processTimedOutException) {
@@ -136,6 +165,35 @@ trait ProcessTrait {
   }
 
   /**
+   * Returns a callback to process streaming output from the running process.
+   *
+   * This callback formats the output with specific prefixes for standard
+   * and error output, and handles line endings correctly.
+   *
+   * @return callable
+   *   The output processing callback.
+   */
+  protected function processStreamingOutputCallback(): callable {
+    return function ($type, $buffer): void {
+      $prefix = $type === Process::ERR ? static::$processStreamingErrorOutputChars : static::$processStreamingStandardOutputChars;
+
+      $parts = preg_split('/(\r\n|\n|\r)/', $buffer, -1, PREG_SPLIT_DELIM_CAPTURE);
+      $counter = is_array($parts) ? count($parts) : 0;
+
+      for ($i = 0; $i < $counter; $i += 2) {
+        $line = $parts[$i] ?? '';
+        $eol = $parts[$i + 1] ?? '';
+
+        if ($line === '' && $eol === '') {
+          continue;
+        }
+
+        fwrite(STDOUT, $prefix . $line . $eol);
+      }
+    };
+  }
+
+  /**
    * Asserts that the process executed successfully.
    *
    * Checks if the process completed with a successful exit code and provides
@@ -143,14 +201,9 @@ trait ProcessTrait {
    */
   public function assertProcessSuccessful(): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
-    $this->assertTrue($this->process->isSuccessful(), sprintf(
-      'Process failed with exit code %d: %s%sOutput:%s%s',
-      $this->process->getExitCode(),
-      $this->process->getErrorOutput(),
-      PHP_EOL,
-      PHP_EOL,
-      $this->process->getOutput()
-    ));
+    if (!$this->process->isSuccessful()) {
+      $this->fail('PROCESS FAILED' . PHP_EOL . $this->processFormatOutput());
+    }
   }
 
   /**
@@ -161,12 +214,38 @@ trait ProcessTrait {
    */
   public function assertProcessFailed(): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
-    $this->assertFalse($this->process->isSuccessful(), sprintf(
-      'Process succeeded when failure was expected.%sOutput:%s%s',
-      PHP_EOL,
-      PHP_EOL,
-      $this->process->getOutput()
-    ));
+    if ($this->process->isSuccessful()) {
+      $this->fail('PROCESS SUCCEEDED but failure was expected' . PHP_EOL . $this->processFormatOutput());
+    }
+  }
+
+  /**
+   * Formats the output of the process for display.
+   *
+   * @return string
+   *   The formatted output string.
+   */
+  protected function processFormatOutput(): string {
+    if (!$this->process instanceof Process) {
+      return 'Process is not initialized' . PHP_EOL;
+    }
+
+    $process_output = $this->process->getOutput();
+    $process_error = $this->process->getErrorOutput();
+
+    $output = PHP_EOL;
+    $output .= 'Exit code: ' . $this->process->getExitCode() . PHP_EOL;
+    $output .= PHP_EOL;
+
+    if (!empty($process_output)) {
+      $output .= static::$processStandardOutputHeader . PHP_EOL . PHP_EOL . trim($process_output) . PHP_EOL . PHP_EOL . static::$processStandardOutputFooter . PHP_EOL . PHP_EOL;
+    }
+
+    if (!empty($process_error)) {
+      $output .= static::$processErrorOutputHeader . PHP_EOL . PHP_EOL . trim($process_error) . PHP_EOL . PHP_EOL . static::$processErrorOutputFooter . PHP_EOL . PHP_EOL;
+    }
+
+    return $output;
   }
 
   /**
