@@ -79,14 +79,9 @@ trait AssertArrayTrait {
           $found = TRUE;
         }
         else {
-          // Check each element in array.
+          // Check each element in array recursively.
           foreach ($array as $item) {
             if (is_array($item)) {
-              // Check if this item is exactly the value.
-              if ($item === $value) {
-                $found = TRUE;
-                break;
-              }
               // Recursively search within this item.
               try {
                 $this->assertArrayContainsArray($item, [$value]);
@@ -137,13 +132,9 @@ trait AssertArrayTrait {
           $this->fail('Unexpected sub-array found.');
         }
 
-        // Check each element in array.
+        // Check each element in array recursively.
         foreach ($array as $item) {
           if (is_array($item)) {
-            // Check if this item is exactly the value.
-            if ($item === $value) {
-              $this->fail('Unexpected sub-array found.');
-            }
             // Recursively search within this item.
             try {
               $this->assertArrayNotContainsArray($item, [$value]);
