@@ -145,14 +145,11 @@ trait ApplicationTrait {
     $this->application->add($instance);
 
     $name = $instance->getName();
-    if (empty($name)) {
-      $ret = static::getProtectedValue($instance, 'defaultName');
-      if (empty($ret) || !is_string($ret)) {
-        throw new \InvalidArgumentException('The provided object does not have a valid name');
-      }
-      $name = $ret;
+    if ($name === NULL) {
+      // @codeCoverageIgnoreStart
+      throw new \InvalidArgumentException('Command name cannot be null after being added to application');
+      // @codeCoverageIgnoreEnd
     }
-
     $this->application->setDefaultCommand($name, $is_single_command);
 
     $this->application->setAutoExit(FALSE);

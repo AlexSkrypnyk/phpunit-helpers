@@ -27,3 +27,11 @@ composer test-coverage
 Coverage reports are stored in:
 - `.logs/cobertura.xml`
 - `.logs/.coverage-html/`
+
+## Commit Message Standards
+- Start with a verb in past tense (added, updated, deleted, removed, fixed)
+- End with a period
+- Use backticks around code references (e.g., `ClassName::methodName()`)
+- Do not include "Generated with Claude Code" footer
+- Focus on what was accomplished, not technical implementation details
+- Make sure that `composer lint` passes before committing

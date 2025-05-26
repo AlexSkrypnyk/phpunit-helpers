@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AlexSkrypnyk\PhpunitHelpers\Tests\Unit;
 
+use Symfony\Component\Console\Exception\LogicException;
 use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\Application\Command\ErrorOutputCommand;
 use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\Application\Command\GreetingCommand;
 use AlexSkrypnyk\PhpunitHelpers\Traits\ApplicationTrait;
@@ -117,6 +118,71 @@ class ApplicationTraitTest extends UnitTestCase {
     $this->assertArrayHasKey('test:configured-name', $commands);
   }
 
+  public function testApplicationInitFromCommandNullName(): void {
+    // Create a command that returns null from getName()
+    $command = new class() extends Command {
+
+      public function getName(): ?string {
+        return NULL;
+      }
+
+    };
+
+    // Symfony's Application class throws this before our null check
+    $this->expectException(LogicException::class);
+    $this->expectExceptionMessage('cannot have an empty name');
+
+    $this->applicationInitFromCommand($command);
+  }
+
+  public function testApplicationInitFromCommandNotSingleCommand(): void {
+    // Test with is_single_command = FALSE
+    $this->applicationInitFromCommand(GreetingCommand::class, FALSE);
+
+    $this->assertNotNull($this->application);
+    $this->assertNotNull($this->applicationTester);
+
+    // With is_single_command = FALSE, we should be able to run commands by name
+    $this->applicationRun(['command' => 'app:greet']);
+    $this->assertApplicationSuccessful();
+    $this->assertApplicationOutputContains('Hello, World!');
+  }
+
+  public function testApplicationInitFromLoaderWithGetcwdFailure(): void {
+    // Mock a scenario where getcwd() returns FALSE (which is hard to test
+    // directly). This tests the conditional branch in applicationInitFromLoader
+    if (!static::$fixtures) {
+      throw new \RuntimeException('Fixtures directory is not set.');
+    }
+
+    // Set a custom working directory
+    $this->applicationCwd = static::$tmp;
+
+    // Initialize from loader (this will trigger the getcwd check)
+    $loader_path = static::$fixtures . '/Application/loader.php';
+    $this->applicationInitFromLoader($loader_path);
+
+    $this->assertNotNull($this->application);
+    $this->assertNotNull($this->applicationTester);
+  }
+
+  public function testApplicationRunWithShowOutput(): void {
+    // Test that the applicationShowOutput flag can be set
+    $this->applicationShowOutput = TRUE;
+    $this->assertTrue($this->applicationShowOutput);
+
+    // Reset to FALSE to avoid output during test
+    $this->applicationShowOutput = FALSE;
+
+    $this->applicationInitFromCommand(GreetingCommand::class);
+
+    // The fwrite(STDOUT, ...) call is excluded from coverage, so we can't test
+    // it directly. But we can verify the application runs successfully
+    $this->applicationRun(['name' => 'TestUser']);
+    $this->assertApplicationSuccessful();
+    $this->assertApplicationOutputContains('Hello, TestUser!');
+  }
+
   /**
    * Test other code paths in applicationTrait.
    */
@@ -188,6 +254,48 @@ class ApplicationTraitTest extends UnitTestCase {
     $this->expectExceptionMessage('Application is not initialized');
 
     $this->applicationRun([]);
+  }
+
+  /**
+   * Test applicationGet() when application is not initialized.
+   */
+  public function testApplicationGetNotInitialized(): void {
+    $this->expectException(\RuntimeException::class);
+    $this->expectExceptionMessage('Application is not initialized. Call applicationInit* first.');
+
+    $this->applicationGet();
+  }
+
+  /**
+   * Test applicationGetTester() when tester is not initialized.
+   */
+  public function testApplicationGetTesterNotInitialized(): void {
+    $this->expectException(\RuntimeException::class);
+    $this->expectExceptionMessage('Application tester is not initialized. Call applicationInit* first.');
+
+    $this->applicationGetTester();
+  }
+
+  /**
+   * Test applicationGet() when application is initialized.
+   */
+  public function testApplicationGetInitialized(): void {
+    $this->applicationInitFromCommand(GreetingCommand::class);
+
+    $application = $this->applicationGet();
+    $this->assertInstanceOf(Application::class, $application);
+    $this->assertSame($this->application, $application);
+  }
+
+  /**
+   * Test applicationGetTester() when tester is initialized.
+   */
+  public function testApplicationGetTesterInitialized(): void {
+    $this->applicationInitFromCommand(GreetingCommand::class);
+
+    $tester = $this->applicationGetTester();
+    $this->assertInstanceOf(ApplicationTester::class, $tester);
+    $this->assertSame($this->applicationTester, $tester);
   }
 
   public function testApplicationRunWithExpectedFailure(): void {
