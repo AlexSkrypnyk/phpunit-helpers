@@ -50,6 +50,9 @@ trait LoggerTrait {
    *   Minimum width of the section.
    */
   public static function logSection(string $title, ?string $message = NULL, bool $double_border = FALSE, int $min_width = 60): void {
+    if ($min_width <= 0) {
+      throw new \InvalidArgumentException('Minimum width must be a positive integer.');
+    }
     if (!static::$loggerIsVerbose) {
       return;
     }

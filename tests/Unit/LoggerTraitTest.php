@@ -83,6 +83,30 @@ class LoggerTraitTest extends UnitTestCase {
   }
 
   /**
+   * Test logSection method with invalid min_width parameter.
+   */
+  public function testLogSectionWithInvalidMinWidth(): void {
+    static::loggerSetVerbose(TRUE);
+
+    $this->expectException(\InvalidArgumentException::class);
+    $this->expectExceptionMessage('Minimum width must be a positive integer.');
+
+    static::logSection('TEST TITLE', NULL, FALSE, 0);
+  }
+
+  /**
+   * Test logSection method with negative min_width parameter.
+   */
+  public function testLogSectionWithNegativeMinWidth(): void {
+    static::loggerSetVerbose(TRUE);
+
+    $this->expectException(\InvalidArgumentException::class);
+    $this->expectExceptionMessage('Minimum width must be a positive integer.');
+
+    static::logSection('TEST TITLE', NULL, FALSE, -10);
+  }
+
+  /**
    * Test logFile method with existing file.
    */
   public function testLogFileWithExistingFile(): void {
