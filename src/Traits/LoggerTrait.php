@@ -134,7 +134,7 @@ trait LoggerTrait {
       throw new \InvalidArgumentException(sprintf('File %s does not exist.', $path));
     }
 
-    $content = file_get_contents($path);
+    $content = @file_get_contents($path);
     if ($content === FALSE) {
       throw new \RuntimeException(sprintf('Failed to read file %s.', $path));
     }
