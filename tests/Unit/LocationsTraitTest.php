@@ -461,16 +461,25 @@ class LocationsTraitTest extends TestCase {
   }
 
   public function testLocationsTearDownWithChmodException(): void {
-    // Create a workspace directory to test exception handling during chmod.
+    // Create a workspace directory with restricted permissions to simulate
+    // chmod issues.
     static::$workspace = $this->testTmp . DIRECTORY_SEPARATOR . 'test_workspace_chmod_fail_' . uniqid();
     mkdir(static::$workspace, 0777, TRUE);
 
-    // Since we can't easily mock the new Filesystem() call, we'll test the
-    // exception handling path by ensuring the method completes without
-    // throwing exceptions.
+    // Create a subdirectory and file structure that might cause chmod issues.
+    $subdir = static::$workspace . DIRECTORY_SEPARATOR . 'readonly_subdir';
+    mkdir($subdir, 0777, TRUE);
+    touch($subdir . DIRECTORY_SEPARATOR . 'test_file.txt');
+
+    // Make the subdirectory read-only to potentially trigger chmod issues
+    // when locationsTearDown tries to modify permissions.
+    chmod($subdir, 0444);
+
+    // Test that locationsTearDown completes successfully even if chmod fails.
+    // This tests the exception handling path in the actual implementation.
     $this->locationsTearDown();
 
-    // Verify the workspace was removed despite the chmod exception.
+    // Verify the workspace was removed despite potential chmod exceptions.
     $this->assertDirectoryDoesNotExist(static::$workspace, 'Workspace should be removed even with chmod exception.');
   }
 
