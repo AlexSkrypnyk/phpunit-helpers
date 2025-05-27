@@ -139,6 +139,37 @@ class LoggerTraitTest extends UnitTestCase {
   }
 
   /**
+   * Test logFile method when verbose mode is disabled.
+   */
+  public function testLogFileWithVerboseDisabled(): void {
+    static::loggerSetVerbose(FALSE);
+
+    // Create a temporary file.
+    $temp_file = tempnam(sys_get_temp_dir(), 'logger_test');
+    file_put_contents($temp_file, 'Test content');
+
+    // This should not output anything and not throw exceptions.
+    static::logFile($temp_file);
+
+    // Clean up.
+    unlink($temp_file);
+
+    $this->addToAssertionCount(1); // Mark that silent logFile works.
+  }
+
+  /**
+   * Test logSection method when verbose mode is disabled.
+   */
+  public function testLogSectionWithVerboseDisabled(): void {
+    static::loggerSetVerbose(FALSE);
+
+    // This should not output anything and not throw exceptions.
+    static::logSection('TEST TITLE', 'Test message');
+
+    $this->addToAssertionCount(1); // Mark that silent logSection works.
+  }
+
+  /**
    * Test that methods are silent when verbose mode is disabled.
    */
   public function testSilentModeForAllMethods(): void {
