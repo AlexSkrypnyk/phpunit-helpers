@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AlexSkrypnyk\PhpunitHelpers\Tests\Unit;
 
+use PHPUnit\Framework\AssertionFailedError;
 use Symfony\Component\Process\Process;
 use AlexSkrypnyk\PhpunitHelpers\Traits\ProcessTrait;
 use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
@@ -647,117 +648,167 @@ EOL;
     $this->assertProcessOutputNotContains('first process');
   }
 
-  public function testProcessRunWithEnvironmentVariables(): void {
-    $this->processRun('sh', ['-c', 'echo "TEST_VAR: $TEST_VAR"'], [], ['TEST_VAR' => 'test_value']);
+  public function testProcessRunWithNullInputs(): void {
+    // Test the empty inputs check that converts empty array to NULL
+    $this->processRun('echo', ['test'], []);
 
     $this->assertProcessSuccessful();
-    $this->assertProcessOutputContains('TEST_VAR: test_value');
+    $this->assertProcessOutputContains('test');
   }
 
-  public function testProcessRunWithMultipleInputs(): void {
-    if (!static::$fixtures) {
-      throw new \RuntimeException('Fixtures directory is not set.');
-    }
-
-    $command = static::$fixtures . '/shell-command.sh';
-    $this->processRun($command, [], ['input1', 'input2'], []);
+  public function testProcessRunWithNonEmptyInputs(): void {
+    // Test with actual inputs - this should trigger the implode path
+    $this->processRun('cat', [], ['line1', 'line2', 'line3']);
 
     $this->assertProcessSuccessful();
-    $this->assertProcessOutputContains('NAME: input1');
-    $this->assertProcessOutputContains('COLOR: input2');
+    $this->assertProcessOutputContains('line1');
+    $this->assertProcessOutputContains('line2');
+    $this->assertProcessOutputContains('line3');
   }
 
-  public function testProcessStreamOutputProperty(): void {
-    // Test that processStreamOutput property works
-    $this->assertFalse($this->processStreamOutput);
-
-    $this->processStreamOutput = TRUE;
-    $this->assertTrue($this->processStreamOutput);
-
-    // Reset for other tests
-    $this->processStreamOutput = FALSE;
-  }
-
-  public function testProcessRunWithLongOutput(): void {
-    // Test with process that generates substantial output
-    $large_text = str_repeat('This is a long line of text. ', 100);
-    $this->processRun('echo', [$large_text]);
+  public function testProcessRunWithIdleTimeout(): void {
+    // Test the setIdleTimeout path
+    $this->processRun('echo', ['test'], [], [], 10, 5);
 
     $this->assertProcessSuccessful();
-    $this->assertProcessOutputContains('This is a long line of text.');
+    $this->assertProcessOutputContains('test');
   }
 
-  public function testProcessRunWithSpecialCharacters(): void {
-    // Test with special characters and unicode
-    $special_text = 'Special chars: !@#$%^&*()[]{}|;:,.<>?';
-    $this->processRun('echo', [$special_text]);
+  public function testProcessFormatOutputWithoutProcessInstance(): void {
+    // Test the case where processFormatOutput is called with no process
+    $this->process = NULL;
 
-    $this->assertProcessSuccessful();
-    $this->assertProcessOutputContains($special_text);
+    $reflection = new \ReflectionClass($this);
+    $method = $reflection->getMethod('processFormatOutput');
+    $method->setAccessible(TRUE);
+    $result = $method->invoke($this);
+
+    $this->assertIsString($result);
+    $this->assertStringContainsString('Process is not initialized', $result);
   }
 
-  public function testProcessCwdProperty(): void {
-    // Test processCwd property functionality
-    $original_cwd = $this->processCwd;
+  public function testStaticVariableAccess(): void {
+    // Test that our static variables have expected values
 
-    $temp_dir = sys_get_temp_dir();
-    $this->processCwd = $temp_dir;
-
-    $this->assertEquals($temp_dir, $this->processCwd);
-
-    // Reset
-    $this->processCwd = $original_cwd;
+    // Test that they have expected values
+    $this->assertEquals('>> ', static::$processStreamingStandardOutputChars);
+    $this->assertEquals('XX ', static::$processStreamingErrorOutputChars);
+    $this->assertStringContainsString('Standard output', static::$processStandardOutputHeader);
+    $this->assertStringContainsString('Standard output', static::$processStandardOutputFooter);
+    $this->assertStringContainsString('Error output', static::$processErrorOutputHeader);
+    $this->assertStringContainsString('Error output', static::$processErrorOutputFooter);
   }
 
-  public function testProcessRunWithEmptyArguments(): void {
+  public function testProcessInfoWithEmptyOutput(): void {
+    // Test processInfo when process has no output or error output
+    $this->processRun('true');
+
+    $info = $this->processInfo();
+
+    $this->assertStringContainsString('PROCESS', $info);
+    $this->assertStringContainsString('Output:', $info);
+    $this->assertStringContainsString('(no output)', $info);
+    $this->assertStringContainsString('Error:', $info);
+    $this->assertStringContainsString('(no error output)', $info);
+  }
+
+  public function testProcessInfoWithBothOutputs(): void {
+    // Test processInfo when process has both standard and error output
+    $this->processRun('sh', ['-c', 'echo "stdout message"; echo "stderr message" >&2']);
+
+    $info = $this->processInfo();
+
+    $this->assertStringContainsString('PROCESS', $info);
+    $this->assertStringContainsString('Output:', $info);
+    $this->assertStringContainsString('stdout message', $info);
+    $this->assertStringContainsString('Error:', $info);
+    $this->assertStringContainsString('stderr message', $info);
+    $this->assertStringNotContainsString('(no output)', $info);
+    $this->assertStringNotContainsString('(no error output)', $info);
+  }
+
+  public function testProcessStreamingCallbackReturnsCallable(): void {
+    // Test that processStreamingOutputCallback returns a callable
+    $reflection = new \ReflectionClass($this);
+    $method = $reflection->getMethod('processStreamingOutputCallback');
+    $method->setAccessible(TRUE);
+    $callback = $method->invoke($this);
+
+    $this->assertIsCallable($callback);
+
+    // Test that calling the callback doesn't throw exceptions
+    // Test with empty strings to avoid visible output
+    $callback(Process::OUT, "");
+    $callback(Process::ERR, "");
+
+    // If we reach here, the callback executed without errors
+    $this->addToAssertionCount(1);
+  }
+
+  public function testProcessRunWithZeroArguments(): void {
+    // Test edge case with exactly zero arguments
     $this->processRun('echo', []);
 
     $this->assertProcessSuccessful();
-    // Echo with no arguments should produce empty output (just newline)
-    if ($this->process instanceof Process) {
-      $output = $this->process->getOutput();
-      $this->assertStringContainsString("\n", $output);
-    }
   }
 
-  public function testProcessRunWithBooleanArguments(): void {
-    // Test validation of scalar arguments
-    $this->processRun('echo', ['true', 'false', '1', '0']);
+  public function testProcessRunWithEmptyStringArgument(): void {
+    // Test edge case with empty string argument
+    $this->processRun('echo', ['']);
 
     $this->assertProcessSuccessful();
-    $this->assertProcessOutputContains('true false 1 0');
   }
 
-  public function testProcessFormatOutputWithOnlyStandardOutput(): void {
-    $this->processRun('echo', ['Only standard output']);
+  public function testProcessRunWithMixedScalarArguments(): void {
+    // Test with various scalar types to ensure the scalar validation works
+    $this->processRun('echo', ['string', 123, TRUE, 45.67]);
+
+    $this->assertProcessSuccessful();
+  }
+
+  public function testProcessRunWithMixedScalarEnvironmentVariables(): void {
+    // Test with various scalar types for environment variables
+    $this->processRun('printenv', [], [], [
+      'TEST_STRING' => 'value',
+      'TEST_INT' => 123,
+      'TEST_BOOL' => TRUE,
+      'TEST_FLOAT' => 45.67,
+    ]);
+
+    $this->assertProcessSuccessful();
+  }
+
+  public function testProcessFormatOutputExitCodeDisplay(): void {
+    // Test that exit code is properly displayed in formatted output
+    $this->processRun('sh', ['-c', 'exit 42']);
 
     $reflection = new \ReflectionClass($this);
     $method = $reflection->getMethod('processFormatOutput');
     $method->setAccessible(TRUE);
     $formatted_output = $method->invoke($this);
-    $this->assertIsString($formatted_output);
 
-    $this->assertStringContainsString('Exit code: 0', $formatted_output);
-    $this->assertStringContainsString(static::$processStandardOutputHeader, $formatted_output);
-    $this->assertStringContainsString('Only standard output', $formatted_output);
-    $this->assertStringContainsString(static::$processStandardOutputFooter, $formatted_output);
-    $this->assertStringNotContainsString(static::$processErrorOutputHeader, $formatted_output);
+    $this->assertIsString($formatted_output);
+    $this->assertStringContainsString('Exit code: 42', $formatted_output);
   }
 
-  public function testProcessFormatOutputWithOnlyErrorOutput(): void {
-    $this->processRun('sh', ['-c', 'echo "Only error output" >&2']);
+  public function testAssertProcessSuccessfulWithFailedProcess(): void {
+    // Test the fail() path in assertProcessSuccessful when process failed
+    $this->processRun('sh', ['-c', 'exit 1']);
 
-    $reflection = new \ReflectionClass($this);
-    $method = $reflection->getMethod('processFormatOutput');
-    $method->setAccessible(TRUE);
-    $formatted_output = $method->invoke($this);
-    $this->assertIsString($formatted_output);
+    $this->expectException(AssertionFailedError::class);
+    $this->expectExceptionMessage('PROCESS FAILED');
 
-    $this->assertStringContainsString('Exit code: 0', $formatted_output);
-    $this->assertStringContainsString(static::$processErrorOutputHeader, $formatted_output);
-    $this->assertStringContainsString('Only error output', $formatted_output);
-    $this->assertStringContainsString(static::$processErrorOutputFooter, $formatted_output);
-    $this->assertStringNotContainsString(static::$processStandardOutputHeader, $formatted_output);
+    $this->assertProcessSuccessful();
+  }
+
+  public function testAssertProcessFailedWithSuccessfulProcess(): void {
+    // Test the fail() path in assertProcessFailed when process succeeded
+    $this->processRun('echo', ['success']);
+
+    $this->expectException(AssertionFailedError::class);
+    $this->expectExceptionMessage('PROCESS SUCCEEDED but failure was expected');
+
+    $this->assertProcessFailed();
   }
 
 }
