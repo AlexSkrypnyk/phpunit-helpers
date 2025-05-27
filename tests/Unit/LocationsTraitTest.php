@@ -509,10 +509,10 @@ class LocationsTraitTest extends TestCase {
     /** @var non-empty-string $expected_suffix */
     $this->locationsInit($this->testCwd);
 
-    // Create baseline directory structure.
-    $baseline_dir = $this->testFixtures . DIRECTORY_SEPARATOR . 'locations_fixture_dir_with_baseline_dataset' . DIRECTORY_SEPARATOR . $expected_suffix;
-    mkdir($baseline_dir, 0777, TRUE);
-    touch($baseline_dir . DIRECTORY_SEPARATOR . 'test_file.txt');
+    // Create dataset directory structure for each test case.
+    $dataset_dir = $this->testFixtures . DIRECTORY_SEPARATOR . 'locations_fixture_dir_with_baseline_dataset' . DIRECTORY_SEPARATOR . $expected_suffix;
+    mkdir($dataset_dir, 0777, TRUE);
+    touch($dataset_dir . DIRECTORY_SEPARATOR . 'test_file.txt');
 
     $fixture_dir = $this->locationsFixtureDir();
 
@@ -524,6 +524,8 @@ class LocationsTraitTest extends TestCase {
   public static function dataProviderBaselineDataset(): array {
     return [
       static::BASELINE_DATASET => [static::BASELINE_DIR],
+      'custom-dataset' => ['custom_dataset'],
+      'another-test-case' => ['another_test_case'],
     ];
   }
 
