@@ -6,10 +6,12 @@ namespace AlexSkrypnyk\PhpunitHelpers\Tests\Unit;
 
 use AlexSkrypnyk\PhpunitHelpers\Traits\LoggerTrait;
 use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversTrait;
 
 /**
  * Tests for LoggerTrait.
  */
+#[CoversTrait(LoggerTrait::class)]
 class LoggerTraitTest extends UnitTestCase {
 
   use LoggerTrait;
