@@ -28,6 +28,18 @@ Coverage reports are stored in:
 - `.logs/cobertura.xml`
 - `.logs/.coverage-html/`
 
+## Git Workflow
+- When creating features, create feature branches using format: `feature/branch-name`
+- Convert human-readable feature names to machine-readable branch names:
+  - Use lowercase letters and hyphens only
+  - Maximum 20 characters for the branch name part
+  - Remove articles (a, an, the) and common words
+  - Abbreviate when necessary
+- Examples:
+  - "Add user authentication" → `feature/add-user-auth`
+  - "Fix email validation bug" → `feature/fix-email-valid`
+  - "Update database schema" → `feature/update-db-schema`
+
 ## Commit Message Standards
 - Start with a verb in past tense (added, updated, deleted, removed, fixed)
 - End with a period
