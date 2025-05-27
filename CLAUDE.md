@@ -39,6 +39,7 @@ Coverage reports are stored in:
   - "Add user authentication" → `feature/add-user-auth`
   - "Fix email validation bug" → `feature/fix-email-valid`
   - "Update database schema" → `feature/update-db-schema`
+- Do NOT push to remote repositories unless explicitly asked to do so
 
 ## Commit Message Standards
 - Start with a verb in past tense (added, updated, deleted, removed, fixed)
