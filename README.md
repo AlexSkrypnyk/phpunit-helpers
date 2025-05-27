@@ -32,6 +32,7 @@
 | [`ReflectionTrait`](#reflectiontrait)                   | [src](src/Traits/ReflectionTrait.php)          | Access protected/private methods and properties                    |
 | [`SerializableClosureTrait`](#serializableclosuretrait) | [src](src/Traits/SerializableClosureTrait.php) | Make closures serializable for use in data providers               |
 | [`TuiTrait`](#tuitrait)                                 | [src](src/Traits/TuiTrait.php)                 | Interact with and test Textual User Interfaces                     |
+| [`LoggerTrait`](#loggertrait)                           | [src](src/Traits/LoggerTrait.php)              | Conditional logging to STDERR for test debugging                   |
 
 ## Installation
 
@@ -427,6 +428,65 @@ class MyTuiTest extends TestCase {
 }
 ```
 
+### `LoggerTrait`
+
+The `LoggerTrait` provides conditional logging functionality to STDERR for test debugging. All logging methods are controlled by a verbose flag that defaults to `FALSE` for clean test output.
+
+```php
+use AlexSkrypnyk\PhpunitHelpers\Traits\LoggerTrait;
+use PHPUnit\Framework\TestCase;
+
+class MyLoggerTest extends TestCase {
+  use LoggerTrait;
+
+  protected function setUp(): void {
+    // Enable verbose logging for debugging
+    static::loggerSetVerbose(TRUE);
+  }
+
+  public function testWithLogging() {
+    // Basic message logging
+    static::log('This is a debug message');
+
+    // Log a bordered section with title
+    static::logSection('TEST SECTION', 'This is the content of the section');
+
+    // Log a bordered section with double border
+    static::logSection('IMPORTANT', 'Critical information', TRUE);
+
+    // Log a bordered section with custom width
+    static::logSection('WIDE SECTION', 'Content', FALSE, 100);
+
+    // Log file contents with borders
+    static::logFile('/path/to/file.txt');
+    static::logFile('/path/to/file.txt', 'Custom description');
+
+    // Disable logging temporarily
+    static::loggerSetVerbose(FALSE);
+    static::log('This will not be output');
+
+    // Re-enable logging
+    static::loggerSetVerbose(TRUE);
+    static::log('This will be output');
+  }
+
+  public function testSilentMode() {
+    // Disable verbose logging for clean output
+    static::loggerSetVerbose(FALSE);
+
+    // All logging calls will be silent
+    static::log('Silent message');
+    static::logSection('Silent section', 'No output');
+  }
+}
+```
+
+All logging methods output to STDERR and support:
+- `log(string)` - Basic message logging
+- `logSection(string, ?string, bool, int)` - Bordered message sections
+- `logFile(string, ?string)` - File content logging with bordered sections
+- `loggerSetVerbose(bool)` - Control verbose mode
+
 ### Using Multiple Traits
 
 You can combine multiple traits in a single test class:
@@ -435,6 +495,7 @@ You can combine multiple traits in a single test class:
 use AlexSkrypnyk\PhpunitHelpers\Traits\AssertArrayTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\ApplicationTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\EnvTrait;
+use AlexSkrypnyk\PhpunitHelpers\Traits\LoggerTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\ProcessTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\ReflectionTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\TuiTrait;
@@ -444,6 +505,7 @@ class MyCombinedTest extends TestCase {
   use AssertArrayTrait;
   use ApplicationTrait;
   use EnvTrait;
+  use LoggerTrait;
   use ProcessTrait;
   use ReflectionTrait;
   use TuiTrait;
