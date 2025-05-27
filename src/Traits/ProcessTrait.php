@@ -92,9 +92,12 @@ trait ProcessTrait {
    * Run a process.
    *
    * @param string $command
-   *   The command to run.
+   *   The command to run. Can be a single command or command with arguments
+   *   separated by spaces (e.g., "git status" or "ls -la").
    * @param array $arguments
-   *   Command arguments.
+   *   Additional command arguments. If the command string contains arguments,
+   *   these explicit arguments will take precedence and be placed before
+   *   the parsed command arguments in the final command.
    * @param array $inputs
    *   Array of inputs for interactive processes.
    * @param array $env
@@ -115,11 +118,23 @@ trait ProcessTrait {
     int $timeout = 60,
     int $idle_timeout = 30,
   ): Process {
-    if (preg_match('/[^a-zA-Z0-9_\-\.\/]/', $command)) {
-      throw new \InvalidArgumentException(sprintf('Invalid command: %s. Only alphanumeric characters, dashes, underscores, and slashes are allowed. Check that you did not pass multiple commands.', $command));
+    // Parse command string to extract command and arguments as a shortcut.
+    $parsed_command = $this->processParseCommand($command);
+    $base_command = array_shift($parsed_command);
+    $parsed_arguments = $parsed_command;
+
+    // Validate the base command contains only allowed characters.
+    if (preg_match('/[^a-zA-Z0-9_\-.\/]/', $base_command)) {
+      throw new \InvalidArgumentException(sprintf('Invalid command: %s. Only alphanumeric characters, dashes, underscores, and slashes are allowed.', $base_command));
     }
 
-    foreach ($arguments as $arg) {
+    // Merge parsed arguments with provided arguments (provided arguments take
+    // precedence). The order is: explicit $arguments first, then parsed
+    // arguments from command string. This allows explicit arguments to
+    // override/take precedence over defaults in command strings.
+    $all_arguments = array_merge($arguments, $parsed_arguments);
+
+    foreach ($all_arguments as $arg) {
       if (!is_scalar($arg)) {
         throw new \InvalidArgumentException("All arguments must be scalar values.");
       }
@@ -131,7 +146,7 @@ trait ProcessTrait {
       }
     }
 
-    $cmd = array_merge([$command], $arguments);
+    $cmd = array_merge([$base_command], $all_arguments);
 
     $inputs = empty($inputs) ? NULL : implode(PHP_EOL, $inputs) . PHP_EOL;
 
@@ -162,6 +177,84 @@ trait ProcessTrait {
     }
     // @codeCoverageIgnoreEnd
     return $this->process;
+  }
+
+  /**
+   * Parses a command string into command and arguments.
+   *
+   * Handles quoted arguments and escaping properly. Supports both single
+   * and double quotes.
+   *
+   * @param string $command
+   *   The command string to parse.
+   *
+   * @return array
+   *   Array with command as first element and arguments as subsequent elements.
+   */
+  protected function processParseCommand(string $command): array {
+    $command = trim($command);
+    if (empty($command)) {
+      throw new \InvalidArgumentException('Command cannot be empty.');
+    }
+
+    $parts = [];
+    $current = '';
+    $in_quotes = FALSE;
+    $quote_char = '';
+    $escaped = FALSE;
+    $length = strlen($command);
+    $has_content = FALSE;
+
+    for ($i = 0; $i < $length; $i++) {
+      $char = $command[$i];
+
+      if ($escaped) {
+        $current .= $char;
+        $escaped = FALSE;
+        $has_content = TRUE;
+        continue;
+      }
+
+      if ($char === '\\') {
+        $escaped = TRUE;
+        continue;
+      }
+
+      if (!$in_quotes && ($char === '"' || $char === "'")) {
+        $in_quotes = TRUE;
+        $quote_char = $char;
+        $has_content = TRUE;
+        continue;
+      }
+
+      if ($in_quotes && $char === $quote_char) {
+        $in_quotes = FALSE;
+        $quote_char = '';
+        continue;
+      }
+
+      if (!$in_quotes && ($char === ' ' || $char === "\t")) {
+        if ($current !== '' || $has_content) {
+          $parts[] = $current;
+          $current = '';
+          $has_content = FALSE;
+        }
+        continue;
+      }
+
+      $current .= $char;
+      $has_content = TRUE;
+    }
+
+    if ($in_quotes) {
+      throw new \InvalidArgumentException('Unclosed quote in command string.');
+    }
+
+    if ($current !== '' || $has_content) {
+      $parts[] = $current;
+    }
+
+    return $parts;
   }
 
   /**

@@ -666,6 +666,143 @@ EOL;
     $this->assertProcessOutputContains('line3');
   }
 
+  #[DataProvider('dataProviderProcessRunWithCommandString')]
+  public function testProcessRunWithCommandString(string $command_string, array $additional_args, array $expected_output): void {
+    $this->processRun($command_string, $additional_args);
+
+    $this->assertProcessSuccessful();
+    foreach ($expected_output as $expected) {
+      $this->assertProcessOutputContains($expected);
+    }
+  }
+
+  public static function dataProviderProcessRunWithCommandString(): array {
+    return [
+      'simple_command_string' => [
+        'echo hello world',
+        [],
+        ['hello world'],
+      ],
+      'command_with_flags' => [
+        'echo -n test',
+        [],
+        ['test'],
+      ],
+      'command_with_quoted_arguments' => [
+        'echo "hello world" test',
+        [],
+        ['hello world', 'test'],
+      ],
+      'command_with_additional_args' => [
+        'echo hello',
+        ['world', 'again'],
+        ['world again hello'],
+      ],
+      'mixed_quotes' => [
+        'echo "double quote" \'single quote\'',
+        [],
+        ['double quote', 'single quote'],
+      ],
+      'escaped_characters' => [
+        'echo hello\\ world',
+        [],
+        ['hello world'],
+      ],
+      'complex_git_like_command' => [
+        'echo --message="Initial commit"',
+        ['--author=John'],
+        ['--author=John', '--message=Initial commit'],
+      ],
+    ];
+  }
+
+  public function testProcessRunWithInvalidCommandString(): void {
+    $this->expectException(\InvalidArgumentException::class);
+    $this->expectExceptionMessage('Invalid command: invalid$command. Only alphanumeric characters, dashes, underscores, and slashes are allowed.');
+
+    $this->processRun('invalid$command with args');
+  }
+
+  public function testProcessRunWithEmptyCommandString(): void {
+    $this->expectException(\InvalidArgumentException::class);
+    $this->expectExceptionMessage('Command cannot be empty.');
+
+    $this->processRun('');
+  }
+
+  public function testProcessRunWithWhitespaceOnlyCommandString(): void {
+    $this->expectException(\InvalidArgumentException::class);
+    $this->expectExceptionMessage('Command cannot be empty.');
+
+    $this->processRun('   ');
+  }
+
+  public function testProcessRunWithUnclosedQuotes(): void {
+    $this->expectException(\InvalidArgumentException::class);
+    $this->expectExceptionMessage('Unclosed quote in command string.');
+
+    $this->processRun('echo "unclosed quote');
+  }
+
+  public function testProcessRunPreservesBackwardCompatibility(): void {
+    // Test that the old array-based approach still works exactly as before
+    $this->processRun('echo', ['hello', 'world']);
+
+    $this->assertProcessSuccessful();
+    $this->assertProcessOutputContains('hello world');
+  }
+
+  public function testProcessRunCommandStringParsing(): void {
+    // Test that command string parsing works correctly
+    $this->processRun('echo test1 test2');
+
+    $this->assertProcessSuccessful();
+    $this->assertProcessOutputContains('test1 test2');
+  }
+
+  public function testProcessRunCommandStringWithSpecialCharacters(): void {
+    // Test command string with special characters in quotes
+    $this->processRun('echo "Hello! @#$%^&*()"');
+
+    $this->assertProcessSuccessful();
+    $this->assertProcessOutputContains('Hello! @#$%^&*()');
+  }
+
+  public function testProcessRunCommandStringWithFileFlags(): void {
+    // Test realistic file command with flags
+    $this->processRun('echo -e "line1\\nline2"');
+
+    $this->assertProcessSuccessful();
+    $this->assertProcessOutputContains('line1');
+  }
+
+  public function testProcessRunArgumentOverrideBehavior(): void {
+    // Test how parsed arguments and explicit arguments interact
+    // Explicit arguments take precedence and come first
+    $this->processRun('echo parsed1 parsed2', ['explicit1', 'explicit2']);
+
+    $this->assertProcessSuccessful();
+    $this->assertProcessOutputContains('explicit1 explicit2 parsed1 parsed2');
+  }
+
+  public function testProcessRunArgumentOrderWithFlags(): void {
+    // Test order with flag-like arguments - explicit flags come first
+    $this->processRun('echo --parsed-flag', ['--explicit-flag']);
+
+    $this->assertProcessSuccessful();
+    $this->assertProcessOutputContains('--explicit-flag --parsed-flag');
+  }
+
+  public function testProcessRunExplicitArgumentsPrecedence(): void {
+    // Test that explicit arguments take complete precedence over parsed ones
+    // This is useful for overriding default arguments in command strings
+    $this->processRun('echo default-arg1 default-arg2', ['override-arg1', 'override-arg2']);
+
+    $this->assertProcessSuccessful();
+    // Explicit arguments come first, then parsed arguments
+    $this->assertProcessOutputContains('override-arg1 override-arg2 default-arg1 default-arg2');
+  }
+
   public function testProcessRunWithIdleTimeout(): void {
     // Test the setIdleTimeout path
     $this->processRun('echo', ['test'], [], [], 10, 5);
@@ -697,6 +834,221 @@ EOL;
     $this->assertStringContainsString('Standard output', static::$processStandardOutputFooter);
     $this->assertStringContainsString('Error output', static::$processErrorOutputHeader);
     $this->assertStringContainsString('Error output', static::$processErrorOutputFooter);
+  }
+
+  #[DataProvider('dataProviderProcessParseCommand')]
+  public function testProcessParseCommand(string $command, array $expected, ?string $exception_message = NULL): void {
+    $reflection = new \ReflectionClass($this);
+    $method = $reflection->getMethod('processParseCommand');
+    $method->setAccessible(TRUE);
+
+    if ($exception_message !== NULL) {
+      $this->expectException(\InvalidArgumentException::class);
+      $this->expectExceptionMessage($exception_message);
+    }
+
+    $result = $method->invoke($this, $command);
+
+    if ($exception_message === NULL) {
+      $this->assertEquals($expected, $result);
+    }
+  }
+
+  public static function dataProviderProcessParseCommand(): array {
+    return [
+      // Basic cases
+      'simple_command' => [
+        'echo',
+        ['echo'],
+      ],
+      'command_with_single_argument' => [
+        'echo hello',
+        ['echo', 'hello'],
+      ],
+      'command_with_multiple_arguments' => [
+        'echo hello world',
+        ['echo', 'hello', 'world'],
+      ],
+      'command_with_flags' => [
+        'ls -la',
+        ['ls', '-la'],
+      ],
+      'command_with_multiple_flags' => [
+        'ls -l -a -h',
+        ['ls', '-l', '-a', '-h'],
+      ],
+      'command_with_flag_and_value' => [
+        'git commit -m message',
+        ['git', 'commit', '-m', 'message'],
+      ],
+
+      // Quoted arguments
+      'double_quoted_argument' => [
+        'echo "hello world"',
+        ['echo', 'hello world'],
+      ],
+      'single_quoted_argument' => [
+        "echo 'hello world'",
+        ['echo', 'hello world'],
+      ],
+      'multiple_quoted_arguments' => [
+        'echo "hello world" "goodbye earth"',
+        ['echo', 'hello world', 'goodbye earth'],
+      ],
+      'mixed_quoted_arguments' => [
+        'echo "hello world" \'goodbye earth\'',
+        ['echo', 'hello world', 'goodbye earth'],
+      ],
+      'quoted_argument_with_spaces' => [
+        'echo "  hello   world  "',
+        ['echo', '  hello   world  '],
+      ],
+      'empty_quoted_argument' => [
+        'echo ""',
+        ['echo', ''],
+      ],
+      'empty_single_quoted_argument' => [
+        "echo ''",
+        ['echo', ''],
+      ],
+
+      // Escaped characters
+      'escaped_double_quote_in_double_quotes' => [
+        'echo "She said \"Hello\""',
+        ['echo', 'She said "Hello"'],
+      ],
+      'escaped_single_quote_in_single_quotes' => [
+        "echo 'It\\'s working'",
+        ['echo', "It's working"],
+      ],
+      'escaped_backslash' => [
+        'echo "Path\\\\to\\\\file"',
+        ['echo', 'Path\\to\\file'],
+      ],
+      'escaped_space' => [
+        'echo hello\\ world',
+        ['echo', 'hello world'],
+      ],
+      'escaped_characters_outside_quotes' => [
+        'echo test\\nvalue',
+        ['echo', 'testnvalue'],
+      ],
+
+      // Complex cases
+      'complex_command_with_mixed_quoting' => [
+        'git commit -m "Initial commit" --author="John Doe <john@example.com>"',
+        ['git', 'commit', '-m', 'Initial commit', '--author=John Doe <john@example.com>'],
+      ],
+      'command_with_equals_in_quotes' => [
+        'env VAR="value=with=equals" command',
+        ['env', 'VAR=value=with=equals', 'command'],
+      ],
+      'command_with_special_characters' => [
+        'echo "Hello! @#$%^&*()_+-={}[]|\\\\:;\"\'<>?,./"',
+        ['echo', 'Hello! @#$%^&*()_+-={}[]|\\:;"\'<>?,./'],
+      ],
+
+      // Whitespace handling
+      'command_with_leading_spaces' => [
+        '   echo hello',
+        ['echo', 'hello'],
+      ],
+      'command_with_trailing_spaces' => [
+        'echo hello   ',
+        ['echo', 'hello'],
+      ],
+      'command_with_multiple_spaces_between_args' => [
+        'echo    hello     world',
+        ['echo', 'hello', 'world'],
+      ],
+      'command_with_tabs' => [
+        "echo\thello\tworld",
+        ['echo', 'hello', 'world'],
+      ],
+
+      // Edge cases with quotes
+      'nested_quotes_different_types' => [
+        'echo "He said \'Hello\'"',
+        ['echo', "He said 'Hello'"],
+      ],
+      'nested_quotes_same_type_escaped' => [
+        'echo "He said \"Hello\" loudly"',
+        ['echo', 'He said "Hello" loudly'],
+      ],
+      'quotes_in_argument_preserved' => [
+        'echo hello"world"test',
+        ['echo', 'helloworldtest'],
+      ],
+      'quote_at_beginning_of_argument' => [
+        'echo "hello"world',
+        ['echo', 'helloworld'],
+      ],
+
+      // Arguments with special command characters
+      'argument_with_pipe_in_quotes' => [
+        'echo "command | grep something"',
+        ['echo', 'command | grep something'],
+      ],
+      'argument_with_redirect_in_quotes' => [
+        'echo "output > file.txt"',
+        ['echo', 'output > file.txt'],
+      ],
+      'argument_with_semicolon_in_quotes' => [
+        'echo "cmd1; cmd2"',
+        ['echo', 'cmd1; cmd2'],
+      ],
+
+      // Number and boolean-like arguments
+      'numeric_arguments' => [
+        'test 123 456.789',
+        ['test', '123', '456.789'],
+      ],
+      'boolean_like_arguments' => [
+        'test true false',
+        ['test', 'true', 'false'],
+      ],
+
+      // File paths
+      'relative_path' => [
+        'cat ./file.txt',
+        ['cat', './file.txt'],
+      ],
+      'absolute_path' => [
+        'cat /usr/local/bin/file',
+        ['cat', '/usr/local/bin/file'],
+      ],
+      'path_with_spaces_quoted' => [
+        'cat "/path/with spaces/file.txt"',
+        ['cat', '/path/with spaces/file.txt'],
+      ],
+
+      // Error cases
+      'empty_command' => [
+        '',
+        [],
+        'Command cannot be empty.',
+      ],
+      'whitespace_only_command' => [
+        '   ',
+        [],
+        'Command cannot be empty.',
+      ],
+      'unclosed_double_quote' => [
+        'echo "hello world',
+        [],
+        'Unclosed quote in command string.',
+      ],
+      'unclosed_single_quote' => [
+        "echo 'hello world",
+        [],
+        'Unclosed quote in command string.',
+      ],
+      'unclosed_quote_with_escape' => [
+        'echo "hello world\\',
+        [],
+        'Unclosed quote in command string.',
+      ],
+    ];
   }
 
   public function testProcessInfoWithEmptyOutput(): void {
