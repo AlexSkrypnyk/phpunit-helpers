@@ -138,6 +138,31 @@ class LoggerTraitTest extends UnitTestCase {
   }
 
   /**
+   * Test logFile method with unreadable file.
+   */
+  public function testLogFileWithUnreadableFile(): void {
+    static::loggerSetVerbose(TRUE);
+
+    // Create a temporary file.
+    $temp_file = tempnam(sys_get_temp_dir(), 'logger_test');
+    file_put_contents($temp_file, 'Test content');
+
+    // Change permissions to make file unreadable.
+    chmod($temp_file, 0000);
+
+    $this->expectException(\RuntimeException::class);
+    $this->expectExceptionMessage('Failed to read file ' . $temp_file . '.');
+
+    try {
+      static::logFile($temp_file);
+    } finally {
+      // Restore permissions and clean up.
+      chmod($temp_file, 0644);
+      unlink($temp_file);
+    }
+  }
+
+  /**
    * Test logFile method with non-existent file.
    */
   public function testLogFileWithNonExistentFile(): void {
