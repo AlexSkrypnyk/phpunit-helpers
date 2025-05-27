@@ -46,8 +46,7 @@ class LoggerTraitTest extends UnitTestCase {
     static::log('Silent message');
     static::logSection('Silent', 'Silent content');
 
-    // Test completed successfully.
-    $this->assertTrue(TRUE);
+    $this->addToAssertionCount(1); // Test completed successfully.
   }
 
   /**
@@ -70,8 +69,7 @@ class LoggerTraitTest extends UnitTestCase {
     // Test that calling log doesn't throw exceptions when verbose is enabled.
     static::log('Test message');
 
-    // Verify state remains consistent.
-    $this->assertTrue(TRUE); // Test executed without exceptions.
+    $this->addToAssertionCount(1); // Test executed without exceptions.
   }
 
   /**
@@ -92,8 +90,7 @@ class LoggerTraitTest extends UnitTestCase {
     // Test section with custom width.
     static::logSection('TEST TITLE', NULL, FALSE, 80);
 
-    // Verify all methods executed without exceptions.
-    $this->assertTrue(TRUE);
+    $this->addToAssertionCount(1); // All methods executed without exceptions.
   }
 
   /**
@@ -137,8 +134,7 @@ class LoggerTraitTest extends UnitTestCase {
     // Clean up.
     unlink($temp_file);
 
-    // Verify method executed without exceptions.
-    $this->assertTrue(TRUE);
+    $this->addToAssertionCount(1); // Method executed without exceptions.
   }
 
   /**
@@ -152,7 +148,6 @@ class LoggerTraitTest extends UnitTestCase {
 
     static::logFile('/non/existent/file');
   }
-
 
   /**
    * Test logFile method when verbose mode is disabled.
@@ -170,8 +165,8 @@ class LoggerTraitTest extends UnitTestCase {
     // Clean up.
     unlink($temp_file);
 
-    // Verify method executed silently without exceptions.
-    $this->assertTrue(TRUE);
+    // Method executed silently without exceptions.
+    $this->addToAssertionCount(1);
   }
 
   /**
@@ -183,8 +178,8 @@ class LoggerTraitTest extends UnitTestCase {
     // This should not output anything and not throw exceptions.
     static::logSection('TEST TITLE', 'Test message');
 
-    // Verify method executed silently without exceptions.
-    $this->assertTrue(TRUE);
+    // Method executed silently without exceptions.
+    $this->addToAssertionCount(1);
   }
 
   /**
@@ -203,8 +198,8 @@ class LoggerTraitTest extends UnitTestCase {
     static::logFile($temp_file);
     unlink($temp_file);
 
-    // Verify all methods executed silently without exceptions.
-    $this->assertTrue(TRUE);
+    // All methods executed silently without exceptions.
+    $this->addToAssertionCount(1);
   }
 
   /**
@@ -223,8 +218,7 @@ class LoggerTraitTest extends UnitTestCase {
     // Call methods again.
     static::log('Message 2');
 
-    // Verify verbose mode changes work correctly.
-    $this->assertTrue(TRUE);
+    $this->addToAssertionCount(1); // Verbose mode changes work correctly.
   }
 
 }
