@@ -20,18 +20,8 @@ trait LoggerTrait {
    * @param bool $verbose
    *   TRUE to enable verbose logging, FALSE to disable.
    */
-  public static function setLoggerVerbose(bool $verbose): void {
+  public static function loggerSetVerbose(bool $verbose): void {
     static::$loggerIsVerbose = $verbose;
-  }
-
-  /**
-   * Gets the current verbose mode state.
-   *
-   * @return bool
-   *   TRUE if verbose logging is enabled, FALSE otherwise.
-   */
-  public static function isLoggerVerbose(): bool {
-    return static::$loggerIsVerbose;
   }
 
   /**
@@ -48,18 +38,18 @@ trait LoggerTrait {
   }
 
   /**
-   * Logs a message within a bordered box.
+   * Logs a message within a bordered section.
    *
    * @param string $title
    *   The title to display in the header.
    * @param string|null $message
-   *   Optional message content to display within the box.
+   *   Optional message content to display within the section.
    * @param bool $double_border
    *   Whether to use double border characters (=) instead of single (-).
    * @param int $min_width
-   *   Minimum width of the box.
+   *   Minimum width of the section.
    */
-  public static function logBox(string $title, ?string $message = NULL, bool $double_border = FALSE, int $min_width = 60): void {
+  public static function logSection(string $title, ?string $message = NULL, bool $double_border = FALSE, int $min_width = 60): void {
     if (!static::$loggerIsVerbose) {
       return;
     }
@@ -121,7 +111,7 @@ trait LoggerTrait {
   }
 
   /**
-   * Logs the contents of a file with a bordered header and footer.
+   * Logs the contents of a file with a bordered section header and footer.
    *
    * @param string $path
    *   The path to the file to log.
@@ -148,9 +138,9 @@ trait LoggerTrait {
 
     $message = $message ? $message . ' (' . $path . ')' : $path;
 
-    static::logBox('FILE START', $message);
+    static::logSection('FILE START', $message);
     static::log($content);
-    static::logBox('FILE END', $message);
+    static::logSection('FILE END', $message);
   }
 
 }

@@ -441,57 +441,51 @@ class MyLoggerTest extends TestCase {
 
   protected function setUp(): void {
     // Enable verbose logging for debugging
-    static::setLoggerVerbose(TRUE);
+    static::loggerSetVerbose(TRUE);
   }
 
   public function testWithLogging() {
     // Basic message logging
     static::log('This is a debug message');
 
-    // Log a bordered box with title
-    static::logBox('TEST SECTION', 'This is the content of the box');
+    // Log a bordered section with title
+    static::logSection('TEST SECTION', 'This is the content of the section');
 
-    // Log a bordered box with double border
-    static::logBox('IMPORTANT', 'Critical information', TRUE);
+    // Log a bordered section with double border
+    static::logSection('IMPORTANT', 'Critical information', TRUE);
 
-    // Log a bordered box with custom width
-    static::logBox('WIDE SECTION', 'Content', FALSE, 100);
+    // Log a bordered section with custom width
+    static::logSection('WIDE SECTION', 'Content', FALSE, 100);
 
     // Log file contents with borders
     static::logFile('/path/to/file.txt');
     static::logFile('/path/to/file.txt', 'Custom description');
 
-    // Check verbose state
-    if (static::isLoggerVerbose()) {
-      // Additional debug operations
-    }
-
     // Disable logging temporarily
-    static::setLoggerVerbose(FALSE);
+    static::loggerSetVerbose(FALSE);
     static::log('This will not be output');
 
     // Re-enable logging
-    static::setLoggerVerbose(TRUE);
+    static::loggerSetVerbose(TRUE);
     static::log('This will be output');
   }
 
   public function testSilentMode() {
     // Disable verbose logging for clean output
-    static::setLoggerVerbose(FALSE);
+    static::loggerSetVerbose(FALSE);
 
     // All logging calls will be silent
     static::log('Silent message');
-    static::logBox('Silent box', 'No output');
+    static::logSection('Silent section', 'No output');
   }
 }
 ```
 
 All logging methods output to STDERR and support:
 - `log(string)` - Basic message logging
-- `logBox(string, ?string, bool, int)` - Bordered message boxes
-- `logFile(string, ?string)` - File content logging with borders
-- `setLoggerVerbose(bool)` - Control verbose mode
-- `isLoggerVerbose()` - Check verbose state
+- `logSection(string, ?string, bool, int)` - Bordered message sections
+- `logFile(string, ?string)` - File content logging with bordered sections
+- `loggerSetVerbose(bool)` - Control verbose mode
 
 ### Using Multiple Traits
 
