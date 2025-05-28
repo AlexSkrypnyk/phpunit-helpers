@@ -98,6 +98,7 @@ trait ProcessTrait {
    *   Additional command arguments. If the command string contains arguments,
    *   these explicit arguments will take precedence and be placed before
    *   the parsed command arguments in the final command.
+   *   Note: All scalar arguments are converted to strings (TRUE→"1", FALSE→"").
    * @param array $inputs
    *   Array of inputs for interactive processes.
    * @param array $env
@@ -257,6 +258,10 @@ trait ProcessTrait {
 
     if ($in_quotes) {
       throw new \InvalidArgumentException('Unclosed quote in command string.');
+    }
+
+    if ($escaped) {
+      throw new \InvalidArgumentException('Trailing escape character in command string.');
     }
 
     if ($current !== '' || $has_content) {

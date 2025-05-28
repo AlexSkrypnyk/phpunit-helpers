@@ -672,6 +672,11 @@ EOL;
 
   #[DataProvider('dataProviderProcessRunWithCommandString')]
   public function testProcessRunWithCommandString(string $command_string, array $additional_args, array $expected_output): void {
+    // Skip POSIX-specific commands on Windows
+    if (DIRECTORY_SEPARATOR === '\\' && str_starts_with($command_string, 'printf')) {
+      $this->markTestSkipped('Requires POSIX utilities');
+    }
+
     $this->processRun($command_string, $additional_args);
 
     $this->assertProcessSuccessful();
@@ -688,7 +693,7 @@ EOL;
         ['hello world'],
       ],
       'command_with_flags' => [
-        'echo -n test',
+        'printf %s test',
         [],
         ['test'],
       ],
@@ -1051,6 +1056,11 @@ EOL;
         'echo "hello world\\',
         [],
         'Unclosed quote in command string.',
+      ],
+      'trailing_escape_character' => [
+        'echo hello\\',
+        [],
+        'Trailing escape character in command string.',
       ],
     ];
   }
