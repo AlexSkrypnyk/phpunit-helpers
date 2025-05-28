@@ -219,7 +219,7 @@ class ProcessTraitTest extends UnitTestCase {
 
   public function testProcessRunWithInvalidCommand(): void {
     $this->expectException(\InvalidArgumentException::class);
-    $this->expectExceptionMessage('Invalid command: invalid$command. Only alphanumeric characters, dashes, underscores, and slashes are allowed.');
+    $this->expectExceptionMessage('Invalid command: invalid$command. Only alphanumeric characters, dots, dashes, underscores and slashes are allowed.');
 
     $this->processRun('invalid$command');
   }
@@ -657,6 +657,10 @@ EOL;
   }
 
   public function testProcessRunWithNonEmptyInputs(): void {
+    if (DIRECTORY_SEPARATOR === '\\') {
+      $this->markTestSkipped('Requires POSIX utilities');
+    }
+
     // Test with actual inputs - this should trigger the implode path
     $this->processRun('cat', [], ['line1', 'line2', 'line3']);
 
@@ -696,7 +700,7 @@ EOL;
       'command_with_additional_args' => [
         'echo hello',
         ['world', 'again'],
-        ['world again hello'],
+        ['world', 'again', 'hello'],
       ],
       'mixed_quotes' => [
         'echo "double quote" \'single quote\'',
@@ -718,7 +722,7 @@ EOL;
 
   public function testProcessRunWithInvalidCommandString(): void {
     $this->expectException(\InvalidArgumentException::class);
-    $this->expectExceptionMessage('Invalid command: invalid$command. Only alphanumeric characters, dashes, underscores, and slashes are allowed.');
+    $this->expectExceptionMessage('Invalid command: invalid$command. Only alphanumeric characters, dots, dashes, underscores and slashes are allowed.');
 
     $this->processRun('invalid$command with args');
   }
@@ -1052,6 +1056,10 @@ EOL;
   }
 
   public function testProcessInfoWithEmptyOutput(): void {
+    if (DIRECTORY_SEPARATOR === '\\') {
+      $this->markTestSkipped('Requires POSIX utilities');
+    }
+
     // Test processInfo when process has no output or error output
     $this->processRun('true');
 
@@ -1119,6 +1127,10 @@ EOL;
   }
 
   public function testProcessRunWithMixedScalarEnvironmentVariables(): void {
+    if (DIRECTORY_SEPARATOR === '\\') {
+      $this->markTestSkipped('Requires POSIX utilities');
+    }
+
     // Test with various scalar types for environment variables
     $this->processRun('printenv', [], [], [
       'TEST_STRING' => 'value',
@@ -1131,6 +1143,10 @@ EOL;
   }
 
   public function testProcessFormatOutputExitCodeDisplay(): void {
+    if (DIRECTORY_SEPARATOR === '\\') {
+      $this->markTestSkipped('Requires POSIX utilities');
+    }
+
     // Test that exit code is properly displayed in formatted output
     $this->processRun('sh', ['-c', 'exit 42']);
 

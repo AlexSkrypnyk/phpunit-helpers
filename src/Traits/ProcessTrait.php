@@ -125,26 +125,30 @@ trait ProcessTrait {
 
     // Validate the base command contains only allowed characters.
     if (preg_match('/[^a-zA-Z0-9_\-.\/]/', $base_command)) {
-      throw new \InvalidArgumentException(sprintf('Invalid command: %s. Only alphanumeric characters, dashes, underscores, and slashes are allowed.', $base_command));
+      throw new \InvalidArgumentException(sprintf('Invalid command: %s. Only alphanumeric characters, dots, dashes, underscores and slashes are allowed.', $base_command));
     }
 
     // Merge parsed arguments with provided arguments (provided arguments take
     // precedence). The order is: explicit $arguments first, then parsed
     // arguments from command string. This allows explicit arguments to
     // override/take precedence over defaults in command strings.
-    $all_arguments = array_merge($arguments, $parsed_arguments);
+    $all_arguments = array_values(array_merge($arguments, $parsed_arguments));
 
-    foreach ($all_arguments as $arg) {
+    foreach ($all_arguments as &$arg) {
       if (!is_scalar($arg)) {
         throw new \InvalidArgumentException("All arguments must be scalar values.");
       }
+      $arg = (string) $arg;
     }
+    unset($arg);
 
-    foreach ($env as $env_value) {
+    foreach ($env as &$env_value) {
       if (!is_scalar($env_value)) {
         throw new \InvalidArgumentException("All environment variables must be scalar values.");
       }
+      $env_value = (string) $env_value;
     }
+    unset($env_value);
 
     $cmd = array_merge([$base_command], $all_arguments);
 
@@ -184,6 +188,11 @@ trait ProcessTrait {
    *
    * Handles quoted arguments and escaping properly. Supports both single
    * and double quotes.
+   *
+   * Note: This parser intentionally allows backslash escaping inside single
+   * quotes (e.g., 'It\'s working'), which deviates from POSIX shell behavior
+   * where backslashes are literal inside single quotes. This provides more
+   * intuitive escaping for users.
    *
    * @param string $command
    *   The command string to parse.
