@@ -183,7 +183,7 @@ trait TuiTrait {
       // If an entry has a special key - we consider that any additional
       // functionality like clearing the existing entry or appending an accept
       // key is handled by the consumer.
-      $skip_additional_processing = static::tuiHasKey($entry);
+      $skip_additional_processing = static::tuiHasKey($entry, [self::KEYS['SPACE']]);
 
       // Clear the existing TUI value, if any, one character at a time.
       if (!$skip_additional_processing && $clear_size > 0) {
@@ -251,12 +251,19 @@ trait TuiTrait {
    *
    * @param string $value
    *   The value to check.
+   * @param array $exclude
+   *   An array of keys to exclude from the check.
    *
    * @return bool
    *   TRUE if the value contains a special key, FALSE otherwise.
    */
-  public static function tuiHasKey(string $value): bool {
+  public static function tuiHasKey(string $value, array $exclude = []): bool {
     $flattened_keys = static::tuiKeysFlattened();
+
+    // Exclude specified keys from the check.
+    if (!empty($exclude)) {
+      $flattened_keys = array_diff($flattened_keys, $exclude);
+    }
 
     foreach ($flattened_keys as $key_seq) {
       if (str_contains($value, $key_seq)) {
