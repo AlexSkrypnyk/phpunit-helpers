@@ -199,6 +199,40 @@ class TuiTraitTest extends TestCase {
           self::KEYS['DOWN'], 'n', self::KEYS['ENTER'],
         ],
       ],
+      'string_with_spaces' => [
+        [
+          'answer1' => 'hello world',
+        ],
+        0,
+        NULL,
+        NULL,
+        [
+          'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd', self::KEYS['ENTER'],
+        ],
+      ],
+      'string_with_spaces_an_key' => [
+        [
+          'answer1' => 'hello world',
+        ],
+        0,
+        NULL,
+        NULL,
+        [
+          'h', 'e', 'l', 'l', 'o', self::KEYS['SPACE'], 'w', 'o', 'r', 'l', 'd', self::KEYS['ENTER'],
+        ],
+      ],
+      'string_with_spaces_clear_size' => [
+        [
+          'answer1' => 'hello world',
+        ],
+        2,
+        NULL,
+        NULL,
+        [
+          self::KEYS['BACKSPACE'], self::KEYS['BACKSPACE'],
+          'h', 'e', 'l', 'l', 'o', self::KEYS['SPACE'], 'w', 'o', 'r', 'l', 'd', self::KEYS['ENTER'],
+        ],
+      ],
     ];
   }
 
@@ -219,6 +253,28 @@ class TuiTraitTest extends TestCase {
       'not_a_key' => ['not_a_key', FALSE],
       'key_name_as_string' => ['ENTER', FALSE],
       'empty_string' => ['', FALSE],
+    ];
+  }
+
+  #[DataProvider('dataProviderTuiHasKey')]
+  public function testTuiHasKey(string $value, array $exclude, bool $expected): void {
+    $this->assertEquals($expected, static::tuiHasKey($value, $exclude));
+  }
+
+  public static function dataProviderTuiHasKey(): array {
+    return [
+      'string_with_enter_key' => ['some text' . self::KEYS['ENTER'] . 'more text', [], TRUE],
+      'string_with_space_key' => ['text with' . self::KEYS['SPACE'] . 'space', [], TRUE],
+      'string_with_tab_key' => ['text' . self::KEYS['TAB'] . 'tab', [], TRUE],
+      'string_with_backspace_key' => ['text' . self::KEYS['BACKSPACE'] . 'backspace', [], TRUE],
+      'string_with_arrow_key' => ['text' . self::KEYS['UP'] . 'arrow', [], TRUE],
+      'string_without_keys' => ['plaintext', [], FALSE],
+      'empty_string' => ['', [], FALSE],
+      'string_with_excluded_key' => ['text' . self::KEYS['SPACE'] . 'space', [self::KEYS['SPACE']], FALSE],
+      'string_with_non_excluded_key' => ['text' . self::KEYS['ENTER'] . 'enter', [self::KEYS['SPACE']], TRUE],
+      'string_with_multiple_keys' => ['text' . self::KEYS['ENTER'] . self::KEYS['TAB'] . 'keys', [], TRUE],
+      'string_with_multiple_excluded_keys' => ['text' . self::KEYS['SPACE'] . 'space', [self::KEYS['SPACE'], self::KEYS['TAB']], FALSE],
+      'string_with_mixed_keys_and_exclusions' => ['text' . self::KEYS['ENTER'] . self::KEYS['SPACE'] . 'mixed', [self::KEYS['SPACE']], TRUE],
     ];
   }
 
