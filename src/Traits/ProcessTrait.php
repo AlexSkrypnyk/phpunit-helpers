@@ -95,9 +95,7 @@ trait ProcessTrait {
    *   The command to run. Can be a single command or command with arguments
    *   separated by spaces (e.g., "git status" or "ls -la").
    * @param array $arguments
-   *   Additional command arguments. If the command string contains arguments,
-   *   these explicit arguments will take precedence and be placed before
-   *   the parsed command arguments in the final command.
+   *   Additional command arguments.
    *   Note: All scalar arguments are converted to strings (TRUE→"1", FALSE→"").
    * @param array $inputs
    *   Array of inputs for interactive processes.
@@ -129,11 +127,7 @@ trait ProcessTrait {
       throw new \InvalidArgumentException(sprintf('Invalid command: %s. Only alphanumeric characters, dots, dashes, underscores and slashes are allowed.', $base_command));
     }
 
-    // Merge parsed arguments with provided arguments (provided arguments take
-    // precedence). The order is: explicit $arguments first, then parsed
-    // arguments from command string. This allows explicit arguments to
-    // override/take precedence over defaults in command strings.
-    $all_arguments = array_values(array_merge($arguments, $parsed_arguments));
+    $all_arguments = array_values(array_merge($parsed_arguments, $arguments));
 
     foreach ($all_arguments as &$arg) {
       if (!is_scalar($arg)) {
@@ -188,7 +182,9 @@ trait ProcessTrait {
    * Parses a command string into command and arguments.
    *
    * Handles quoted arguments and escaping properly. Supports both single
-   * and double quotes.
+   * and double quotes. Also supports the end-of-options marker (--) which
+   * stops option parsing and treats all subsequent tokens as positional
+   * arguments.
    *
    * Note: This parser intentionally allows backslash escaping inside single
    * quotes (e.g., 'It\'s working'), which deviates from POSIX shell behavior
@@ -214,6 +210,7 @@ trait ProcessTrait {
     $escaped = FALSE;
     $length = strlen($command);
     $has_content = FALSE;
+    $end_of_options_found = FALSE;
 
     for ($i = 0; $i < $length; $i++) {
       $char = $command[$i];
@@ -245,6 +242,17 @@ trait ProcessTrait {
 
       if (!$in_quotes && ($char === ' ' || $char === "\t")) {
         if ($current !== '' || $has_content) {
+          // Check for end-of-options marker (--) only if not already found
+          // and not inside quotes.
+          if (!$end_of_options_found && $current === '--') {
+            $end_of_options_found = TRUE;
+            // Add the -- marker to the parts array so it reaches the command.
+            $parts[] = $current;
+            $current = '';
+            $has_content = FALSE;
+            continue;
+          }
+
           $parts[] = $current;
           $current = '';
           $has_content = FALSE;
