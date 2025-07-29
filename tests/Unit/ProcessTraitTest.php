@@ -386,7 +386,7 @@ class ProcessTraitTest extends UnitTestCase {
 >>   - Component A: OK
 >>   - Component B: OK
 >>   - Component C: FAILED
->> 
+>>
 >> Step 2: Processing data...
 >> ----------------------------------------
 >> | Item     | Status    | Progress      |
@@ -395,12 +395,12 @@ class ProcessTraitTest extends UnitTestCase {
 >> | File 2   | Error     | [####------]  |
 >> | File 3   | Pending   | [----------]  |
 >> ----------------------------------------
->> 
+>>
 XX ERROR: Critical failure in Component C
 XX ERROR: Unable to process File 2
 XX ERROR: Operation aborted
 >> Some non-error output that should not be treated as an error
->> 
+>>
 XX === Complex Operation Failed ===
 EOL;
 
@@ -787,29 +787,38 @@ EOL;
 
   public function testProcessRunArgumentOverrideBehavior(): void {
     // Test how parsed arguments and explicit arguments interact
-    // Explicit arguments take precedence and come first
+    // Parsed arguments come first, explicit arguments are appended
     $this->processRun('echo parsed1 parsed2', ['explicit1', 'explicit2']);
 
     $this->assertProcessSuccessful();
-    $this->assertProcessOutputContains('explicit1 explicit2 parsed1 parsed2');
+    $this->assertProcessOutputContains('parsed1 parsed2 explicit1 explicit2');
   }
 
   public function testProcessRunArgumentOrderWithFlags(): void {
-    // Test order with flag-like arguments - explicit flags come first
+    // Test order with flag-like arguments - parsed flags come first
     $this->processRun('echo --parsed-flag', ['--explicit-flag']);
 
     $this->assertProcessSuccessful();
-    $this->assertProcessOutputContains('--explicit-flag --parsed-flag');
+    $this->assertProcessOutputContains('--parsed-flag --explicit-flag');
   }
 
   public function testProcessRunExplicitArgumentsPrecedence(): void {
-    // Test that explicit arguments take complete precedence over parsed ones
-    // This is useful for overriding default arguments in command strings
+    // Test that parsed arguments come first, explicit arguments are appended
+    // This preserves command structure, especially for -- markers
     $this->processRun('echo default-arg1 default-arg2', ['override-arg1', 'override-arg2']);
 
     $this->assertProcessSuccessful();
-    // Explicit arguments come first, then parsed arguments
-    $this->assertProcessOutputContains('override-arg1 override-arg2 default-arg1 default-arg2');
+    // Parsed arguments come first, then explicit arguments
+    $this->assertProcessOutputContains('default-arg1 default-arg2 override-arg1 override-arg2');
+  }
+
+  public function testProcessRunWithEndOfOptionsAndExplicitArgs(): void {
+    // Test that commands with -- preserve structure with explicit args.
+    $this->processRun('echo command -- after-marker', ['explicit']);
+
+    $this->assertProcessSuccessful();
+    // Command structure preserved, explicit args appended at end
+    $this->assertProcessOutputContains('command -- after-marker explicit');
   }
 
   public function testProcessRunWithIdleTimeout(): void {
@@ -1029,6 +1038,68 @@ EOL;
       'path_with_spaces_quoted' => [
         'cat "/path/with spaces/file.txt"',
         ['cat', '/path/with spaces/file.txt'],
+      ],
+
+      // End-of-options marker (--) cases
+      'end_of_options_basic' => [
+        'run -- -abc',
+        ['run', '--', '-abc'],
+      ],
+      'end_of_options_mixed_options_and_arguments' => [
+        'start -v -- --dry-run -f config.yml',
+        ['start', '-v', '--', '--dry-run', '-f', 'config.yml'],
+      ],
+      'end_of_options_no_options_present' => [
+        'do -- foo bar',
+        ['do', '--', 'foo', 'bar'],
+      ],
+      'end_of_options_quoted_delimiter_should_not_split' => [
+        'exec "-- --not-an-option"',
+        ['exec', '-- --not-an-option'],
+      ],
+      'end_of_options_with_multiple_dashes_after' => [
+        'deploy -f -- --force --verbose --dry-run',
+        ['deploy', '-f', '--', '--force', '--verbose', '--dry-run'],
+      ],
+      'end_of_options_with_flags_before_and_after' => [
+        'build --clean -- --no-cache --parallel',
+        ['build', '--clean', '--', '--no-cache', '--parallel'],
+      ],
+      'end_of_options_at_end_of_command' => [
+        'command arg1 arg2 --',
+        ['command', 'arg1', 'arg2', '--'],
+      ],
+      'end_of_options_only_double_dash' => [
+        'command --',
+        ['command', '--'],
+      ],
+      'end_of_options_with_quoted_args_after' => [
+        'test -- "quoted arg" \'single quoted\'',
+        ['test', '--', 'quoted arg', 'single quoted'],
+      ],
+      'end_of_options_with_special_characters_after' => [
+        'cmd -- --option=value -x "complex arg with spaces"',
+        ['cmd', '--', '--option=value', '-x', 'complex arg with spaces'],
+      ],
+      'end_of_options_multiple_markers_only_first_counts' => [
+        'test -- first -- second',
+        ['test', '--', 'first', '--', 'second'],
+      ],
+      'end_of_options_with_escaping_before_marker' => [
+        'echo hello\\ world --',
+        ['echo', 'hello world', '--'],
+      ],
+      'end_of_options_with_complex_args_after' => [
+        'deploy -f -- --env=prod --config="/path/with spaces/config.yml" -x',
+        ['deploy', '-f', '--', '--env=prod', '--config=/path/with spaces/config.yml', '-x'],
+      ],
+      'end_of_options_command_subcommand_pattern' => [
+        'cli subcommand -- arguments --option',
+        ['cli', 'subcommand', '--', 'arguments', '--option'],
+      ],
+      'end_of_options_ahoy_like_pattern' => [
+        'tool subtool -- target --flag --setting=value',
+        ['tool', 'subtool', '--', 'target', '--flag', '--setting=value'],
       ],
 
       // Error cases
