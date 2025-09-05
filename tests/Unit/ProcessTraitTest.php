@@ -1260,4 +1260,83 @@ EOL;
     $this->assertProcessFailed();
   }
 
+  public function testStreamingOutputWithDimmingEnabled(): void {
+    $this->processStreamOutput = TRUE;
+    static::$processStreamingOutputShouldDim = TRUE;
+
+    $temp_file = tempnam(sys_get_temp_dir(), 'phpunit_stdout_test');
+
+    $test_script = sprintf('
+<?php
+require_once "%s/vendor/autoload.php";
+use AlexSkrypnyk\PhpunitHelpers\Traits\ProcessTrait;
+
+class TestClass {
+  use ProcessTrait;
+  
+  public function enableStreamingWithDimming() {
+    $this->processStreamOutput = true;
+    static::$processStreamingOutputShouldDim = true;
+  }
+}
+
+$test = new TestClass();
+$test->enableStreamingWithDimming();
+$test->processRun("echo", ["test output"]);
+', getcwd());
+
+    file_put_contents($temp_file . '.php', $test_script);
+    $output = shell_exec('php ' . escapeshellarg($temp_file . '.php'));
+    unlink($temp_file . '.php');
+    unlink($temp_file);
+
+    $this->assertNotNull($output);
+    $output = (string) $output;
+    $this->assertStringContainsString("\033[2m", $output, 'Should contain ANSI dim start code');
+    $this->assertStringContainsString("\033[22m", $output, 'Should contain ANSI dim end code');
+    $this->assertStringContainsString('test output', $output, 'Should contain actual text');
+
+    $this->processStreamOutput = FALSE;
+  }
+
+  public function testStreamingOutputWithDimmingDisabled(): void {
+    $this->processStreamOutput = TRUE;
+    static::$processStreamingOutputShouldDim = FALSE;
+
+    $temp_file = tempnam(sys_get_temp_dir(), 'phpunit_stdout_test');
+
+    $test_script = sprintf('
+<?php
+require_once "%s/vendor/autoload.php";
+use AlexSkrypnyk\PhpunitHelpers\Traits\ProcessTrait;
+
+class TestClass {
+  use ProcessTrait;
+  
+  public function enableStreamingWithoutDimming() {
+    $this->processStreamOutput = true;
+    static::$processStreamingOutputShouldDim = false;
+  }
+}
+
+$test = new TestClass();
+$test->enableStreamingWithoutDimming();
+$test->processRun("echo", ["test output"]);
+', getcwd());
+
+    file_put_contents($temp_file . '.php', $test_script);
+    $output = shell_exec('php ' . escapeshellarg($temp_file . '.php'));
+    unlink($temp_file . '.php');
+    unlink($temp_file);
+
+    $this->assertNotNull($output);
+    $output = (string) $output;
+    $this->assertStringNotContainsString("\033[2m", $output, 'Should not contain ANSI dim start code');
+    $this->assertStringNotContainsString("\033[22m", $output, 'Should not contain ANSI dim end code');
+    $this->assertStringContainsString('test output', $output, 'Should contain actual text');
+
+    $this->processStreamOutput = FALSE;
+    static::$processStreamingOutputShouldDim = TRUE;
+  }
+
 }
