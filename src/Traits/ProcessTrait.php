@@ -64,6 +64,13 @@ trait ProcessTrait {
   protected static string $processErrorOutputFooter = '^^^^^^^^^^^ Error output ^^^^^^^^^^^^';
 
   /**
+   * Dim the streaming output.
+   *
+   * This makes the streaming output less prominent in the console.
+   */
+  protected static bool $processStreamingOutputShouldDim = TRUE;
+
+  /**
    * Gets the currently running process.
    *
    * @return \Symfony\Component\Process\Process
@@ -303,9 +310,36 @@ trait ProcessTrait {
           continue;
         }
 
-        fwrite(STDOUT, $prefix . $line . $eol);
+        $line = $prefix . $line . $eol;
+
+        if (static::$processStreamingOutputShouldDim) {
+          $line = static::dim($line);
+        }
+
+        fwrite(STDOUT, $line);
       }
     };
+  }
+
+  /**
+   * Dim the given text for console output.
+   *
+   * @param string $text
+   *   The text to dim.
+   * @param string $eol
+   *   The end-of-line character(s) to use. Default is "\n".
+   *
+   * @return string
+   *   The dimmed text.
+   */
+  protected static function dim(string $text, string $eol = "\n"): string {
+    // Ensure $eol is non-empty for explode().
+    $eol = $eol ?: "\n";
+    $lines = explode($eol, $text);
+    $colored_lines = array_map(function (string $line): string {
+      return sprintf("\033[%sm%s\033[%sm", 2, $line, 22);
+    }, $lines);
+    return implode($eol, $colored_lines);
   }
 
   /**
