@@ -74,8 +74,8 @@ trait LoggerTrait {
 
     // Calculate padding for centering.
     $padding_length = ($total_length - $header_length) / 2;
-    $left_padding = max($min_padding, (int) floor($padding_length));
-    $right_padding = max($min_padding, (int) ceil($padding_length));
+    $left_padding = max($min_padding, (int) ceil($padding_length));
+    $right_padding = max($min_padding, (int) floor($padding_length));
 
     // Create the top delimiter line.
     $top_line = str_repeat($delimiter_char, $left_padding) . $header . str_repeat($delimiter_char, $right_padding);
