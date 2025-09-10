@@ -577,6 +577,106 @@ trait ProcessTrait {
   }
 
   /**
+   * Asserts that combined process output contains expected string(s).
+   *
+   * Checks both standard output and error output for the presence of strings.
+   *
+   * @param array|string $expected
+   *   Expected string or array of strings to check for in combined output.
+   */
+  public function assertProcessAnyOutputContains(array|string $expected): void {
+    $this->assertNotNull($this->process, 'Process is not initialized');
+
+    $output = $this->process->getOutput();
+    $output .= $this->process->getErrorOutput();
+
+    $expected = is_array($expected) ? $expected : [$expected];
+
+    foreach ($expected as $value) {
+      if (is_string($value)) {
+        $this->assertStringContainsString($value, $output, sprintf(
+          "Process output does not contain '%s'.%sOutput:%s%s",
+          $value,
+          PHP_EOL,
+          PHP_EOL,
+          $output
+        ));
+      }
+    }
+  }
+
+  /**
+   * Asserts that combined process output does not contain expected string(s).
+   *
+   * Checks both standard output and error output for the absence of strings.
+   *
+   * @param array|string $expected
+   *   String or array of strings that should not be in combined output.
+   */
+  public function assertProcessAnyOutputNotContains(array|string $expected): void {
+    $this->assertNotNull($this->process, 'Process is not initialized');
+
+    $output = $this->process->getOutput();
+    $output .= $this->process->getErrorOutput();
+
+    $expected = is_array($expected) ? $expected : [$expected];
+
+    foreach ($expected as $value) {
+      if (is_string($value)) {
+        $this->assertStringNotContainsString($value, $output, sprintf(
+          "Process output contains '%s' but should not.%sOutput:%s%s",
+          $value,
+          PHP_EOL,
+          PHP_EOL,
+          $output
+        ));
+      }
+    }
+  }
+
+  /**
+   * Asserts combined process output contains or does not contain strings.
+   *
+   * Checks both standard output and error output. For strings that should NOT
+   * be in the output, prefix them with '---'.
+   *
+   * @param string|array $expected
+   *   String or array of strings to check in combined process output.
+   *   Prefix with '---' for strings that should not be present.
+   */
+  public function assertProcessAnyOutputContainsOrNot(string|array $expected): void {
+    $this->assertNotNull($this->process, 'Process is not initialized');
+
+    $output = $this->process->getOutput();
+    $output .= $this->process->getErrorOutput();
+
+    $expected = is_array($expected) ? $expected : [$expected];
+
+    foreach ($expected as $value) {
+      if (str_starts_with($value, '---')) {
+        $value = substr($value, 4);
+
+        $this->assertStringNotContainsString($value, $output, sprintf(
+          "Process output contains '%s' but should not.%sOutput:%s%s",
+          $value,
+          PHP_EOL,
+          PHP_EOL,
+          $output
+        ));
+      }
+      else {
+        $this->assertStringContainsString($value, $output, sprintf(
+          "Process output does not contain '%s'.%sOutput:%s%s",
+          $value,
+          PHP_EOL,
+          PHP_EOL,
+          $output
+        ));
+      }
+    }
+  }
+
+  /**
    * Print the process info.
    *
    * @return string
