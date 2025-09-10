@@ -31,6 +31,7 @@
 | [`ProcessTrait`](#processtrait)                         | [src](src/Traits/ProcessTrait.php)             | Run and assert on command line processes during tests              |
 | [`ReflectionTrait`](#reflectiontrait)                   | [src](src/Traits/ReflectionTrait.php)          | Access protected/private methods and properties                    |
 | [`SerializableClosureTrait`](#serializableclosuretrait) | [src](src/Traits/SerializableClosureTrait.php) | Make closures serializable for use in data providers               |
+| [`StringTrait`](#stringtrait)                           | [src](src/Traits/StringTrait.php)              | Advanced string assertions with exact/substring matching           |
 | [`TuiTrait`](#tuitrait)                                 | [src](src/Traits/TuiTrait.php)                 | Interact with and test Textual User Interfaces                     |
 | [`LoggerTrait`](#loggertrait)                           | [src](src/Traits/LoggerTrait.php)              | Comprehensive hierarchical logging system for test debugging       |
 
@@ -134,9 +135,16 @@ class MyApplicationTest extends TestCase {
     // Assert that the application error output does not contain string(s)
     $this->assertApplicationErrorOutputNotContains('Unexpected error');
 
-    // Assert in one call - prefix with '---' for strings that should NOT be present
-    $this->assertApplicationOutputContainsOrNot(['Expected', '---Unexpected']);
-    $this->assertApplicationErrorOutputContainsOrNot(['Expected error', '---Unexpected error']);
+    // Assert in one call using four single-character prefixes:
+    // '+' = exact match present, '*' = substring present
+    // '-' = exact match absent,  '!' = substring absent
+    
+    // Shortcut mode: no prefixes means all strings should be present as substrings
+    $this->assertApplicationOutputContainsOrNot(['Expected', 'Output']);
+    
+    // Mixed mode: if any string has prefix, ALL must have prefixes
+    $this->assertApplicationOutputContainsOrNot(['* Expected', '! Unexpected']);
+    $this->assertApplicationErrorOutputContainsOrNot(['* Expected error', '! Unexpected error']);
 
     // Get debug info about the application (output, error output)
     echo $this->applicationInfo();
@@ -285,9 +293,16 @@ class MyProcessTest extends TestCase {
     $this->assertProcessErrorOutputNotContains('Critical');
     $this->assertProcessErrorOutputNotContains(['Critical1', 'Critical2']); // Can check multiple strings
 
-    // Assert in one call - prefix with '---' for strings that should NOT be present.
-    $this->assertProcessOutputContainsOrNot(['Hello', '---Error']);
-    $this->assertProcessErrorOutputContainsOrNot(['Warning', '---Critical']);
+    // Assert with advanced prefix control using four single-character prefixes:
+    // '+' = exact match present, '*' = substring present
+    // '-' = exact match absent,  '!' = substring absent
+
+    // Shortcut mode: no prefixes means all strings should be present as substrings.
+    $this->assertProcessOutputContainsOrNot(['Hello', 'World']); // All should be present
+
+    // Mixed mode: if any string has prefix, ALL must have prefixes.
+    $this->assertProcessOutputContainsOrNot(['+ Hello', '! Error']);
+    $this->assertProcessErrorOutputContainsOrNot(['* Warning', '- Critical']);
 
     // Assert that combined output (stdout + stderr) contains string(s).
     $this->assertProcessAnyOutputContains('Expected in either output');
@@ -297,8 +312,8 @@ class MyProcessTest extends TestCase {
     $this->assertProcessAnyOutputNotContains('Should not appear anywhere');
     $this->assertProcessAnyOutputNotContains(['Unwanted1', 'Unwanted2']); // Can check multiple strings
 
-    // Assert combined output in one call - prefix with '---' for strings that should NOT be present.
-    $this->assertProcessAnyOutputContainsOrNot(['Expected', '---Unwanted']);
+    // Assert combined output with advanced prefix control.
+    $this->assertProcessAnyOutputContainsOrNot(['+ Expected', '! Unwanted']);
 
     // Get debug info about the process (output, error output).
     echo $this->processInfo();
@@ -439,6 +454,81 @@ class MyTuiTest extends TestCase {
 }
 ```
 
+### `StringTrait`
+
+The `StringTrait` provides simple string assertion capabilities with four single-character prefixes for substring presence and absence checks, with configurable case sensitivity.
+
+```php
+use AlexSkrypnyk\PhpunitHelpers\Traits\StringTrait;
+use PHPUnit\Framework\TestCase;
+
+class MyStringTest extends TestCase {
+  use StringTrait;
+
+  public function testSimpleStringMatching() {
+    $haystack = 'The quick brown fox jumps over the lazy dog';
+
+    // Four prefix types for string control:
+    $this->assertStringContainsOrNot(
+      $haystack,
+      [
+        '+ quick',     // Exact match present
+        '* brown',     // Substring present
+        '- slow',      // Exact match absent
+        '! elephant',  // Substring absent
+      ]
+    );
+
+    // Shortcut mode (no prefixes) - all treated as substring present
+    $this->assertStringContainsOrNot(
+      $haystack,
+      ['quick', 'brown', 'fox']  // All must be present as substrings
+    );
+
+    // Case-insensitive matching (default behavior)
+    $this->assertStringContainsOrNot(
+      'Hello WORLD',
+      ['+ hello', '* world']
+    );
+
+    // Case-sensitive matching
+    $this->assertStringContainsOrNot(
+      'Hello WORLD',
+      ['+ Hello', '- hello'], // 'hello' should not be found (case sensitive)
+      'Expected exact match for "%s" in haystack',
+      'Expected substring "%s" in haystack',
+      'Expected no exact match for "%s" in haystack',
+      'Expected substring "%s" not in haystack',
+      '+', '*', '-', '!',  // Default prefixes
+      ' ',                 // Default separator
+      FALSE                // Case sensitive
+    );
+
+    // Custom prefixes
+    $this->assertStringContainsOrNot(
+      $haystack,
+      ['# quick', '~ brown', '_ slow', '? elephant'],
+      'Expected exact match for "%s" in haystack',
+      'Expected substring "%s" in haystack',
+      'Expected no exact match for "%s" in haystack',
+      'Expected substring "%s" not in haystack',
+      '#', // present exact
+      '~', // present contains
+      '_', // absent exact
+      '?'  // absent contains
+    );
+  }
+}
+```
+
+**Features:**
+- **Four Assertion Types:** Exact vs substring matching, present vs absent
+- **Four Configurable Prefixes:** `+` exact present, `*` substring present, `-` exact absent, `!` substring absent
+- **Prefix Separator:** Configurable separator (space by default) between prefix and value
+- **Case Sensitivity Control:** Case-insensitive by default, can be turned off
+- **Mode Validation:** Enforces consistent prefix usage (all or none)
+- **Standard PHPUnit Assertions:** Uses `assertEquals`, `assertStringContainsString`, `assertNotEquals`, `assertStringNotContainsString`
+
 ### `LoggerTrait`
 
 The `LoggerTrait` provides comprehensive hierarchical logging system for test debugging with step tracking, timing, and nested workflows. All logging is controlled by a verbose flag that defaults to `FALSE` for clean test output.
@@ -529,6 +619,7 @@ use AlexSkrypnyk\PhpunitHelpers\Traits\EnvTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\LoggerTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\ProcessTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\ReflectionTrait;
+use AlexSkrypnyk\PhpunitHelpers\Traits\StringTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\TuiTrait;
 use PHPUnit\Framework\TestCase;
 
@@ -537,8 +628,9 @@ class MyCombinedTest extends TestCase {
   use ApplicationTrait;
   use EnvTrait;
   use LoggerTrait;
-  use ProcessTrait;
+  use ProcessTrait; // Note: ProcessTrait automatically includes StringTrait
   use ReflectionTrait;
+  use StringTrait;
   use TuiTrait;
 
   // Your test methods.

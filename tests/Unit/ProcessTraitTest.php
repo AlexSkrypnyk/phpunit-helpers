@@ -169,9 +169,9 @@ class ProcessTraitTest extends UnitTestCase {
     $this->assertProcessOutputNotContains(['Nonexistent1', 'Nonexistent2']);
 
     $this->assertProcessOutputContainsOrNot([
-      'Test',
-      'Output',
-      '---Nonexistent String',
+      '* Test',
+      '* Output',
+      '! Nonexistent String',
     ]);
   }
 
@@ -185,9 +185,9 @@ class ProcessTraitTest extends UnitTestCase {
     $this->assertProcessErrorOutputNotContains(['NoError1', 'NoError2']);
 
     $this->assertProcessErrorOutputContainsOrNot([
-      'Test',
-      'Error',
-      '---Nonexistent Error',
+      '* Test',
+      '* Error',
+      '! Nonexistent Error',
     ]);
   }
 
@@ -208,10 +208,10 @@ class ProcessTraitTest extends UnitTestCase {
 
     // Test assertProcessAnyOutputContainsOrNot
     $this->assertProcessAnyOutputContainsOrNot([
-      'Standard Output',
-      'Error Output',
-      '---Nonexistent String',
-      '---NotFound',
+      '* Standard Output',
+      '* Error Output',
+      '! Nonexistent String',
+      '! NotFound',
     ]);
   }
 
@@ -229,6 +229,56 @@ class ProcessTraitTest extends UnitTestCase {
     $this->assertProcessSuccessful();
     $this->assertProcessAnyOutputContains('Only Error');
     $this->assertProcessAnyOutputNotContains('Standard Content');
+  }
+
+  public function testProcessAnyOutputAssertionsShortcutMode(): void {
+    $this->processRun('echo', ['Test Output']);
+
+    $this->assertProcessSuccessful();
+
+    // Test shortcut mode - no prefixes, all should be present
+    $this->assertProcessAnyOutputContainsOrNot([
+      'Test Output',
+      'Test',
+      'Output',
+    ]);
+  }
+
+  public function testProcessAnyOutputAssertionsInconsistentPrefixUsage(): void {
+    $this->processRun('echo', ['Test Output']);
+
+    $this->expectException(\RuntimeException::class);
+    $this->expectExceptionMessage('All strings must have valid prefixes in mixed mode');
+
+    // This should fail - mixed usage (some with prefix, some without)
+    $this->assertProcessAnyOutputContainsOrNot([
+      '* Test Output',
+      'Missing prefix',
+    ]);
+  }
+
+  public function testProcessErrorOutputAssertionsInconsistentPrefixUsage(): void {
+    $this->processRun('sh', ['-c', 'echo "Test Error" 1>&2']);
+
+    $this->expectException(\RuntimeException::class);
+    $this->expectExceptionMessage('All strings must have valid prefixes in mixed mode');
+
+    $this->assertProcessErrorOutputContainsOrNot([
+      '! Nonexistent',
+      'Test Error',
+    ]);
+  }
+
+  public function testProcessOutputAssertionsInconsistentPrefixUsage(): void {
+    $this->processRun('echo', ['Test Output']);
+
+    $this->expectException(\RuntimeException::class);
+    $this->expectExceptionMessage('All strings must have valid prefixes in mixed mode');
+
+    $this->assertProcessOutputContainsOrNot([
+      '* Test',
+      'Output',
+    ]);
   }
 
   public function testProcessFailed(): void {
