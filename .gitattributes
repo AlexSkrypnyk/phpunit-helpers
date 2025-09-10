@@ -1,16 +1,17 @@
 # Ignore files for distribution archives.
 
-/.editorconfig   export-ignore
-/.gitattributes  export-ignore
-/.github         export-ignore
-/.gitignore      export-ignore
-/CLAUDE.md       export-ignore
-/logo.png        export-ignore
-/phpcs.xml       export-ignore
-/phpmd.xml       export-ignore
-/phpstan.neon    export-ignore
-/phpunit.xml     export-ignore
-/rector.php      export-ignore
-/renovate.json   export-ignore
-/tests/Fixtures  export-ignore
-/tests/Unit      export-ignore
+/.editorconfig    export-ignore
+/.gitattributes   export-ignore
+/.github          export-ignore
+/.gitignore       export-ignore
+/CLAUDE.md        export-ignore
+/logo.png         export-ignore
+/phpcs.xml        export-ignore
+/phpmd.xml        export-ignore
+/phpstan.neon     export-ignore
+/phpunit.xml      export-ignore
+/rector.php       export-ignore
+/renovate.json    export-ignore
+/tests/Fixtures   export-ignore
+/tests/Functional export-ignore
+/tests/Unit       export-ignore

@@ -40,11 +40,15 @@ class LoggerTraitTest extends UnitTestCase {
     $this->logBuffer = $buffer;
     static::loggerSetOutputStream($this->logBuffer);
 
-    // Reset steps tracking array for each test.
+    // Reset steps tracking arrays for each test.
     $reflection_class = new \ReflectionClass(static::class);
     $steps_property = $reflection_class->getProperty('loggerSteps');
     $steps_property->setAccessible(TRUE);
     $steps_property->setValue(NULL, []);
+
+    $stack_property = $reflection_class->getProperty('loggerStepStack');
+    $stack_property->setAccessible(TRUE);
+    $stack_property->setValue(NULL, []);
   }
 
   /**
@@ -1018,6 +1022,124 @@ class LoggerTraitTest extends UnitTestCase {
     $this->assertStringContainsString('| Complete', $output);
     $this->assertStringContainsString('| Running', $output);
     $this->assertStringContainsString('testStepSummaryTableFormat', $output);
+  }
+
+  /**
+   * Test hierarchical step tracking with parent stack.
+   */
+  public function testHierarchicalStepTracking(): void {
+    static::loggerSetVerbose(TRUE);
+
+    // Access the steps array via reflection.
+    $reflection_class = new \ReflectionClass(static::class);
+    $steps_property = $reflection_class->getProperty('loggerSteps');
+    $steps_property->setAccessible(TRUE);
+
+    $stack_property = $reflection_class->getProperty('loggerStepStack');
+    $stack_property->setAccessible(TRUE);
+
+    // Test nested steps.
+    static::logStepStart('Level 1');
+    $steps = $steps_property->getValue(NULL);
+    $stack = $stack_property->getValue(NULL);
+
+    // @phpstan-ignore-next-line argument.type
+    $this->assertCount(1, $steps);
+    // @phpstan-ignore-next-line offsetAccess.nonOffsetAccessible
+    $this->assertEmpty($steps[0]['parent_stack']);
+    $this->assertEquals(['testHierarchicalStepTracking'], $stack);
+
+    // Start nested step.
+    static::logStepStart('Level 2');
+    $steps = $steps_property->getValue(NULL);
+    $stack = $stack_property->getValue(NULL);
+
+    // @phpstan-ignore-next-line argument.type
+    $this->assertCount(2, $steps);
+    // @phpstan-ignore-next-line offsetAccess.nonOffsetAccessible
+    $this->assertEquals(['testHierarchicalStepTracking'], $steps[1]['parent_stack']);
+    $this->assertEquals(['testHierarchicalStepTracking', 'testHierarchicalStepTracking'], $stack);
+
+    // Start deeply nested step.
+    static::logStepStart('Level 3');
+    $steps = $steps_property->getValue(NULL);
+    $stack = $stack_property->getValue(NULL);
+
+    // @phpstan-ignore-next-line argument.type
+    $this->assertCount(3, $steps);
+    // @phpstan-ignore-next-line offsetAccess.nonOffsetAccessible
+    $this->assertEquals(['testHierarchicalStepTracking', 'testHierarchicalStepTracking'], $steps[2]['parent_stack']);
+    $this->assertEquals(['testHierarchicalStepTracking', 'testHierarchicalStepTracking', 'testHierarchicalStepTracking'], $stack);
+
+    // Finish level 3.
+    static::logStepFinish('Level 3 done');
+    $stack = $stack_property->getValue(NULL);
+    $this->assertEquals(['testHierarchicalStepTracking', 'testHierarchicalStepTracking'], $stack);
+
+    // Finish level 2.
+    static::logStepFinish('Level 2 done');
+    $stack = $stack_property->getValue(NULL);
+    $this->assertEquals(['testHierarchicalStepTracking'], $stack);
+
+    // Finish level 1.
+    static::logStepFinish('Level 1 done');
+    $stack = $stack_property->getValue(NULL);
+    $this->assertEmpty($stack);
+  }
+
+  /**
+   * Test configurable step indentation.
+   */
+  public function testConfigurableStepIndentation(): void {
+    static::loggerSetVerbose(TRUE);
+
+    // Create nested steps.
+    static::logStepStart('Parent step');
+    static::logStepStart('Child step');
+    static::logStepFinish('Child completed');
+    static::logStepFinish('Parent completed');
+
+    // Generate summary with custom indentation.
+    static::logStepSummary('CUSTOM INDENT TEST', '    ');
+
+    $output = $this->getCapturedOutput();
+
+    // Check that 4-space indentation is used.
+    $this->assertStringContainsString('testConfigurableStepIndentation     |', $output);
+    $this->assertStringContainsString('    testConfigurableStepIndentation |', $output);
+  }
+
+  /**
+   * Test step summary with hierarchical indentation display.
+   */
+  public function testStepSummaryHierarchicalDisplay(): void {
+    static::loggerSetVerbose(TRUE);
+
+    // Create a hierarchy of steps.
+    static::logStepStart('Main process');
+    static::logStepStart('Sub process');
+    static::logStepStart('Deep process');
+    static::logStepFinish('Deep process done');
+    static::logStepFinish('Sub process done');
+    static::logStepFinish('Main process done');
+
+    static::logStepSummary('HIERARCHY TEST');
+
+    $output = $this->getCapturedOutput();
+
+    // Verify title and table structure.
+    $this->assertStringContainsString('HIERARCHY TEST', $output);
+    $this->assertStringContainsString('| Step', $output);
+    $this->assertStringContainsString('| Status', $output);
+    $this->assertStringContainsString('| Elapsed', $output);
+
+    // Verify hierarchical indentation in the table.
+    // Level 0: no indentation.
+    $this->assertStringContainsString('testStepSummaryHierarchicalDisplay', $output);
+    // Level 1: 2-space indentation.
+    $this->assertStringContainsString('  testStepSummaryHierarchicalDisplay', $output);
+    // Level 2: 4-space indentation.
+    $this->assertStringContainsString('    testStepSummaryHierarchicalDisplay', $output);
   }
 
 }

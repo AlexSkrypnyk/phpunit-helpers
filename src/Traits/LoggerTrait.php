@@ -29,8 +29,16 @@ trait LoggerTrait {
    * - 'start_time': The start timestamp
    * - 'end_time': The end timestamp (null if not finished)
    * - 'elapsed': The elapsed time in seconds (null if not finished)
+   * - 'parent_stack': Array of parent step names for hierarchy.
    */
   protected static array $loggerSteps = [];
+
+  /**
+   * Stack of currently running steps for hierarchy tracking.
+   *
+   * @var array<string>
+   */
+  protected static array $loggerStepStack = [];
 
   /**
    * Sets the verbose mode for logging.
@@ -201,13 +209,20 @@ trait LoggerTrait {
     $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
     $step = $trace[1]['function'] ?? 'unknown';
 
-    // Add step to tracking array.
+    // Capture current parent stack for hierarchy.
+    $parent_stack = static::$loggerStepStack;
+
+    // Add step to tracking array with hierarchy information.
     static::$loggerSteps[] = [
       'name' => $step,
       'start_time' => microtime(TRUE),
       'end_time' => NULL,
       'elapsed' => NULL,
+      'parent_stack' => $parent_stack,
     ];
+
+    // Push current step onto the stack for nested steps.
+    static::$loggerStepStack[] = $step;
 
     static::logSection('STEP START | ' . $step, $message, FALSE, 40);
     if (static::$loggerIsVerbose) {
@@ -247,6 +262,13 @@ trait LoggerTrait {
       static::$loggerSteps[$step_index]['elapsed'] = $elapsed_time;
 
       $section_title .= ' | ' . $formatted_time;
+
+      // Pop the step from the stack when it finishes.
+      // Find and remove the step from the stack.
+      $stack_key = array_search($step, static::$loggerStepStack, TRUE);
+      if ($stack_key !== FALSE) {
+        array_splice(static::$loggerStepStack, (int) $stack_key, 1);
+      }
     }
 
     static::logSection($section_title, $message, FALSE, 40);
@@ -286,8 +308,10 @@ trait LoggerTrait {
    *
    * @param string|null $title
    *   Optional title for the summary table.
+   * @param string $indent
+   *   Indentation string for hierarchical display (e.g., '  ', '    ', '\t').
    */
-  public static function logStepSummary(?string $title = NULL): void {
+  public static function logStepSummary(?string $title = NULL, string $indent = '  '): void {
     if (!static::$loggerIsVerbose) {
       return;
     }
@@ -300,8 +324,12 @@ trait LoggerTrait {
     $title = $title ?: 'STEP SUMMARY';
     static::logSection($title, NULL, TRUE);
 
-    // Calculate column widths.
-    $name_lengths = array_map(fn(array $step): int => strlen($step['name']), static::$loggerSteps);
+    // Calculate column widths including indentation.
+    $name_lengths = array_map(function (array $step) use ($indent): int {
+      $depth = count($step['parent_stack']);
+      $indentation = str_repeat($indent, $depth);
+      return strlen($indentation . $step['name']);
+    }, static::$loggerSteps);
     $max_name_length = empty($name_lengths) ? 0 : max($name_lengths);
     // Minimum for "Step" header.
     $max_name_length = max($max_name_length, 4);
@@ -327,14 +355,19 @@ trait LoggerTrait {
     fwrite(static::getOutputStream(), $header . PHP_EOL);
     fwrite(static::getOutputStream(), $separator . PHP_EOL);
 
-    // Create table rows.
+    // Create table rows with hierarchical indentation.
     foreach (static::$loggerSteps as $step) {
       $status = $step['end_time'] === NULL ? 'Running' : 'Complete';
       $elapsed = $step['elapsed'] === NULL ? '-' : static::formatElapsedTime($step['elapsed']);
 
+      // Calculate depth and add indentation.
+      $depth = count($step['parent_stack']);
+      $indentation = str_repeat($indent, $depth);
+      $indented_name = $indentation . $step['name'];
+
       $row = sprintf(
         '| %-' . $max_name_length . 's | %-' . $max_status_length . 's | %-' . $max_elapsed_length . 's |',
-        $step['name'],
+        $indented_name,
         $status,
         $elapsed
       );
