@@ -32,7 +32,7 @@
 | [`ReflectionTrait`](#reflectiontrait)                   | [src](src/Traits/ReflectionTrait.php)          | Access protected/private methods and properties                    |
 | [`SerializableClosureTrait`](#serializableclosuretrait) | [src](src/Traits/SerializableClosureTrait.php) | Make closures serializable for use in data providers               |
 | [`TuiTrait`](#tuitrait)                                 | [src](src/Traits/TuiTrait.php)                 | Interact with and test Textual User Interfaces                     |
-| [`LoggerTrait`](#loggertrait)                           | [src](src/Traits/LoggerTrait.php)              | Conditional logging to STDERR for test debugging                   |
+| [`LoggerTrait`](#loggertrait)                           | [src](src/Traits/LoggerTrait.php)              | Comprehensive hierarchical logging system for test debugging       |
 
 ## Installation
 
@@ -430,7 +430,7 @@ class MyTuiTest extends TestCase {
 
 ### `LoggerTrait`
 
-The `LoggerTrait` provides conditional logging functionality to STDERR for test debugging. All logging methods are controlled by a verbose flag that defaults to `FALSE` for clean test output.
+The `LoggerTrait` provides comprehensive hierarchical logging system for test debugging with step tracking, timing, and nested workflows. All logging is controlled by a verbose flag that defaults to `FALSE` for clean test output.
 
 ```php
 use AlexSkrypnyk\PhpunitHelpers\Traits\LoggerTrait;
@@ -444,48 +444,68 @@ class MyLoggerTest extends TestCase {
     static::loggerSetVerbose(TRUE);
   }
 
-  public function testWithLogging() {
-    // Basic message logging
-    static::log('This is a debug message');
-
-    // Log a bordered section with title
-    static::logSection('TEST SECTION', 'This is the content of the section');
-
-    // Log a bordered section with double border
-    static::logSection('IMPORTANT', 'Critical information', TRUE);
-
-    // Log a bordered section with custom width
-    static::logSection('WIDE SECTION', 'Content', FALSE, 100);
-
-    // Log file contents with borders
-    static::logFile('/path/to/file.txt');
-    static::logFile('/path/to/file.txt', 'Custom description');
-
-    // Disable logging temporarily
-    static::loggerSetVerbose(FALSE);
-    static::log('This will not be output');
-
-    // Re-enable logging
-    static::loggerSetVerbose(TRUE);
-    static::log('This will be output');
+  public function testHierarchicalWorkflow() {
+    // Basic logging methods
+    static::log('Basic debug message');
+    static::logSection('SECTION TITLE', 'Section content');
+    static::logFile('/path/to/file.txt', 'Optional description');
+    
+    // Step tracking with automatic timing and hierarchy
+    static::logStepStart('Optional step message');
+    static::logSubstep('Processing data');
+    static::logNote('Additional context information');
+    
+    // Nested steps automatically create hierarchy
+    $this->nestedStepMethod();
+    
+    static::logStepFinish('Step completed successfully');
+    
+    // Generate hierarchical summary with timing
+    static::logStepSummary('WORKFLOW SUMMARY');
   }
-
-  public function testSilentMode() {
-    // Disable verbose logging for clean output
-    static::loggerSetVerbose(FALSE);
-
-    // All logging calls will be silent
-    static::log('Silent message');
-    static::logSection('Silent section', 'No output');
+  
+  private function nestedStepMethod(): void {
+    static::logStepStart('Nested operation');
+    // Work here creates deeper hierarchy level
+    static::logStepFinish('Nested operation complete');
   }
 }
 ```
 
-All logging methods output to STDERR and support:
+**Available logging methods:**
 - `log(string)` - Basic message logging
-- `logSection(string, ?string, bool, int)` - Bordered message sections
-- `logFile(string, ?string)` - File content logging with bordered sections
+- `logSection(string, ?string, bool, int)` - Bordered sections with optional double borders and custom width
+- `logFile(string, ?string)` - File content logging with borders
+- `logStepStart(?string)` - Begin step tracking with automatic method name detection
+- `logStepFinish(?string)` - End step tracking with elapsed time calculation
+- `logSubstep(string)` - Indented substep messages
+- `logNote(string)` - Indented note messages
+- `logStepSummary(?string, string)` - Hierarchical step summary table with configurable indentation
 - `loggerSetVerbose(bool)` - Control verbose mode
+- `loggerSetOutputStream(resource|null)` - Set custom output stream (defaults to STDERR)
+
+**Key features:**
+- Hierarchical step tracking with parent-child relationships
+- Automatic timing and elapsed time calculation
+- Configurable indentation for nested workflows
+- Method name detection via debug_backtrace
+- Memory-efficient step stack management
+- Support for custom output streams and silent mode
+
+**Example hierarchical summary output:**
+```
+===============================[ WORKFLOW SUMMARY ]===============================
+
++----------------------------------+----------+---------+
+| Step                             | Status   | Elapsed |
++----------------------------------+----------+---------+
+| stepDeploymentProcess            | Complete | 2m 15s  |
+|   stepDatabaseMigration          | Complete | 1m 23s  |
+|   stepApplicationDeployment      | Complete | 45s     |
+|     stepAssetCompilation         | Complete | 32s     |
+|   stepHealthChecks               | Complete | 27s     |
++----------------------------------+----------+---------+
+```
 
 ### Using Multiple Traits
 
