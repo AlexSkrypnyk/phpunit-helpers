@@ -146,4 +146,58 @@ trait LoggerTrait {
     static::logSection('FILE END', $message);
   }
 
+  /**
+   * Logs the start of a step, inferred from the calling function name.
+   *
+   * @param string|null $message
+   *   Optional message to log with the step start.
+   */
+  public static function logStepStart(?string $message = NULL): void {
+    $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+    $step = $trace[1]['function'] ?? 'unknown';
+
+    static::logSection('STEP START | ' . $step, $message, FALSE, 40);
+    fwrite(STDERR, PHP_EOL);
+  }
+
+  /**
+   * Logs the completion of a step, inferred from the calling function name.
+   *
+   * @param string|null $message
+   *   Optional message to log with the step completion.
+   */
+  public static function logStepFinish(?string $message = NULL): void {
+    $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+    $step = $trace[1]['function'] ?? 'unknown';
+
+    static::logSection('STEP DONE | ' . $step, $message, FALSE, 40);
+    fwrite(STDERR, PHP_EOL);
+  }
+
+  /**
+   * Logs a substep message with indentation.
+   *
+   * @param string $message
+   *   The substep message to log.
+   */
+  public static function logSubstep(string $message): void {
+    if (!static::$loggerIsVerbose) {
+      return;
+    }
+    fwrite(STDERR, '  --> ' . $message . PHP_EOL);
+  }
+
+  /**
+   * Logs a note message with indentation.
+   *
+   * @param string $message
+   *   The note message to log.
+   */
+  public static function logNote(string $message): void {
+    if (!static::$loggerIsVerbose) {
+      return;
+    }
+    fwrite(STDERR, '    > ' . $message . PHP_EOL);
+  }
+
 }
