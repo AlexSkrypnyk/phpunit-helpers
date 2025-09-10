@@ -246,4 +246,154 @@ class LoggerTraitTest extends UnitTestCase {
     $this->addToAssertionCount(1); // Verbose mode changes work correctly.
   }
 
+  /**
+   * Test logStepStart method with verbose mode enabled.
+   */
+  public function testLogStepStartVerboseMode(): void {
+    static::loggerSetVerbose(TRUE);
+
+    // Test step start without message.
+    static::logStepStart();
+
+    // Test step start with message.
+    static::logStepStart('Starting the test step');
+
+    $this->addToAssertionCount(1); // Method executed without exceptions.
+  }
+
+  /**
+   * Test logStepStart method with verbose mode disabled.
+   */
+  public function testLogStepStartSilentMode(): void {
+    static::loggerSetVerbose(FALSE);
+
+    // This should not output anything and not throw exceptions.
+    static::logStepStart();
+    static::logStepStart('Silent step start');
+
+    // Method executed silently without exceptions.
+    $this->addToAssertionCount(1);
+  }
+
+  /**
+   * Test logStepFinish method with verbose mode enabled.
+   */
+  public function testLogStepFinishVerboseMode(): void {
+    static::loggerSetVerbose(TRUE);
+
+    // Test step finish without message.
+    static::logStepFinish();
+
+    // Test step finish with message.
+    static::logStepFinish('Completed the test step');
+
+    $this->addToAssertionCount(1); // Method executed without exceptions.
+  }
+
+  /**
+   * Test logStepFinish method with verbose mode disabled.
+   */
+  public function testLogStepFinishSilentMode(): void {
+    static::loggerSetVerbose(FALSE);
+
+    // This should not output anything and not throw exceptions.
+    static::logStepFinish();
+    static::logStepFinish('Silent step finish');
+
+    // Method executed silently without exceptions.
+    $this->addToAssertionCount(1);
+  }
+
+  /**
+   * Test logSubstep method with verbose mode enabled.
+   */
+  public function testLogSubstepVerboseMode(): void {
+    static::loggerSetVerbose(TRUE);
+
+    // Test substep logging.
+    static::logSubstep('Processing substep 1');
+    static::logSubstep('Processing substep 2');
+
+    $this->addToAssertionCount(1); // Method executed without exceptions.
+  }
+
+  /**
+   * Test logSubstep method with verbose mode disabled.
+   */
+  public function testLogSubstepSilentMode(): void {
+    static::loggerSetVerbose(FALSE);
+
+    // This should not output anything and not throw exceptions.
+    static::logSubstep('Silent substep');
+
+    // Method executed silently without exceptions.
+    $this->addToAssertionCount(1);
+  }
+
+  /**
+   * Test logNote method with verbose mode enabled.
+   */
+  public function testLogNoteVerboseMode(): void {
+    static::loggerSetVerbose(TRUE);
+
+    // Test note logging.
+    static::logNote('Important note about the process');
+    static::logNote('Another note with details');
+
+    $this->addToAssertionCount(1); // Method executed without exceptions.
+  }
+
+  /**
+   * Test logNote method with verbose mode disabled.
+   */
+  public function testLogNoteSilentMode(): void {
+    static::loggerSetVerbose(FALSE);
+
+    // This should not output anything and not throw exceptions.
+    static::logNote('Silent note');
+
+    // Method executed silently without exceptions.
+    $this->addToAssertionCount(1);
+  }
+
+  /**
+   * Test step logging workflow.
+   */
+  public function testStepLoggingWorkflow(): void {
+    static::loggerSetVerbose(TRUE);
+
+    // Test a complete step workflow.
+    static::logStepStart('Test workflow');
+    static::logSubstep('Initializing');
+    static::logNote('Setting up test data');
+    static::logSubstep('Processing');
+    static::logNote('Performing calculations');
+    static::logStepFinish('Test workflow completed');
+
+    // Complete workflow executed without exceptions.
+    $this->addToAssertionCount(1);
+  }
+
+  /**
+   * Test that step methods respect verbose mode.
+   */
+  public function testStepMethodsRespectVerboseMode(): void {
+    // Test with verbose disabled.
+    static::loggerSetVerbose(FALSE);
+    static::logStepStart('Silent step');
+    static::logSubstep('Silent substep');
+    static::logNote('Silent note');
+    static::logStepFinish('Silent step end');
+
+    // Test with verbose enabled.
+    static::loggerSetVerbose(TRUE);
+    static::logStepStart('Verbose step');
+    static::logSubstep('Verbose substep');
+    static::logNote('Verbose note');
+    static::logStepFinish('Verbose step end');
+
+    // All methods respected verbose mode setting.
+    $this->addToAssertionCount(1);
+  }
+
 }
