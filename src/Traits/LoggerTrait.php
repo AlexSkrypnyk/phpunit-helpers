@@ -15,6 +15,24 @@ trait LoggerTrait {
   protected static bool $loggerIsVerbose = FALSE;
 
   /**
+   * The output stream for logging. Defaults to STDERR if not set.
+   *
+   * @var resource|null
+   */
+  protected static $loggerOutputStream;
+
+  /**
+   * Stores all step tracking information.
+   *
+   * Each entry contains:
+   * - 'name': The step name
+   * - 'start_time': The start timestamp
+   * - 'end_time': The end timestamp (null if not finished)
+   * - 'elapsed': The elapsed time in seconds (null if not finished)
+   */
+  protected static array $loggerSteps = [];
+
+  /**
    * Sets the verbose mode for logging.
    *
    * @param bool $verbose
@@ -25,7 +43,34 @@ trait LoggerTrait {
   }
 
   /**
-   * Logs a message to STDERR.
+   * Sets the output stream for logging.
+   *
+   * @param resource|null $stream
+   *   The stream resource to write to, or NULL to use STDERR.
+   *
+   * @throws \InvalidArgumentException
+   *   When the provided stream is not a valid resource or NULL.
+   */
+  public static function loggerSetOutputStream($stream): void {
+    if (!is_resource($stream) && $stream !== NULL) {
+      throw new \InvalidArgumentException('Stream must be a valid resource or NULL.');
+    }
+
+    static::$loggerOutputStream = $stream;
+  }
+
+  /**
+   * Gets the output stream for logging.
+   *
+   * @return resource
+   *   The output stream resource (STDERR if not set).
+   */
+  protected static function getOutputStream() {
+    return static::$loggerOutputStream ?: STDERR;
+  }
+
+  /**
+   * Logs a message to the configured output stream.
    *
    * @param string $message
    *   The message to log.
@@ -34,7 +79,7 @@ trait LoggerTrait {
     if (!static::$loggerIsVerbose) {
       return;
     }
-    fwrite(STDERR, PHP_EOL . $message . PHP_EOL);
+    fwrite(static::getOutputStream(), PHP_EOL . $message . PHP_EOL);
   }
 
   /**
@@ -83,7 +128,7 @@ trait LoggerTrait {
     // Create the bottom delimiter line.
     $bottom_line = str_repeat($delimiter_char, strlen($top_line));
 
-    fwrite(STDERR, PHP_EOL . $top_line . PHP_EOL);
+    fwrite(static::getOutputStream(), PHP_EOL . $top_line . PHP_EOL);
 
     if (!empty($message)) {
       $message = trim($message);
@@ -106,10 +151,10 @@ trait LoggerTrait {
 
       // Output the wrapped message lines.
       foreach ($wrapped_lines as $line) {
-        fwrite(STDERR, $line . PHP_EOL);
+        fwrite(static::getOutputStream(), $line . PHP_EOL);
       }
 
-      fwrite(STDERR, $bottom_line . PHP_EOL);
+      fwrite(static::getOutputStream(), $bottom_line . PHP_EOL);
     }
   }
 
@@ -156,8 +201,18 @@ trait LoggerTrait {
     $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
     $step = $trace[1]['function'] ?? 'unknown';
 
+    // Add step to tracking array.
+    static::$loggerSteps[] = [
+      'name' => $step,
+      'start_time' => microtime(TRUE),
+      'end_time' => NULL,
+      'elapsed' => NULL,
+    ];
+
     static::logSection('STEP START | ' . $step, $message, FALSE, 40);
-    fwrite(STDERR, PHP_EOL);
+    if (static::$loggerIsVerbose) {
+      fwrite(static::getOutputStream(), PHP_EOL);
+    }
   }
 
   /**
@@ -170,8 +225,34 @@ trait LoggerTrait {
     $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
     $step = $trace[1]['function'] ?? 'unknown';
 
-    static::logSection('STEP DONE | ' . $step, $message, FALSE, 40);
-    fwrite(STDERR, PHP_EOL);
+    // Find the most recent unfinished step with matching name.
+    $section_title = 'STEP DONE | ' . $step;
+    $step_index = NULL;
+
+    // Search backwards for the most recent matching step.
+    for ($i = count(static::$loggerSteps) - 1; $i >= 0; $i--) {
+      if (static::$loggerSteps[$i]['name'] === $step && static::$loggerSteps[$i]['end_time'] === NULL) {
+        $step_index = $i;
+        break;
+      }
+    }
+
+    if ($step_index !== NULL) {
+      $end_time = microtime(TRUE);
+      $elapsed_time = $end_time - static::$loggerSteps[$step_index]['start_time'];
+      $formatted_time = static::formatElapsedTime($elapsed_time);
+
+      // Update the step entry with completion info.
+      static::$loggerSteps[$step_index]['end_time'] = $end_time;
+      static::$loggerSteps[$step_index]['elapsed'] = $elapsed_time;
+
+      $section_title .= ' | ' . $formatted_time;
+    }
+
+    static::logSection($section_title, $message, FALSE, 40);
+    if (static::$loggerIsVerbose) {
+      fwrite(static::getOutputStream(), PHP_EOL);
+    }
   }
 
   /**
@@ -184,7 +265,7 @@ trait LoggerTrait {
     if (!static::$loggerIsVerbose) {
       return;
     }
-    fwrite(STDERR, '  --> ' . $message . PHP_EOL);
+    fwrite(static::getOutputStream(), '  --> ' . $message . PHP_EOL);
   }
 
   /**
@@ -197,7 +278,98 @@ trait LoggerTrait {
     if (!static::$loggerIsVerbose) {
       return;
     }
-    fwrite(STDERR, '    > ' . $message . PHP_EOL);
+    fwrite(static::getOutputStream(), '    > ' . $message . PHP_EOL);
+  }
+
+  /**
+   * Logs a summary table of all tracked steps.
+   *
+   * @param string|null $title
+   *   Optional title for the summary table.
+   */
+  public static function logStepSummary(?string $title = NULL): void {
+    if (!static::$loggerIsVerbose) {
+      return;
+    }
+
+    if (empty(static::$loggerSteps)) {
+      static::log('No steps tracked.');
+      return;
+    }
+
+    $title = $title ?: 'STEP SUMMARY';
+    static::logSection($title, NULL, TRUE);
+
+    // Calculate column widths.
+    $name_lengths = array_map(fn(array $step): int => strlen($step['name']), static::$loggerSteps);
+    $max_name_length = empty($name_lengths) ? 0 : max($name_lengths);
+    // Minimum for "Step" header.
+    $max_name_length = max($max_name_length, 4);
+
+    // "Complete" or "Running"
+    $max_status_length = 8;
+    // "Elapsed" header length
+    $max_elapsed_length = 7;
+
+    // Create table header.
+    $header = sprintf(
+      '| %-' . $max_name_length . 's | %-' . $max_status_length . 's | %-' . $max_elapsed_length . 's |',
+      'Step',
+      'Status',
+      'Elapsed'
+    );
+
+    $separator = '+' . str_repeat('-', $max_name_length + 2) . '+' .
+                 str_repeat('-', $max_status_length + 2) . '+' .
+                 str_repeat('-', $max_elapsed_length + 2) . '+';
+
+    fwrite(static::getOutputStream(), $separator . PHP_EOL);
+    fwrite(static::getOutputStream(), $header . PHP_EOL);
+    fwrite(static::getOutputStream(), $separator . PHP_EOL);
+
+    // Create table rows.
+    foreach (static::$loggerSteps as $step) {
+      $status = $step['end_time'] === NULL ? 'Running' : 'Complete';
+      $elapsed = $step['elapsed'] === NULL ? '-' : static::formatElapsedTime($step['elapsed']);
+
+      $row = sprintf(
+        '| %-' . $max_name_length . 's | %-' . $max_status_length . 's | %-' . $max_elapsed_length . 's |',
+        $step['name'],
+        $status,
+        $elapsed
+      );
+
+      fwrite(static::getOutputStream(), $row . PHP_EOL);
+    }
+
+    fwrite(static::getOutputStream(), $separator . PHP_EOL);
+    fwrite(static::getOutputStream(), PHP_EOL);
+  }
+
+  /**
+   * Formats elapsed time into a human-readable string.
+   *
+   * @param float $elapsed_seconds
+   *   The elapsed time in seconds.
+   *
+   * @return string
+   *   The formatted time string (e.g., "1m 23s" or "45s").
+   */
+  protected static function formatElapsedTime(float $elapsed_seconds): string {
+    $total_seconds = (int) round($elapsed_seconds);
+
+    if ($total_seconds < 60) {
+      return $total_seconds . 's';
+    }
+
+    $minutes = (int) floor($total_seconds / 60);
+    $seconds = $total_seconds % 60;
+
+    if ($seconds === 0) {
+      return $minutes . 'm';
+    }
+
+    return $minutes . 'm ' . $seconds . 's';
   }
 
 }
