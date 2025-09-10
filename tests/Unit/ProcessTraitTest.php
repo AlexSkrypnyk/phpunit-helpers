@@ -191,6 +191,46 @@ class ProcessTraitTest extends UnitTestCase {
     ]);
   }
 
+  public function testProcessAnyOutputAssertions(): void {
+    $this->processRun('sh', ['-c', 'echo "Standard Output"; echo "Error Output" 1>&2']);
+
+    $this->assertProcessSuccessful();
+
+    // Test assertProcessAnyOutputContains
+    $this->assertProcessAnyOutputContains('Standard Output');
+    $this->assertProcessAnyOutputContains('Error Output');
+    $this->assertProcessAnyOutputContains(['Standard', 'Error']);
+    $this->assertProcessAnyOutputContains(['Standard Output', 'Error Output']);
+
+    // Test assertProcessAnyOutputNotContains
+    $this->assertProcessAnyOutputNotContains('Nonexistent String');
+    $this->assertProcessAnyOutputNotContains(['NotFound1', 'NotFound2']);
+
+    // Test assertProcessAnyOutputContainsOrNot
+    $this->assertProcessAnyOutputContainsOrNot([
+      'Standard Output',
+      'Error Output',
+      '---Nonexistent String',
+      '---NotFound',
+    ]);
+  }
+
+  public function testProcessAnyOutputAssertionsStandardOutputOnly(): void {
+    $this->processRun('echo', ['Only Standard']);
+
+    $this->assertProcessSuccessful();
+    $this->assertProcessAnyOutputContains('Only Standard');
+    $this->assertProcessAnyOutputNotContains('Error Content');
+  }
+
+  public function testProcessAnyOutputAssertionsErrorOutputOnly(): void {
+    $this->processRun('sh', ['-c', 'echo "Only Error" 1>&2']);
+
+    $this->assertProcessSuccessful();
+    $this->assertProcessAnyOutputContains('Only Error');
+    $this->assertProcessAnyOutputNotContains('Standard Content');
+  }
+
   public function testProcessFailed(): void {
     $command = 'nonexistent-command';
 
@@ -308,6 +348,33 @@ class ProcessTraitTest extends UnitTestCase {
     $this->expectExceptionMessage('Process is not initialized');
 
     $this->assertProcessErrorOutputContainsOrNot('test');
+  }
+
+  public function testAssertProcessAnyOutputContainsWhenNull(): void {
+    $this->process = NULL;
+
+    $this->expectException(ExpectationFailedException::class);
+    $this->expectExceptionMessage('Process is not initialized');
+
+    $this->assertProcessAnyOutputContains('test');
+  }
+
+  public function testAssertProcessAnyOutputNotContainsWhenNull(): void {
+    $this->process = NULL;
+
+    $this->expectException(ExpectationFailedException::class);
+    $this->expectExceptionMessage('Process is not initialized');
+
+    $this->assertProcessAnyOutputNotContains('test');
+  }
+
+  public function testAssertProcessAnyOutputContainsOrNotWhenNull(): void {
+    $this->process = NULL;
+
+    $this->expectException(ExpectationFailedException::class);
+    $this->expectExceptionMessage('Process is not initialized');
+
+    $this->assertProcessAnyOutputContainsOrNot('test');
   }
 
   /**

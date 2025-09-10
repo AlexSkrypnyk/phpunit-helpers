@@ -289,6 +289,17 @@ class MyProcessTest extends TestCase {
     $this->assertProcessOutputContainsOrNot(['Hello', '---Error']);
     $this->assertProcessErrorOutputContainsOrNot(['Warning', '---Critical']);
 
+    // Assert that combined output (stdout + stderr) contains string(s).
+    $this->assertProcessAnyOutputContains('Expected in either output');
+    $this->assertProcessAnyOutputContains(['String1', 'String2']); // Can check multiple strings
+
+    // Assert that combined output (stdout + stderr) does not contain string(s).
+    $this->assertProcessAnyOutputNotContains('Should not appear anywhere');
+    $this->assertProcessAnyOutputNotContains(['Unwanted1', 'Unwanted2']); // Can check multiple strings
+
+    // Assert combined output in one call - prefix with '---' for strings that should NOT be present.
+    $this->assertProcessAnyOutputContainsOrNot(['Expected', '---Unwanted']);
+
     // Get debug info about the process (output, error output).
     echo $this->processInfo();
   }
