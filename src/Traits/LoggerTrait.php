@@ -317,7 +317,6 @@ trait LoggerTrait {
     }
 
     if (empty(static::$loggerSteps)) {
-      static::log('No steps tracked.');
       return;
     }
 

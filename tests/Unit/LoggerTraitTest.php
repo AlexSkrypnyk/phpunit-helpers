@@ -612,11 +612,11 @@ class LoggerTraitTest extends UnitTestCase {
   public function testLogStepSummaryWithNoSteps(): void {
     static::loggerSetVerbose(TRUE);
 
-    // Should display "No steps tracked" message.
+    // Should produce no output when no steps tracked.
     static::logStepSummary();
 
     $output = $this->getCapturedOutput();
-    $this->assertStringContainsString('No steps tracked.', $output);
+    $this->assertEmpty($output);
   }
 
   /**
