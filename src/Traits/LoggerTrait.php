@@ -304,24 +304,17 @@ trait LoggerTrait {
   }
 
   /**
-   * Logs a summary table of all tracked steps.
+   * Generates a summary table of all tracked steps as a string.
    *
-   * @param string|null $title
-   *   Optional title for the summary table.
    * @param string $indent
    *   Indentation string for hierarchical display (e.g., '  ', '    ', '\t').
    */
-  public static function logStepSummary(?string $title = NULL, string $indent = '  '): void {
-    if (!static::$loggerIsVerbose) {
-      return;
-    }
-
+  public static function logStepSummary(string $indent = '  '): string {
     if (empty(static::$loggerSteps)) {
-      return;
+      return '';
     }
 
-    $title = $title ?: 'STEP SUMMARY';
-    static::logSection($title, NULL, TRUE);
+    $lines = [];
 
     // Calculate column widths including indentation.
     $name_lengths = array_map(function (array $step) use ($indent): int {
@@ -329,7 +322,7 @@ trait LoggerTrait {
       $indentation = str_repeat($indent, $depth);
       return strlen($indentation . $step['name']);
     }, static::$loggerSteps);
-    $max_name_length = empty($name_lengths) ? 0 : max($name_lengths);
+    $max_name_length = max($name_lengths);
     // Minimum for "Step" header.
     $max_name_length = max($max_name_length, 4);
 
@@ -347,12 +340,13 @@ trait LoggerTrait {
     );
 
     $separator = '+' . str_repeat('-', $max_name_length + 2) . '+' .
-                 str_repeat('-', $max_status_length + 2) . '+' .
-                 str_repeat('-', $max_elapsed_length + 2) . '+';
+      str_repeat('-', $max_status_length + 2) . '+' .
+      str_repeat('-', $max_elapsed_length + 2) . '+';
 
-    fwrite(static::getOutputStream(), $separator . PHP_EOL);
-    fwrite(static::getOutputStream(), $header . PHP_EOL);
-    fwrite(static::getOutputStream(), $separator . PHP_EOL);
+    // Build table output.
+    $lines[] = $separator;
+    $lines[] = $header;
+    $lines[] = $separator;
 
     // Create table rows with hierarchical indentation.
     foreach (static::$loggerSteps as $step) {
@@ -371,11 +365,13 @@ trait LoggerTrait {
         $elapsed
       );
 
-      fwrite(static::getOutputStream(), $row . PHP_EOL);
+      $lines[] = $row;
     }
 
-    fwrite(static::getOutputStream(), $separator . PHP_EOL);
-    fwrite(static::getOutputStream(), PHP_EOL);
+    $lines[] = $separator;
+    $lines[] = '';
+
+    return implode(PHP_EOL, $lines);
   }
 
   /**
@@ -402,6 +398,18 @@ trait LoggerTrait {
     }
 
     return $minutes . 'm ' . $seconds . 's';
+  }
+
+  /**
+   * Print the logger info.
+   *
+   * @return string
+   *   The locations' info.
+   */
+  public function loggerInfo(): string {
+    $lines = '';
+    $lines .= 'STEP SUMMARY' . PHP_EOL;
+    return $lines . static::logStepSummary();
   }
 
 }

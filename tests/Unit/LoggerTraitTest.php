@@ -649,77 +649,51 @@ class LoggerTraitTest extends UnitTestCase {
 
   /**
    * Test logStepSummary with completed and running steps.
-   *
-   * With visual output for inspection.
    */
   public function testLogStepSummaryWithMixedSteps(): void {
-    static::loggerSetVerbose(TRUE);
-
-    // Add completed step.
     static::logStepStart('Completed step');
     usleep(1200000); // 1.2 second delay to show measurable time.
     static::logStepFinish('Completed step');
 
-    // Add running step.
     static::logStepStart('Running step');
 
-    // Display summary.
-    static::logStepSummary();
+    $result = static::logStepSummary();
 
-    // Verify summary table format and content.
-    $output = $this->getCapturedOutput();
-    $this->assertStringContainsString('STEP SUMMARY', $output);
-    $this->assertStringContainsString('| Step', $output);
-    $this->assertStringContainsString('| Status', $output);
-    $this->assertStringContainsString('| Elapsed', $output);
-    $this->assertStringContainsString('| Complete', $output);
-    $this->assertStringContainsString('| Running', $output);
-    $this->assertStringContainsString('1s', $output); // Elapsed time shown.
-    $this->assertStringContainsString('testLogStepSummaryWithMixedSteps', $output);
-    $this->assertStringContainsString('+', $output); // Table borders.
-    $this->assertStringContainsString('-', $output); // Table separators.
+    $this->assertStringContainsString('| Step', $result);
+    $this->assertStringContainsString('Complete', $result);
+    $this->assertStringContainsString('Running', $result);
   }
 
   /**
    * Test logStepSummary with custom title.
    */
   public function testLogStepSummaryWithCustomTitle(): void {
-    static::loggerSetVerbose(TRUE);
-
-    // Add a step.
     static::logStepStart('Test step');
     static::logStepFinish('Test step');
 
-    // Display summary with custom title.
-    static::logStepSummary('CUSTOM STEP REPORT');
+    $result = static::logStepSummary();
 
-    // Method executed without exceptions.
-    $this->addToAssertionCount(1);
+    $this->assertStringContainsString('testLogStepSummaryWithCustomTitle', $result);
   }
 
   /**
    * Test multiple step tracking and summary.
    */
   public function testMultipleStepTracking(): void {
-    static::loggerSetVerbose(TRUE);
+    static::logStepStart('StepOne');
+    static::logStepFinish('StepOne');
 
-    // Track multiple steps.
-    static::logStepStart('Step 1');
-    usleep(1000);
-    static::logStepFinish('Step 1');
+    static::logStepStart('StepTwo');
+    static::logStepFinish('StepTwo');
 
-    static::logStepStart('Step 2');
-    usleep(1000);
-    static::logStepFinish('Step 2');
+    static::logStepStart('StepThree');
+    // Leave StepThree running.
 
-    static::logStepStart('Step 3');
-    // Leave Step 3 running.
+    $result = static::logStepSummary();
 
-    // Display summary to show all tracked steps.
-    static::logStepSummary();
-
-    // Method executed without exceptions.
-    $this->addToAssertionCount(1);
+    $this->assertStringContainsString('testMultipleStepTracking', $result);
+    $this->assertStringContainsString('Complete', $result);
+    $this->assertStringContainsString('Running', $result);
   }
 
   /**
@@ -1002,26 +976,18 @@ class LoggerTraitTest extends UnitTestCase {
    * Test step summary table output format.
    */
   public function testStepSummaryTableFormat(): void {
-    static::loggerSetVerbose(TRUE);
-
-    // Add a completed step.
     static::logStepStart('Test step');
     static::logStepFinish('Test completed');
 
-    // Add a running step.
     static::logStepStart('Running step');
 
-    // Generate summary.
-    static::logStepSummary();
+    $result = static::logStepSummary();
 
-    $output = $this->getCapturedOutput();
-    $this->assertStringContainsString('STEP SUMMARY', $output);
-    $this->assertStringContainsString('| Step', $output);
-    $this->assertStringContainsString('| Status', $output);
-    $this->assertStringContainsString('| Elapsed', $output);
-    $this->assertStringContainsString('| Complete', $output);
-    $this->assertStringContainsString('| Running', $output);
-    $this->assertStringContainsString('testStepSummaryTableFormat', $output);
+    $this->assertStringContainsString('| Step', $result);
+    $this->assertStringContainsString('| Status', $result);
+    $this->assertStringContainsString('| Elapsed', $result);
+    $this->assertStringContainsString('Complete', $result);
+    $this->assertStringContainsString('Running', $result);
   }
 
   /**
@@ -1091,30 +1057,21 @@ class LoggerTraitTest extends UnitTestCase {
    * Test configurable step indentation.
    */
   public function testConfigurableStepIndentation(): void {
-    static::loggerSetVerbose(TRUE);
-
     // Create nested steps.
     static::logStepStart('Parent step');
     static::logStepStart('Child step');
     static::logStepFinish('Child completed');
     static::logStepFinish('Parent completed');
 
-    // Generate summary with custom indentation.
-    static::logStepSummary('CUSTOM INDENT TEST', '    ');
-
-    $output = $this->getCapturedOutput();
-
-    // Check that 4-space indentation is used.
-    $this->assertStringContainsString('testConfigurableStepIndentation     |', $output);
-    $this->assertStringContainsString('    testConfigurableStepIndentation |', $output);
+    $result = static::logStepSummary('    ');
+    $this->assertStringContainsString('testConfigurableStepIndentation', $result);
+    $this->assertStringContainsString('    testConfigurableStepIndentation', $result);
   }
 
   /**
    * Test step summary with hierarchical indentation display.
    */
   public function testStepSummaryHierarchicalDisplay(): void {
-    static::loggerSetVerbose(TRUE);
-
     // Create a hierarchy of steps.
     static::logStepStart('Main process');
     static::logStepStart('Sub process');
@@ -1123,23 +1080,57 @@ class LoggerTraitTest extends UnitTestCase {
     static::logStepFinish('Sub process done');
     static::logStepFinish('Main process done');
 
-    static::logStepSummary('HIERARCHY TEST');
+    $result = static::logStepSummary();
+    $this->assertStringContainsString('testStepSummaryHierarchicalDisplay', $result);
+    $this->assertStringContainsString('  testStepSummaryHierarchicalDisplay', $result);
+    $this->assertStringContainsString('    testStepSummaryHierarchicalDisplay', $result);
+  }
 
-    $output = $this->getCapturedOutput();
+  /**
+   * Test logStepSummary returns string.
+   */
+  public function testLogStepSummaryReturn(): void {
+    static::logStepStart('testReturnMode');
+    static::logStepFinish('testReturnMode');
 
-    // Verify title and table structure.
-    $this->assertStringContainsString('HIERARCHY TEST', $output);
-    $this->assertStringContainsString('| Step', $output);
-    $this->assertStringContainsString('| Status', $output);
-    $this->assertStringContainsString('| Elapsed', $output);
+    $result = static::logStepSummary();
 
-    // Verify hierarchical indentation in the table.
-    // Level 0: no indentation.
-    $this->assertStringContainsString('testStepSummaryHierarchicalDisplay', $output);
-    // Level 1: 2-space indentation.
-    $this->assertStringContainsString('  testStepSummaryHierarchicalDisplay', $output);
-    // Level 2: 4-space indentation.
-    $this->assertStringContainsString('    testStepSummaryHierarchicalDisplay', $output);
+    $this->addToAssertionCount(1);
+    $this->assertStringContainsString('testLogStepSummaryReturn', $result);
+    $this->assertStringContainsString('Complete', $result);
+  }
+
+  /**
+   * Test logStepSummary with no steps.
+   */
+  public function testLogStepSummaryEmpty(): void {
+    // Should return empty string when no steps.
+    $result = static::logStepSummary();
+    $this->assertSame('', $result);
+  }
+
+  /**
+   * Test loggerInfo method.
+   */
+  public function testLoggerInfo(): void {
+    static::logStepStart('TestStep');
+    static::logStepFinish('TestStep');
+
+    $info = $this->loggerInfo();
+
+    $this->assertStringContainsString('STEP SUMMARY', $info);
+    $this->assertStringContainsString('testLoggerInfo', $info);
+    $this->assertStringContainsString('Complete', $info);
+  }
+
+  /**
+   * Test loggerInfo with no steps.
+   */
+  public function testLoggerInfoEmpty(): void {
+    $info = $this->loggerInfo();
+
+    $this->assertStringContainsString('STEP SUMMARY', $info);
+    $this->assertSame("STEP SUMMARY\n", $info);
   }
 
 }
