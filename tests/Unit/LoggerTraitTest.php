@@ -328,6 +328,27 @@ class LoggerTraitTest extends UnitTestCase {
   }
 
   /**
+   * Test logStepStart method with custom step method prefix.
+   */
+  public function testLogStepStartWithCustomPrefix(): void {
+    static::loggerSetVerbose(TRUE);
+
+    // Set custom prefix.
+    $original_prefix = static::$loggerStepMethodPrefix;
+    static::$loggerStepMethodPrefix = 'process';
+
+    try {
+      $this->processTest();
+
+      $output = $this->getCapturedOutput();
+      $this->assertStringContainsString('PROCESS START | processTest', $output);
+    } finally {
+      // Restore original prefix.
+      static::$loggerStepMethodPrefix = $original_prefix;
+    }
+  }
+
+  /**
    * Test logStepStart method with verbose mode disabled.
    */
   public function testLogStepStartSilentMode(): void {
@@ -355,6 +376,28 @@ class LoggerTraitTest extends UnitTestCase {
     $this->assertStringContainsString('STEP START | testLogStepFinishVerboseMode', $output);
     $this->assertStringContainsString('STEP DONE | testLogStepFinishVerboseMode | 0s', $output);
     $this->assertStringContainsString('Completed the test step', $output);
+  }
+
+  /**
+   * Test logStepFinish method with custom step method prefix.
+   */
+  public function testLogStepFinishWithCustomPrefix(): void {
+    static::loggerSetVerbose(TRUE);
+
+    // Set custom prefix.
+    $original_prefix = static::$loggerStepMethodPrefix;
+    static::$loggerStepMethodPrefix = 'process';
+
+    try {
+      $this->processFinishTest();
+
+      $output = $this->getCapturedOutput();
+      $this->assertStringContainsString('PROCESS START | processFinishTest', $output);
+      $this->assertStringContainsString('PROCESS DONE | processFinishTest | 0s', $output);
+    } finally {
+      // Restore original prefix.
+      static::$loggerStepMethodPrefix = $original_prefix;
+    }
   }
 
   /**
@@ -1131,6 +1174,22 @@ class LoggerTraitTest extends UnitTestCase {
 
     $this->assertStringContainsString('STEP SUMMARY', $info);
     $this->assertSame("STEP SUMMARY\n", $info);
+  }
+
+  /**
+   * Helper method that starts with 'process' prefix for testing.
+   */
+  private function processTest(): void {
+    static::logStepStart('Testing process prefix');
+    static::logStepFinish('Process prefix test completed');
+  }
+
+  /**
+   * Helper method that starts with 'process' prefix for testing finish.
+   */
+  private function processFinishTest(): void {
+    static::logStepStart('Testing process finish');
+    static::logStepFinish('Process finish test completed');
   }
 
 }

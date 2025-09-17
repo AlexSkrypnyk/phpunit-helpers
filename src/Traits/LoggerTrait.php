@@ -41,6 +41,11 @@ trait LoggerTrait {
   protected static array $loggerStepStack = [];
 
   /**
+   * Prefix for identifying step methods.
+   */
+  protected static string $loggerStepMethodPrefix = 'step';
+
+  /**
    * Sets the verbose mode for logging.
    *
    * @param bool $verbose
@@ -224,7 +229,9 @@ trait LoggerTrait {
     // Push current step onto the stack for nested steps.
     static::$loggerStepStack[] = $step;
 
-    static::logSection('STEP START | ' . $step, $message, FALSE, 40);
+    $prefix = str_starts_with($step, static::$loggerStepMethodPrefix) ? sprintf('%s START', strtoupper(static::$loggerStepMethodPrefix)) : 'STEP START';
+    static::logSection($prefix . ' | ' . $step, $message, FALSE, 40);
+
     if (static::$loggerIsVerbose) {
       fwrite(static::getOutputStream(), PHP_EOL);
     }
@@ -241,7 +248,8 @@ trait LoggerTrait {
     $step = $trace[1]['function'] ?? 'unknown';
 
     // Find the most recent unfinished step with matching name.
-    $section_title = 'STEP DONE | ' . $step;
+    $prefix = str_starts_with($step, static::$loggerStepMethodPrefix) ? sprintf('%s DONE', strtoupper(static::$loggerStepMethodPrefix)) : 'STEP DONE';
+    $section_title = $prefix . ' | ' . $step;
     $step_index = NULL;
 
     // Search backwards for the most recent matching step.
