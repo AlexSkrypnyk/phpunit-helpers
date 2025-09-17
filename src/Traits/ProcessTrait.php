@@ -18,7 +18,6 @@ trait ProcessTrait {
 
   use StringTrait;
 
-
   /**
    * The currently running process.
    */
@@ -350,11 +349,15 @@ trait ProcessTrait {
    *
    * Checks if the process completed with a successful exit code and provides
    * detailed error output if it failed.
+   *
+   * @param string|null $message
+   *   Optional message to include in the failure output if the process failed.
    */
-  public function assertProcessSuccessful(): void {
-    $this->assertNotNull($this->process, 'Process is not initialized');
+  public function assertProcessSuccessful(?string $message = NULL): void {
+    $this->assertNotNull($this->process, 'Process should be initialized');
+
     if (!$this->process->isSuccessful()) {
-      $this->fail('PROCESS FAILED' . PHP_EOL . $this->processFormatOutput());
+      $this->fail('PROCESS FAILED' . PHP_EOL . ($message ? 'Message: ' . $message . PHP_EOL : '') . $this->processFormatOutput());
     }
   }
 
@@ -363,11 +366,16 @@ trait ProcessTrait {
    *
    * Checks if the process failed and provides detailed output if it
    * unexpectedly succeeded.
+   *
+   * @param string|null $message
+   *   Optional message to include in the failure output if the process
+   *   succeeded.
    */
-  public function assertProcessFailed(): void {
+  public function assertProcessFailed(?string $message = NULL): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
+
     if ($this->process->isSuccessful()) {
-      $this->fail('PROCESS SUCCEEDED but failure was expected' . PHP_EOL . $this->processFormatOutput());
+      $this->fail('PROCESS SUCCEEDED but failure was expected' . PHP_EOL . ($message ? 'Message: ' . $message . PHP_EOL : '') . $this->processFormatOutput());
     }
   }
 

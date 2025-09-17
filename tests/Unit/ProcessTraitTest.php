@@ -332,7 +332,7 @@ class ProcessTraitTest extends UnitTestCase {
     $this->process = NULL;
 
     $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Process is not initialized');
+    $this->expectExceptionMessage('Process should be initialized');
 
     $this->assertProcessSuccessful();
   }
@@ -1367,6 +1367,17 @@ EOL;
     $this->assertProcessSuccessful();
   }
 
+  public function testAssertProcessSuccessfulWithFailedProcessAndMessage(): void {
+    // Test the fail() path in assertProcessSuccessful with custom message
+    $this->processRun('sh', ['-c', 'exit 1']);
+
+    $this->expectException(AssertionFailedError::class);
+    $this->expectExceptionMessage('PROCESS FAILED');
+    $this->expectExceptionMessage('Message: Custom failure message');
+
+    $this->assertProcessSuccessful('Custom failure message');
+  }
+
   public function testAssertProcessFailedWithSuccessfulProcess(): void {
     // Test the fail() path in assertProcessFailed when process succeeded
     $this->processRun('echo', ['success']);
@@ -1375,6 +1386,17 @@ EOL;
     $this->expectExceptionMessage('PROCESS SUCCEEDED but failure was expected');
 
     $this->assertProcessFailed();
+  }
+
+  public function testAssertProcessFailedWithSuccessfulProcessAndMessage(): void {
+    // Test the fail() path in assertProcessFailed with custom message
+    $this->processRun('echo', ['success']);
+
+    $this->expectException(AssertionFailedError::class);
+    $this->expectExceptionMessage('PROCESS SUCCEEDED but failure was expected');
+    $this->expectExceptionMessage('Message: Expected process to fail');
+
+    $this->assertProcessFailed('Expected process to fail');
   }
 
   public function testStreamingOutputWithDimmingEnabled(): void {
