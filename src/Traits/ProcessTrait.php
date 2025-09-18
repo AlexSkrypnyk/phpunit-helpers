@@ -88,12 +88,11 @@ trait ProcessTrait {
   /**
    * Tears down the process.
    *
-   * Stops the currently running process and resets the process variable.
+   * Stops the currently running process.
    */
   protected function processTearDown(): void {
     if ($this->process instanceof Process) {
       $this->process->stop();
-      $this->process = NULL;
     }
   }
 
@@ -319,7 +318,7 @@ trait ProcessTrait {
         }
 
         // Start the output on a new line for STDOUT.
-        if ($i === 0 && $type === Process::OUT){
+        if ($i === 0 && $type === Process::OUT) {
           fwrite(STDOUT, $eol);
         }
 
@@ -362,7 +361,7 @@ trait ProcessTrait {
     $this->assertNotNull($this->process, 'Process should be initialized');
 
     if (!$this->process->isSuccessful()) {
-      $this->fail('PROCESS FAILED' . PHP_EOL . ($message ? 'Message: ' . $message . PHP_EOL : '') . $this->processFormatOutput());
+      $this->fail('PROCESS FAILED' . PHP_EOL . ($message ? 'Message: ' . $message . PHP_EOL : '') . $this->processFormatOutput() . $this->assertionSuffix());
     }
   }
 
@@ -380,7 +379,7 @@ trait ProcessTrait {
     $this->assertNotNull($this->process, 'Process is not initialized');
 
     if ($this->process->isSuccessful()) {
-      $this->fail('PROCESS SUCCEEDED but failure was expected' . PHP_EOL . ($message ? 'Message: ' . $message . PHP_EOL : '') . $this->processFormatOutput());
+      $this->fail('PROCESS SUCCEEDED but failure was expected' . PHP_EOL . ($message ? 'Message: ' . $message . PHP_EOL : '') . $this->processFormatOutput() . $this->assertionSuffix());
     }
   }
 
@@ -431,12 +430,12 @@ trait ProcessTrait {
     foreach ($expected as $value) {
       if (is_string($value)) {
         $this->assertStringContainsString($value, $output, sprintf(
-          "Process output does not contain '%s'.%sOutput:%s%s",
-          $value,
-          PHP_EOL,
-          PHP_EOL,
-          $output
-        ));
+            "Process output does not contain '%s'.%sOutput:%s%s",
+            $value,
+            PHP_EOL,
+            PHP_EOL,
+            $output
+          ) . $this->assertionSuffix());
       }
     }
   }
@@ -456,12 +455,12 @@ trait ProcessTrait {
     foreach ($expected as $value) {
       if (is_string($value)) {
         $this->assertStringNotContainsString($value, $output, sprintf(
-          "Process output contains '%s' but should not.%sOutput:%s%s",
-          $value,
-          PHP_EOL,
-          PHP_EOL,
-          $output
-        ));
+            "Process output contains '%s' but should not.%sOutput:%s%s",
+            $value,
+            PHP_EOL,
+            PHP_EOL,
+            $output
+          ) . $this->assertionSuffix());
       }
     }
   }
@@ -481,12 +480,12 @@ trait ProcessTrait {
     foreach ($expected as $value) {
       if (is_string($value)) {
         $this->assertStringContainsString($value, $output, sprintf(
-          "Process error output does not contain '%s'.%sOutput:%s%s",
-          $value,
-          PHP_EOL,
-          PHP_EOL,
-          $output
-        ));
+            "Process error output does not contain '%s'.%sOutput:%s%s",
+            $value,
+            PHP_EOL,
+            PHP_EOL,
+            $output
+          ) . $this->assertionSuffix());
       }
     }
   }
@@ -506,12 +505,12 @@ trait ProcessTrait {
     foreach ($expected as $value) {
       if (is_string($value)) {
         $this->assertStringNotContainsString($value, $output, sprintf(
-          "Process error output contains '%s' but should not.%sOutput:%s%s",
-          $value,
-          PHP_EOL,
-          PHP_EOL,
-          $output
-        ));
+            "Process error output contains '%s' but should not.%sOutput:%s%s",
+            $value,
+            PHP_EOL,
+            PHP_EOL,
+            $output
+          ) . $this->assertionSuffix());
       }
     }
   }
@@ -548,10 +547,10 @@ trait ProcessTrait {
     $this->assertStringContainsOrNot(
       $output,
       $expected,
-      "Process output exact match failed for '%s'",
-      "Process output does not contain '%s'",
-      "Process output should not exactly match '%s'",
-      "Process output contains '%s' but should not"
+      "Process output exact match failed for '%s'" . $this->assertionSuffix(),
+      "Process output does not contain '%s'" . $this->assertionSuffix(),
+      "Process output should not exactly match '%s'" . $this->assertionSuffix(),
+      "Process output contains '%s' but should not" . $this->assertionSuffix()
     );
   }
 
@@ -587,10 +586,10 @@ trait ProcessTrait {
     $this->assertStringContainsOrNot(
       $output,
       $expected,
-      "Process error output exact match failed for '%s'",
-      "Process error output does not contain '%s'",
-      "Process error output should not exactly match '%s'",
-      "Process error output contains '%s' but should not"
+      "Process error output exact match failed for '%s'" . $this->assertionSuffix(),
+      "Process error output does not contain '%s'" . $this->assertionSuffix(),
+      "Process error output should not exactly match '%s'" . $this->assertionSuffix(),
+      "Process error output contains '%s' but should not" . $this->assertionSuffix()
     );
   }
 
@@ -618,7 +617,7 @@ trait ProcessTrait {
           PHP_EOL,
           PHP_EOL,
           $output
-        ));
+        ) . $this->assertionSuffix());
       }
     }
   }
@@ -647,7 +646,7 @@ trait ProcessTrait {
           PHP_EOL,
           PHP_EOL,
           $output
-        ));
+        ) . $this->assertionSuffix());
       }
     }
   }
@@ -686,31 +685,11 @@ trait ProcessTrait {
     $this->assertStringContainsOrNot(
       $output,
       $expected,
-      "Process output exact match failed for '%s'",
-      "Process output does not contain '%s'",
-      "Process output should not exactly match '%s'",
-      "Process output contains '%s' but should not"
+      "Process output exact match failed for '%s'" . $this->assertionSuffix(),
+      "Process output does not contain '%s'" . $this->assertionSuffix(),
+      "Process output should not exactly match '%s'" . $this->assertionSuffix(),
+      "Process output contains '%s' but should not" . $this->assertionSuffix()
     );
-  }
-
-  /**
-   * Print the process info.
-   *
-   * @return string
-   *   The locations' info.
-   */
-  public function processInfo(): string {
-    if (!$this->process instanceof Process) {
-      return 'PROCESS: Not initialized' . PHP_EOL;
-    }
-    $lines[] = 'PROCESS';
-    $lines[] = 'Output:';
-    $output = $this->process->getOutput();
-    $lines[] = $output ?: '(no output)';
-    $lines[] = 'Error:';
-    $error = $this->process->getErrorOutput();
-    $lines[] = $error ?: '(no error output)';
-    return implode(PHP_EOL, $lines) . PHP_EOL;
   }
 
 }

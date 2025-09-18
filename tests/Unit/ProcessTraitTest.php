@@ -289,24 +289,6 @@ class ProcessTraitTest extends UnitTestCase {
     $this->assertProcessFailed();
   }
 
-  public function testProcessInfo(): void {
-    $this->processRun('echo', ['Test Output']);
-
-    $info = $this->processInfo();
-
-    $this->assertStringContainsString('PROCESS', $info);
-    $this->assertStringContainsString('Output:', $info);
-    $this->assertStringContainsString('Test Output', $info);
-    $this->assertStringContainsString('Error:', $info);
-  }
-
-  public function testProcessInfoUninitializedProcess(): void {
-    $this->process = NULL;
-    $info = $this->processInfo();
-
-    $this->assertStringContainsString('PROCESS: Not initialized', $info);
-  }
-
   public function testProcessRunWithInvalidCommand(): void {
     $this->expectException(\InvalidArgumentException::class);
     $this->expectExceptionMessage('Invalid command: invalid$command. Only alphanumeric characters, dots, dashes, underscores and slashes are allowed.');
@@ -537,7 +519,7 @@ EOL;
     $formatted_output = $method->invoke($this);
     $this->assertIsString($formatted_output);
 
-    $this->assertStringContainsString('Exit code: 0', $formatted_output);
+    $this->assertStringContainsString('EXIT CODE: 0', $formatted_output);
     $this->assertStringContainsString(static::$processStandardOutputHeader, $formatted_output);
     $this->assertStringContainsString('Standard output text', $formatted_output);
     $this->assertStringContainsString(static::$processStandardOutputFooter, $formatted_output);
@@ -552,7 +534,7 @@ EOL;
     $formatted_output = $method->invoke($this);
     $this->assertIsString($formatted_output);
 
-    $this->assertStringContainsString('Exit code: 1', $formatted_output);
+    $this->assertStringContainsString('EXIT CODE: 1', $formatted_output);
     $this->assertStringContainsString(static::$processStandardOutputHeader, $formatted_output);
     $this->assertStringContainsString('Process stdout message', $formatted_output);
     $this->assertStringContainsString(static::$processStandardOutputFooter, $formatted_output);
@@ -570,7 +552,7 @@ EOL;
     $formatted_output = $method->invoke($this);
     $this->assertIsString($formatted_output);
 
-    $this->assertStringContainsString('Exit code: 0', $formatted_output);
+    $this->assertStringContainsString('EXIT CODE: 0', $formatted_output);
     $this->assertStringNotContainsString(static::$processStandardOutputHeader, $formatted_output);
     $this->assertStringNotContainsString(static::$processErrorOutputHeader, $formatted_output);
   }
@@ -598,7 +580,8 @@ EOL;
 
     $this->processTearDown();
 
-    $this->assertNull($this->process);
+    $this->assertInstanceOf(Process::class, $this->process);
+    $this->assertFalse($this->process->isRunning());
   }
 
   public function testProcessTearDownWhenNotInitialized(): void {
@@ -965,10 +948,10 @@ EOL;
     // Test that they have expected values
     $this->assertEquals('>> ', static::$processStreamingStandardOutputChars);
     $this->assertEquals('XX ', static::$processStreamingErrorOutputChars);
-    $this->assertStringContainsString('Standard output', static::$processStandardOutputHeader);
-    $this->assertStringContainsString('Standard output', static::$processStandardOutputFooter);
-    $this->assertStringContainsString('Error output', static::$processErrorOutputHeader);
-    $this->assertStringContainsString('Error output', static::$processErrorOutputFooter);
+    $this->assertStringContainsString('STANDARD OUTPUT', static::$processStandardOutputHeader);
+    $this->assertStringContainsString('STANDARD OUTPUT', static::$processStandardOutputFooter);
+    $this->assertStringContainsString('ERROR OUTPUT', static::$processErrorOutputHeader);
+    $this->assertStringContainsString('ERROR OUTPUT', static::$processErrorOutputFooter);
   }
 
   #[DataProvider('dataProviderProcessParseCommand')]
@@ -1253,38 +1236,6 @@ EOL;
     ];
   }
 
-  public function testProcessInfoWithEmptyOutput(): void {
-    if (DIRECTORY_SEPARATOR === '\\') {
-      $this->markTestSkipped('Requires POSIX utilities');
-    }
-
-    // Test processInfo when process has no output or error output
-    $this->processRun('true');
-
-    $info = $this->processInfo();
-
-    $this->assertStringContainsString('PROCESS', $info);
-    $this->assertStringContainsString('Output:', $info);
-    $this->assertStringContainsString('(no output)', $info);
-    $this->assertStringContainsString('Error:', $info);
-    $this->assertStringContainsString('(no error output)', $info);
-  }
-
-  public function testProcessInfoWithBothOutputs(): void {
-    // Test processInfo when process has both standard and error output
-    $this->processRun('sh', ['-c', 'echo "stdout message"; echo "stderr message" >&2']);
-
-    $info = $this->processInfo();
-
-    $this->assertStringContainsString('PROCESS', $info);
-    $this->assertStringContainsString('Output:', $info);
-    $this->assertStringContainsString('stdout message', $info);
-    $this->assertStringContainsString('Error:', $info);
-    $this->assertStringContainsString('stderr message', $info);
-    $this->assertStringNotContainsString('(no output)', $info);
-    $this->assertStringNotContainsString('(no error output)', $info);
-  }
-
   public function testProcessStreamingCallbackReturnsCallable(): void {
     // Test that processStreamingOutputCallback returns a callable
     $reflection = new \ReflectionClass($this);
@@ -1354,7 +1305,7 @@ EOL;
     $formatted_output = $method->invoke($this);
 
     $this->assertIsString($formatted_output);
-    $this->assertStringContainsString('Exit code: 42', $formatted_output);
+    $this->assertStringContainsString('EXIT CODE: 42', $formatted_output);
   }
 
   public function testAssertProcessSuccessfulWithFailedProcess(): void {

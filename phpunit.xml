@@ -18,6 +18,11 @@
             <directory>tests</directory>
         </testsuite>
     </testsuites>
+    <groups>
+        <exclude>
+            <group>manual</group>
+        </exclude>
+    </groups>
     <source restrictNotices="true"
             restrictWarnings="true"
             >
