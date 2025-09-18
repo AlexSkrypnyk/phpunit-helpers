@@ -48,22 +48,22 @@ trait ProcessTrait {
   /**
    * Standard output header for formatted output.
    */
-  protected static string $processStandardOutputHeader = 'vvvvvvvvvvvv Standard output vvvvvvvvvvvv';
+  protected static string $processStandardOutputHeader = '⬇⬇⬇ STANDARD OUTPUT ⬇⬇⬇';
 
   /**
    * Standard output footer for formatted output.
    */
-  protected static string $processStandardOutputFooter = '^^^^^^^^^^^^ Standard output ^^^^^^^^^^^^';
+  protected static string $processStandardOutputFooter = '⬆⬆⬆ STANDARD OUTPUT ⬆⬆⬆';
 
   /**
    * Error output header for formatted output.
    */
-  protected static string $processErrorOutputHeader = 'vvvvvvvvvvvv Error output vvvvvvvvvvvv';
+  protected static string $processErrorOutputHeader = '▼▼▼ ERROR OUTPUT ▼▼▼';
 
   /**
    * Error output footer for formatted output.
    */
-  protected static string $processErrorOutputFooter = '^^^^^^^^^^^ Error output ^^^^^^^^^^^^';
+  protected static string $processErrorOutputFooter = '▲▲▲ ERROR OUTPUT ▲▲▲';
 
   /**
    * Dim the streaming output.
