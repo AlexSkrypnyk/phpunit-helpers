@@ -186,6 +186,7 @@ trait LocationsTrait {
    */
   public static function locationsInfo(): string {
     $lines[] = 'LOCATIONS';
+    $lines[] = '---------';
     $lines[] = 'Root       : ' . static::$root;
     $lines[] = 'Fixtures   : ' . (static::$fixtures ?? 'Not set');
     $lines[] = 'Workspace  : ' . static::$workspace;
