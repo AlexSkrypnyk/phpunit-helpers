@@ -318,6 +318,11 @@ trait ProcessTrait {
           $line = static::dim($line);
         }
 
+        // Start the output on a new line for STDOUT.
+        if ($i === 0 && $type === Process::OUT){
+          fwrite(STDOUT, $eol);
+        }
+
         fwrite(STDOUT, $line);
       }
     };
