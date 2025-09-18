@@ -399,7 +399,10 @@ trait ProcessTrait {
     $process_error = $this->process->getErrorOutput();
 
     $output = PHP_EOL;
-    $output .= 'Exit code: ' . $this->process->getExitCode() . PHP_EOL;
+    $output .= 'COMMAND: ' . PHP_EOL . $this->process->getCommandLine() . PHP_EOL;
+    $output .= PHP_EOL;
+    $output .= PHP_EOL;
+    $output .= 'EXIT CODE: ' . $this->process->getExitCode() . PHP_EOL;
     $output .= PHP_EOL;
 
     if (!empty($process_output)) {
