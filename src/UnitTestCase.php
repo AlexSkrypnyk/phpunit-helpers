@@ -65,7 +65,7 @@ abstract class UnitTestCase extends TestCase {
    */
   public function info(): string {
     // Collect all methods of the class that end with 'Info'.
-    $methods = array_values(array_filter(get_class_methods(static::class), fn($m): bool => !str_starts_with($m, 'test') && str_ends_with($m, 'Info')));
+    $methods = array_values(array_filter(get_class_methods(static::class), fn($m): bool => !str_contains($m, 'test') && str_ends_with($m, 'Info')));
 
     $info = '';
     foreach ($methods as $key => $method) {

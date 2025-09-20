@@ -50,12 +50,28 @@ use it.
 The `UnitTestCase` class is the base class for unit tests. It includes the
 `ReflectionTrait` and `LocationsTrait` to provide useful methods for testing.
 
+The class also provides an `info()` method that collects additional information
+about the test from methods that end with 'Info'. Methods containing "test" in
+their name are automatically excluded from info collection to avoid conflicts
+with test methods.
+
 ```php
 use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
 
 class MyTest extends UnitTestCase {
   public function testExample() {
     // Test implementation that benefits from included traits.
+    echo $this->info(); // Displays information from *Info methods
+  }
+  
+  public static function environmentInfo(): string {
+    return 'Environment: ' . getenv('APP_ENV');
+  }
+  
+  public function testFixtureInfo(): string {
+    // This method will be excluded from info() output
+    // because it contains "test" in the method name
+    return 'This will not appear in info()';
   }
 }
 ```

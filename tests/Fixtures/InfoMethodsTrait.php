@@ -31,4 +31,8 @@ trait InfoMethodsTrait {
     return 'This is a test fixture info method that should not be included';
   }
 
+  public static function contestableSituationInfo(): string {
+    return 'This method contains test in the middle and should be excluded';
+  }
+
 }
