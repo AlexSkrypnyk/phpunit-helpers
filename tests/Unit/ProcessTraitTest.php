@@ -1291,6 +1291,33 @@ EOL;
     $this->assertProcessSuccessful();
   }
 
+  public function testProcessRunWithEnvironmentVariableUnsetting(): void {
+    if (DIRECTORY_SEPARATOR === '\\') {
+      $this->markTestSkipped('Requires POSIX utilities');
+    }
+
+    // First, set an environment variable
+    putenv('TEST_UNSET_VAR=initial_value');
+    $this->assertNotFalse(getenv('TEST_UNSET_VAR'));
+
+    // Run a process that should unset the environment variable by passing FALSE
+    $this->processRun('printenv', [], [], [
+      'TEST_UNSET_VAR' => FALSE,
+      'TEST_KEEP_VAR' => 'keep_this',
+    ]);
+
+    $this->assertProcessSuccessful();
+
+    // The process should not show TEST_UNSET_VAR in its environment
+    $this->assertProcessOutputNotContains('TEST_UNSET_VAR=initial_value');
+
+    // But it should show TEST_KEEP_VAR
+    $this->assertProcessOutputContains('TEST_KEEP_VAR=keep_this');
+
+    // Clean up
+    putenv('TEST_UNSET_VAR');
+  }
+
   public function testProcessFormatOutputExitCodeDisplay(): void {
     if (DIRECTORY_SEPARATOR === '\\') {
       $this->markTestSkipped('Requires POSIX utilities');
