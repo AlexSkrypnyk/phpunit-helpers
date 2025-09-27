@@ -145,13 +145,13 @@ trait ProcessTrait {
     }
     unset($arg);
 
+    // Processes inherit all the env vars defined in the system. This can be
+    // prevented by setting to FALSE the env vars that need to be removed.
     foreach ($env as &$env_value) {
       if (!is_scalar($env_value)) {
         throw new \InvalidArgumentException("All environment variables must be scalar values.");
       }
-      $env_value = (string) $env_value;
     }
-    unset($env_value);
 
     $cmd = array_merge([$base_command], $all_arguments);
 
