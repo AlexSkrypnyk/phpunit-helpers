@@ -1456,4 +1456,18 @@ $test->processRun("echo", ["test output"]);
     static::$processStreamingOutputShouldDim = TRUE;
   }
 
+  /**
+   * Test custom failure messages work correctly.
+   */
+  public function testCustomFailureMessages(): void {
+    $this->processRun('echo', ['test output']);
+
+    $custom_message = 'This is a custom failure message';
+
+    $this->expectException(AssertionFailedError::class);
+    $this->expectExceptionMessage($custom_message);
+
+    $this->assertProcessOutputContains('nonexistent', $custom_message);
+  }
+
 }

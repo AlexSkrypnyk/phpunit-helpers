@@ -420,8 +420,10 @@ trait ProcessTrait {
    *
    * @param array|string $expected
    *   Expected string or array of strings to check for in the process output.
+   * @param ?string $message
+   *   Optional failure message.
    */
-  public function assertProcessOutputContains(array|string $expected): void {
+  public function assertProcessOutputContains(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
     $output = $this->process->getOutput();
 
@@ -429,7 +431,7 @@ trait ProcessTrait {
 
     foreach ($expected as $value) {
       if (is_string($value)) {
-        $this->assertStringContainsString($value, $output, sprintf(
+        $this->assertStringContainsString($value, $output, $message ?: sprintf(
             "Process output does not contain '%s'.%sOutput:%s%s",
             $value,
             PHP_EOL,
@@ -445,8 +447,10 @@ trait ProcessTrait {
    *
    * @param array|string $expected
    *   String or array of strings that should not be in the process output.
+   * @param ?string $message
+   *   Optional failure message.
    */
-  public function assertProcessOutputNotContains(array|string $expected): void {
+  public function assertProcessOutputNotContains(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
     $output = $this->process->getOutput();
 
@@ -454,7 +458,7 @@ trait ProcessTrait {
 
     foreach ($expected as $value) {
       if (is_string($value)) {
-        $this->assertStringNotContainsString($value, $output, sprintf(
+        $this->assertStringNotContainsString($value, $output, $message ?: sprintf(
             "Process output contains '%s' but should not.%sOutput:%s%s",
             $value,
             PHP_EOL,
@@ -470,8 +474,10 @@ trait ProcessTrait {
    *
    * @param string $expected
    *   Expected string to check for in the process error output.
+   * @param ?string $message
+   *   Optional failure message.
    */
-  public function assertProcessErrorOutputContains(array|string $expected): void {
+  public function assertProcessErrorOutputContains(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
     $output = $this->process->getErrorOutput();
 
@@ -479,7 +485,7 @@ trait ProcessTrait {
 
     foreach ($expected as $value) {
       if (is_string($value)) {
-        $this->assertStringContainsString($value, $output, sprintf(
+        $this->assertStringContainsString($value, $output, $message ?: sprintf(
             "Process error output does not contain '%s'.%sOutput:%s%s",
             $value,
             PHP_EOL,
@@ -495,8 +501,10 @@ trait ProcessTrait {
    *
    * @param string $expected
    *   String that should not be in the process error output.
+   * @param ?string $message
+   *   Optional failure message.
    */
-  public function assertProcessErrorOutputNotContains(array|string $expected): void {
+  public function assertProcessErrorOutputNotContains(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
     $output = $this->process->getErrorOutput();
 
@@ -504,7 +512,7 @@ trait ProcessTrait {
 
     foreach ($expected as $value) {
       if (is_string($value)) {
-        $this->assertStringNotContainsString($value, $output, sprintf(
+        $this->assertStringNotContainsString($value, $output, $message ?: sprintf(
             "Process error output contains '%s' but should not.%sOutput:%s%s",
             $value,
             PHP_EOL,
@@ -535,11 +543,13 @@ trait ProcessTrait {
    *   '- ' prefix for exact match absent,
    *   '! ' prefix for substring absent.
    *   If any string has a prefix, ALL strings must have prefixes.
+   * @param ?string $message
+   *   Optional failure message.
    *
    * @throws \RuntimeException
    *   When prefix usage is inconsistent (some have prefixes, others don't).
    */
-  public function assertProcessOutputContainsOrNot(string|array $expected): void {
+  public function assertProcessOutputContainsOrNot(string|array $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
 
     $output = $this->process->getOutput();
@@ -547,10 +557,10 @@ trait ProcessTrait {
     $this->assertStringContainsOrNot(
       $output,
       $expected,
-      "Process output exact match failed for '%s'" . $this->assertionSuffix(),
-      "Process output does not contain '%s'" . $this->assertionSuffix(),
-      "Process output should not exactly match '%s'" . $this->assertionSuffix(),
-      "Process output contains '%s' but should not" . $this->assertionSuffix()
+      $message ?: "Process output exact match failed for '%s'" . $this->assertionSuffix(),
+      $message ?: "Process output does not contain '%s'" . $this->assertionSuffix(),
+      $message ?: "Process output should not exactly match '%s'" . $this->assertionSuffix(),
+      $message ?: "Process output contains '%s' but should not" . $this->assertionSuffix()
     );
   }
 
@@ -574,11 +584,13 @@ trait ProcessTrait {
    *   '- ' prefix for exact match absent,
    *   '! ' prefix for substring absent.
    *   If any string has a prefix, ALL strings must have prefixes.
+   * @param ?string $message
+   *   Optional failure message.
    *
    * @throws \RuntimeException
    *   When prefix usage is inconsistent (some have prefixes, others don't).
    */
-  public function assertProcessErrorOutputContainsOrNot(string|array $expected): void {
+  public function assertProcessErrorOutputContainsOrNot(string|array $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
 
     $output = $this->process->getErrorOutput();
@@ -586,10 +598,10 @@ trait ProcessTrait {
     $this->assertStringContainsOrNot(
       $output,
       $expected,
-      "Process error output exact match failed for '%s'" . $this->assertionSuffix(),
-      "Process error output does not contain '%s'" . $this->assertionSuffix(),
-      "Process error output should not exactly match '%s'" . $this->assertionSuffix(),
-      "Process error output contains '%s' but should not" . $this->assertionSuffix()
+      $message ?: "Process error output exact match failed for '%s'" . $this->assertionSuffix(),
+      $message ?: "Process error output does not contain '%s'" . $this->assertionSuffix(),
+      $message ?: "Process error output should not exactly match '%s'" . $this->assertionSuffix(),
+      $message ?: "Process error output contains '%s' but should not" . $this->assertionSuffix()
     );
   }
 
@@ -600,8 +612,10 @@ trait ProcessTrait {
    *
    * @param array|string $expected
    *   Expected string or array of strings to check for in combined output.
+   * @param ?string $message
+   *   Optional failure message.
    */
-  public function assertProcessAnyOutputContains(array|string $expected): void {
+  public function assertProcessAnyOutputContains(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
 
     $output = $this->process->getOutput();
@@ -611,13 +625,13 @@ trait ProcessTrait {
 
     foreach ($expected as $value) {
       if (is_string($value)) {
-        $this->assertStringContainsString($value, $output, sprintf(
-          "Process output does not contain '%s'.%sOutput:%s%s",
-          $value,
-          PHP_EOL,
-          PHP_EOL,
-          $output
-        ) . $this->assertionSuffix());
+        $this->assertStringContainsString($value, $output, $message ?: sprintf(
+            "Process output does not contain '%s'.%sOutput:%s%s",
+            $value,
+            PHP_EOL,
+            PHP_EOL,
+            $output
+          ) . $this->assertionSuffix());
       }
     }
   }
@@ -629,8 +643,10 @@ trait ProcessTrait {
    *
    * @param array|string $expected
    *   String or array of strings that should not be in combined output.
+   * @param ?string $message
+   *   Optional failure message.
    */
-  public function assertProcessAnyOutputNotContains(array|string $expected): void {
+  public function assertProcessAnyOutputNotContains(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
 
     $output = $this->process->getOutput();
@@ -640,13 +656,13 @@ trait ProcessTrait {
 
     foreach ($expected as $value) {
       if (is_string($value)) {
-        $this->assertStringNotContainsString($value, $output, sprintf(
-          "Process output contains '%s' but should not.%sOutput:%s%s",
-          $value,
-          PHP_EOL,
-          PHP_EOL,
-          $output
-        ) . $this->assertionSuffix());
+        $this->assertStringNotContainsString($value, $output, $message ?: sprintf(
+            "Process output contains '%s' but should not.%sOutput:%s%s",
+            $value,
+            PHP_EOL,
+            PHP_EOL,
+            $output
+          ) . $this->assertionSuffix());
       }
     }
   }
@@ -672,11 +688,13 @@ trait ProcessTrait {
    *   '- ' prefix for exact match absent,
    *   '! ' prefix for substring absent.
    *   If any string has a prefix, ALL strings must have prefixes.
+   * @param ?string $message
+   *   Optional failure message.
    *
    * @throws \RuntimeException
    *   When prefix usage is inconsistent (some have prefixes, others don't).
    */
-  public function assertProcessAnyOutputContainsOrNot(string|array $expected): void {
+  public function assertProcessAnyOutputContainsOrNot(string|array $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
 
     $output = $this->process->getOutput();
@@ -685,10 +703,10 @@ trait ProcessTrait {
     $this->assertStringContainsOrNot(
       $output,
       $expected,
-      "Process output exact match failed for '%s'" . $this->assertionSuffix(),
-      "Process output does not contain '%s'" . $this->assertionSuffix(),
-      "Process output should not exactly match '%s'" . $this->assertionSuffix(),
-      "Process output contains '%s' but should not" . $this->assertionSuffix()
+      $message ?: "Process output exact match failed for '%s'" . $this->assertionSuffix(),
+      $message ?: "Process output does not contain '%s'" . $this->assertionSuffix(),
+      $message ?: "Process output should not exactly match '%s'" . $this->assertionSuffix(),
+      $message ?: "Process output contains '%s' but should not" . $this->assertionSuffix()
     );
   }
 
