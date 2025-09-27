@@ -92,6 +92,9 @@ class MyAssertArrayTest extends TestCase {
 
     // Assert that a string is present in an array.
     $this->assertArrayContainsString('test', $array);
+    
+    // Assert with custom failure message.
+    $this->assertArrayContainsString('test', $array, 'Custom message: test string not found');
   }
 }
 ```
@@ -141,6 +144,9 @@ class MyApplicationTest extends TestCase {
     // Assert that the application output contains string(s)
     $this->assertApplicationOutputContains('Expected output');
     $this->assertApplicationOutputContains(['String1', 'String2']); // Can check multiple strings
+    
+    // Assert with custom failure message
+    $this->assertApplicationOutputContains('Expected output', 'Custom message: Expected output not found');
 
     // Assert that the application output does not contain string(s)
     $this->assertApplicationOutputNotContains('Unexpected output');
@@ -296,9 +302,13 @@ class MyProcessTest extends TestCase {
     // Assert that the process output contains string(s).
     $this->assertProcessOutputContains('Hello World');
     $this->assertProcessOutputContains(['Hello', 'World']); // Can check for multiple strings
+    
+    // Assert with custom failure message.
+    $this->assertProcessOutputContains('Hello World', 'Custom message: Expected output not found');
 
     // Assert that the process output does not contain string(s).
     $this->assertProcessOutputNotContains('Error');
+    $this->assertProcessOutputNotContains('Error', 'Custom message: Unexpected error found');
     $this->assertProcessOutputNotContains(['Error1', 'Error2']); // Can check multiple strings
 
     // Assert that the process error output contains string(s).

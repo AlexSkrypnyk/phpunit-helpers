@@ -229,10 +229,13 @@ trait ApplicationTrait {
 
   /**
    * Asserts that the application executed successfully.
+   *
+   * @param ?string $message
+   *   Optional failure message.
    */
-  public function assertApplicationSuccessful(): void {
-    $this->assertNotNull($this->applicationTester, 'Application is not initialized');
-    $this->assertSame(0, $this->applicationTester->getStatusCode(), sprintf(
+  public function assertApplicationSuccessful(?string $message = NULL): void {
+    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
+    $this->assertSame(0, $this->applicationTester->getStatusCode(), $message ?: sprintf(
       'Application failed with exit code %d: %s%sOutput:%s%s',
       $this->applicationTester->getStatusCode(),
       $this->applicationTester->getErrorOutput(),
@@ -244,10 +247,13 @@ trait ApplicationTrait {
 
   /**
    * Asserts that the application failed to execute.
+   *
+   * @param ?string $message
+   *   Optional failure message.
    */
-  public function assertApplicationFailed(): void {
-    $this->assertNotNull($this->applicationTester, 'Application is not initialized');
-    $this->assertNotSame(0, $this->applicationTester->getStatusCode(), sprintf(
+  public function assertApplicationFailed(?string $message = NULL): void {
+    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
+    $this->assertNotSame(0, $this->applicationTester->getStatusCode(), $message ?: sprintf(
       'Application succeeded when failure was expected.%sOutput:%s%s',
       PHP_EOL,
       PHP_EOL,
@@ -260,16 +266,18 @@ trait ApplicationTrait {
    *
    * @param array|string $expected
    *   Expected string or strings to check for in the application output.
+   * @param ?string $message
+   *   Optional failure message.
    */
-  public function assertApplicationOutputContains(array|string $expected): void {
-    $this->assertNotNull($this->applicationTester, 'Application is not initialized');
+  public function assertApplicationOutputContains(array|string $expected, ?string $message = NULL): void {
+    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
     $output = $this->applicationTester->getDisplay();
 
     $expected = is_array($expected) ? $expected : [$expected];
 
     foreach ($expected as $value) {
       if (is_string($value)) {
-        $this->assertStringContainsString($value, $output, sprintf(
+        $this->assertStringContainsString($value, $output, $message ?: sprintf(
           "Application output does not contain '%s'.%sOutput:%s%s",
           $value,
           PHP_EOL,
@@ -285,16 +293,18 @@ trait ApplicationTrait {
    *
    * @param array|string $expected
    *   String or array of strings that should not be in the application output.
+   * @param ?string $message
+   *   Optional failure message.
    */
-  public function assertApplicationOutputNotContains(array|string $expected): void {
-    $this->assertNotNull($this->applicationTester, 'Application is not initialized');
+  public function assertApplicationOutputNotContains(array|string $expected, ?string $message = NULL): void {
+    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
     $output = $this->applicationTester->getDisplay();
 
     $expected = is_array($expected) ? $expected : [$expected];
 
     foreach ($expected as $value) {
       if (is_string($value)) {
-        $this->assertStringNotContainsString($value, $output, sprintf(
+        $this->assertStringNotContainsString($value, $output, $message ?: sprintf(
           "Application output contains '%s' but should not.%sOutput:%s%s",
           $value,
           PHP_EOL,
@@ -310,16 +320,18 @@ trait ApplicationTrait {
    *
    * @param array|string $expected
    *   Expected string to check for in the application error output.
+   * @param ?string $message
+   *   Optional failure message.
    */
-  public function assertApplicationErrorOutputContains(array|string $expected): void {
-    $this->assertNotNull($this->applicationTester, 'Application is not initialized');
+  public function assertApplicationErrorOutputContains(array|string $expected, ?string $message = NULL): void {
+    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
     $output = $this->applicationTester->getErrorOutput();
 
     $expected = is_array($expected) ? $expected : [$expected];
 
     foreach ($expected as $value) {
       if (is_string($value)) {
-        $this->assertStringContainsString($value, $output, sprintf(
+        $this->assertStringContainsString($value, $output, $message ?: sprintf(
           "Application error output does not contain '%s'.%sOutput:%s%s",
           $value,
           PHP_EOL,
@@ -335,16 +347,18 @@ trait ApplicationTrait {
    *
    * @param array|string $expected
    *   String that should not be in the error output.
+   * @param ?string $message
+   *   Optional failure message.
    */
-  public function assertApplicationErrorOutputNotContains(array|string $expected): void {
-    $this->assertNotNull($this->applicationTester, 'Application is not initialized');
+  public function assertApplicationErrorOutputNotContains(array|string $expected, ?string $message = NULL): void {
+    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
     $output = $this->applicationTester->getErrorOutput();
 
     $expected = is_array($expected) ? $expected : [$expected];
 
     foreach ($expected as $value) {
       if (is_string($value)) {
-        $this->assertStringNotContainsString($value, $output, sprintf(
+        $this->assertStringNotContainsString($value, $output, $message ?: sprintf(
           "Application error output contains '%s' but should not.%sOutput:%s%s",
           $value,
           PHP_EOL,
@@ -363,9 +377,11 @@ trait ApplicationTrait {
    * @param string|array $expected
    *   String or array of strings to check in the application output.
    *   Prefix with '---' for strings that should not be present.
+   * @param ?string $message
+   *   Optional failure message.
    */
-  public function assertApplicationOutputContainsOrNot(string|array $expected): void {
-    $this->assertNotNull($this->applicationTester, 'Application is not initialized');
+  public function assertApplicationOutputContainsOrNot(string|array $expected, ?string $message = NULL): void {
+    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
     $output = $this->applicationTester->getDisplay();
 
     $expected = is_array($expected) ? $expected : [$expected];
@@ -374,7 +390,7 @@ trait ApplicationTrait {
       if (str_starts_with($value, '---')) {
         $value = substr($value, 4);
 
-        $this->assertStringNotContainsString($value, $output, sprintf(
+        $this->assertStringNotContainsString($value, $output, $message ?: sprintf(
           "Application output contains '%s' but should not.%sOutput:%s%s",
           $value,
           PHP_EOL,
@@ -383,7 +399,7 @@ trait ApplicationTrait {
         ));
       }
       else {
-        $this->assertStringContainsString($value, $output, sprintf(
+        $this->assertStringContainsString($value, $output, $message ?: sprintf(
           "Application output does not contain '%s'.%sOutput:%s%s",
           $value,
           PHP_EOL,
@@ -403,9 +419,11 @@ trait ApplicationTrait {
    * @param string|array $expected
    *   String or array of strings to check in the application error output.
    *   Prefix with '---' for strings that should not be present.
+   * @param ?string $message
+   *   Optional failure message.
    */
-  public function assertApplicationErrorOutputContainsOrNot(string|array $expected): void {
-    $this->assertNotNull($this->applicationTester, 'Application is not initialized');
+  public function assertApplicationErrorOutputContainsOrNot(string|array $expected, ?string $message = NULL): void {
+    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
     $output = $this->applicationTester->getErrorOutput();
 
     $expected = is_array($expected) ? $expected : [$expected];
@@ -414,7 +432,7 @@ trait ApplicationTrait {
       if (str_starts_with($value, '---')) {
         $value = substr($value, 4);
 
-        $this->assertStringNotContainsString($value, $output, sprintf(
+        $this->assertStringNotContainsString($value, $output, $message ?: sprintf(
           "Application error output contains '%s' but should not.%sOutput:%s%s",
           $value,
           PHP_EOL,
@@ -423,7 +441,7 @@ trait ApplicationTrait {
         ));
       }
       else {
-        $this->assertStringContainsString($value, $output, sprintf(
+        $this->assertStringContainsString($value, $output, $message ?: sprintf(
           "Application error output does not contain '%s'.%sOutput:%s%s",
           $value,
           PHP_EOL,

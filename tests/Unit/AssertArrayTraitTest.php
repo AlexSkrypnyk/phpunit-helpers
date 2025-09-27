@@ -479,4 +479,16 @@ class AssertArrayTraitTest extends TestCase {
     ];
   }
 
+  /**
+   * Test custom failure messages work correctly.
+   */
+  public function testCustomFailureMessages(): void {
+    $custom_message = 'This is a custom failure message';
+
+    $this->expectException(AssertionFailedError::class);
+    $this->expectExceptionMessage($custom_message);
+
+    $this->assertArrayContainsString('nonexistent', ['test', 'array'], $custom_message);
+  }
+
 }
