@@ -62,6 +62,28 @@ class EnvTraitTest extends TestCase {
     $this->assertTrue($this->envIsUnset($name));
   }
 
+  public function testEnvUnsetMultiple(): void {
+    $vars = [
+      'TEST_ENV_VAR1' => 'value1',
+      'TEST_ENV_VAR2' => 'value2',
+      'TEST_ENV_VAR3' => 'value3',
+      'TEST_ENV_VAR4' => 'value4',
+    ];
+
+    $this->envSetMultiple($vars);
+
+    foreach (array_keys($vars) as $name) {
+      $this->assertTrue($this->envIsSet($name));
+    }
+
+    $this->envUnsetMultiple(['TEST_ENV_VAR1', 'TEST_ENV_VAR2', 'TEST_ENV_VAR3']);
+
+    $this->assertFalse($this->envIsSet('TEST_ENV_VAR1'));
+    $this->assertFalse($this->envIsSet('TEST_ENV_VAR2'));
+    $this->assertFalse($this->envIsSet('TEST_ENV_VAR3'));
+    $this->assertTrue($this->envIsSet('TEST_ENV_VAR4'));
+  }
+
   public function testEnvUnsetPrefix(): void {
     $vars = [
       'TEST_PREFIX_VAR1' => 'value1',

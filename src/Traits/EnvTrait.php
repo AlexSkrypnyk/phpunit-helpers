@@ -57,6 +57,18 @@ trait EnvTrait {
   }
 
   /**
+   * Unset multiple environment variables.
+   *
+   * @param array $names
+   *   An array of environment variable names to unset.
+   */
+  public static function envUnsetMultiple(array $names): void {
+    foreach ($names as $name) {
+      static::envUnset($name);
+    }
+  }
+
+  /**
    * Unset an environment variable by prefix.
    *
    * @param string $prefix
