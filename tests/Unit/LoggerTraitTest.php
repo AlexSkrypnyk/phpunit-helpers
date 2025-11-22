@@ -751,11 +751,11 @@ class LoggerTraitTest extends UnitTestCase {
     $steps_property->setAccessible(TRUE);
 
     // Initially should be empty.
-    $this->assertEmpty($steps_property->getValue(NULL));
+    $this->assertEmpty($steps_property->getValue());
 
     // Add first step (name comes from method name, not parameter).
     static::logStepStart('First step message');
-    $steps = $steps_property->getValue(NULL);
+    $steps = $steps_property->getValue();
     $this->assertIsArray($steps);
     $this->assertCount(1, $steps);
     // @phpstan-ignore-next-line offsetAccess.nonOffsetAccessible
@@ -765,7 +765,7 @@ class LoggerTraitTest extends UnitTestCase {
 
     // Finish first step.
     static::logStepFinish('First step completed');
-    $steps = $steps_property->getValue(NULL);
+    $steps = $steps_property->getValue();
     $this->assertIsArray($steps);
     // @phpstan-ignore-next-line offsetAccess.nonOffsetAccessible
     $this->assertNotNull($steps[0]['end_time']);
@@ -774,7 +774,7 @@ class LoggerTraitTest extends UnitTestCase {
 
     // Add second step.
     static::logStepStart('Second step message');
-    $steps = $steps_property->getValue(NULL);
+    $steps = $steps_property->getValue();
     $this->assertIsArray($steps);
     $this->assertCount(2, $steps);
     // @phpstan-ignore-next-line offsetAccess.nonOffsetAccessible
@@ -1049,8 +1049,8 @@ class LoggerTraitTest extends UnitTestCase {
 
     // Test nested steps.
     static::logStepStart('Level 1');
-    $steps = $steps_property->getValue(NULL);
-    $stack = $stack_property->getValue(NULL);
+    $steps = $steps_property->getValue();
+    $stack = $stack_property->getValue();
 
     // @phpstan-ignore-next-line argument.type
     $this->assertCount(1, $steps);
@@ -1060,8 +1060,8 @@ class LoggerTraitTest extends UnitTestCase {
 
     // Start nested step.
     static::logStepStart('Level 2');
-    $steps = $steps_property->getValue(NULL);
-    $stack = $stack_property->getValue(NULL);
+    $steps = $steps_property->getValue();
+    $stack = $stack_property->getValue();
 
     // @phpstan-ignore-next-line argument.type
     $this->assertCount(2, $steps);
@@ -1071,8 +1071,8 @@ class LoggerTraitTest extends UnitTestCase {
 
     // Start deeply nested step.
     static::logStepStart('Level 3');
-    $steps = $steps_property->getValue(NULL);
-    $stack = $stack_property->getValue(NULL);
+    $steps = $steps_property->getValue();
+    $stack = $stack_property->getValue();
 
     // @phpstan-ignore-next-line argument.type
     $this->assertCount(3, $steps);
@@ -1082,17 +1082,17 @@ class LoggerTraitTest extends UnitTestCase {
 
     // Finish level 3.
     static::logStepFinish('Level 3 done');
-    $stack = $stack_property->getValue(NULL);
+    $stack = $stack_property->getValue();
     $this->assertEquals(['testHierarchicalStepTracking', 'testHierarchicalStepTracking'], $stack);
 
     // Finish level 2.
     static::logStepFinish('Level 2 done');
-    $stack = $stack_property->getValue(NULL);
+    $stack = $stack_property->getValue();
     $this->assertEquals(['testHierarchicalStepTracking'], $stack);
 
     // Finish level 1.
     static::logStepFinish('Level 1 done');
-    $stack = $stack_property->getValue(NULL);
+    $stack = $stack_property->getValue();
     $this->assertEmpty($stack);
   }
 
