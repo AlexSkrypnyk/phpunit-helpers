@@ -201,6 +201,9 @@ class MyEnvTest extends TestCase {
     // Unset an environment variable.
     self::envUnset('MY_VAR');
 
+    // Unset multiple environment variables.
+    self::envUnsetMultiple(['VAR1', 'VAR2']);
+
     // Unset all environment variables with a specific prefix.
     self::envUnsetPrefix('MY_');
 
