@@ -504,7 +504,7 @@ class LocationsTraitTest extends TestCase {
     }
   }
 
-  #[DataProvider('dataProviderBaselineDataset')]
+  #[DataProvider('dataProviderLocationsFixtureDirWithBaselineDataset')]
   public function testLocationsFixtureDirWithBaselineDataset(string $expected_suffix): void {
     /** @var non-empty-string $expected_suffix */
     $this->locationsInit($this->testCwd);
@@ -521,7 +521,7 @@ class LocationsTraitTest extends TestCase {
     $this->assertStringEndsWith($expected_suffix, $fixture_dir);
   }
 
-  public static function dataProviderBaselineDataset(): array {
+  public static function dataProviderLocationsFixtureDirWithBaselineDataset(): array {
     return [
       static::BASELINE_DATASET => [static::BASELINE_DIR],
       'custom-dataset' => ['custom_dataset'],

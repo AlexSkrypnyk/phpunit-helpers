@@ -112,13 +112,13 @@ class LoggerTraitFunctionalTest extends UnitTestCase {
     static::loggerSetVerbose(TRUE);
 
     // Create a temporary test file.
-    $tempFile = tempnam(sys_get_temp_dir(), 'logger_functional_test');
-    file_put_contents($tempFile, "Sample file content\nLine 2\nLine 3\n");
+    $temp_file = tempnam(sys_get_temp_dir(), 'logger_functional_test');
+    file_put_contents($temp_file, "Sample file content\nLine 2\nLine 3\n");
 
-    static::logFile($tempFile, 'Test configuration file');
+    static::logFile($temp_file, 'Test configuration file');
 
     // Clean up.
-    unlink($tempFile);
+    unlink($temp_file);
 
     $this->addToAssertionCount(1);
   }

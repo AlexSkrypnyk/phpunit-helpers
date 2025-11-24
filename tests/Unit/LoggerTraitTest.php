@@ -103,8 +103,8 @@ class LoggerTraitTest extends UnitTestCase {
     static::log('Silent message');
     static::logSection('Silent Section', 'Silent content');
 
-    $silentOutput = $this->getCapturedOutput();
-    $this->assertEmpty($silentOutput);
+    $silent_output = $this->getCapturedOutput();
+    $this->assertEmpty($silent_output);
   }
 
   /**
@@ -505,11 +505,11 @@ class LoggerTraitTest extends UnitTestCase {
     static::logNote('Silent note');
     static::logStepFinish('Silent step end');
 
-    $silentOutput = $this->getCapturedOutput();
-    if (!empty($silentOutput)) {
-      echo "DEBUG: Unexpected output: " . json_encode($silentOutput) . "\n";
+    $silent_output = $this->getCapturedOutput();
+    if (!empty($silent_output)) {
+      echo "DEBUG: Unexpected output: " . json_encode($silent_output) . "\n";
     }
-    $this->assertEmpty($silentOutput);
+    $this->assertEmpty($silent_output);
 
     // Reset buffer and steps tracking, then test with verbose enabled.
     $buffer = fopen('php://memory', 'r+');
@@ -532,13 +532,13 @@ class LoggerTraitTest extends UnitTestCase {
     static::logStepFinish('Verbose step end');
 
     // Verify verbose output contains expected content.
-    $verboseOutput = $this->getCapturedOutput();
-    $this->assertStringContainsString('STEP START | testStepMethodsRespectVerboseMode', $verboseOutput);
-    $this->assertStringContainsString('STEP DONE | testStepMethodsRespectVerboseMode | 0s', $verboseOutput);
-    $this->assertStringContainsString('Verbose step', $verboseOutput);
-    $this->assertStringContainsString('Verbose step end', $verboseOutput);
-    $this->assertStringContainsString('  --> Verbose substep', $verboseOutput);
-    $this->assertStringContainsString('    > Verbose note', $verboseOutput);
+    $verbose_output = $this->getCapturedOutput();
+    $this->assertStringContainsString('STEP START | testStepMethodsRespectVerboseMode', $verbose_output);
+    $this->assertStringContainsString('STEP DONE | testStepMethodsRespectVerboseMode | 0s', $verbose_output);
+    $this->assertStringContainsString('Verbose step', $verbose_output);
+    $this->assertStringContainsString('Verbose step end', $verbose_output);
+    $this->assertStringContainsString('  --> Verbose substep', $verbose_output);
+    $this->assertStringContainsString('    > Verbose note', $verbose_output);
   }
 
   /**
@@ -618,12 +618,25 @@ class LoggerTraitTest extends UnitTestCase {
   }
 
   /**
+   * Test formatElapsedTime method with various durations.
+   */
+  #[DataProvider('dataProviderFormatElapsedTime')]
+  public function testFormatElapsedTime(float $inputSeconds, string $expectedOutput): void {
+    $reflection_class = new \ReflectionClass(static::class);
+    $method = $reflection_class->getMethod('formatElapsedTime');
+    $method->setAccessible(TRUE);
+
+    $result = $method->invoke(NULL, $inputSeconds);
+    $this->assertEquals($expectedOutput, $result);
+  }
+
+  /**
    * Provides test data for formatElapsedTime method.
    *
    * @return array<string, array{float, string}>
    *   Test cases: [input_seconds, expected_output]
    */
-  public static function formatElapsedTimeProvider(): array {
+  public static function dataProviderFormatElapsedTime(): array {
     return [
       'short duration' => [5.3, '5s'],
       'thirty seconds' => [30.2, '30s'],
@@ -634,19 +647,6 @@ class LoggerTraitTest extends UnitTestCase {
       'longer duration' => [150.2, '2m 30s'],
       'complex duration' => [345.4, '5m 45s'],
     ];
-  }
-
-  /**
-   * Test formatElapsedTime method with various durations.
-   */
-  #[DataProvider('formatElapsedTimeProvider')]
-  public function testFormatElapsedTime(float $inputSeconds, string $expectedOutput): void {
-    $reflection_class = new \ReflectionClass(static::class);
-    $method = $reflection_class->getMethod('formatElapsedTime');
-    $method->setAccessible(TRUE);
-
-    $result = $method->invoke(NULL, $inputSeconds);
-    $this->assertEquals($expectedOutput, $result);
   }
 
   /**
@@ -788,19 +788,19 @@ class LoggerTraitTest extends UnitTestCase {
     static::loggerSetVerbose(TRUE);
 
     // Create a custom buffer.
-    $customBuffer = fopen('php://memory', 'r+');
-    if ($customBuffer === FALSE) {
+    $custom_buffer = fopen('php://memory', 'r+');
+    if ($custom_buffer === FALSE) {
       throw new \RuntimeException('Failed to create custom buffer');
     }
-    static::loggerSetOutputStream($customBuffer);
+    static::loggerSetOutputStream($custom_buffer);
 
     static::log('Custom stream test');
 
-    rewind($customBuffer);
-    $output = stream_get_contents($customBuffer);
+    rewind($custom_buffer);
+    $output = stream_get_contents($custom_buffer);
     $this->assertEquals("\nCustom stream test\n", $output);
 
-    fclose($customBuffer);
+    fclose($custom_buffer);
   }
 
   /**
@@ -895,30 +895,9 @@ class LoggerTraitTest extends UnitTestCase {
   }
 
   /**
-   * Provides test data for verbose mode testing.
-   *
-   * @return array<string, array{bool, string, callable}>
-   *   Test cases: [verbose_mode, test_description, test_method]
-   */
-  public static function verboseModeProvider(): array {
-    return [
-      'log verbose' => [TRUE, 'log method', fn($self) => $self::log('Test message')],
-      'log silent' => [FALSE, 'log method', fn($self) => $self::log('Test message')],
-      'logSubstep verbose' => [TRUE, 'logSubstep method', fn($self) => $self::logSubstep('Test substep')],
-      'logSubstep silent' => [FALSE, 'logSubstep method', fn($self) => $self::logSubstep('Test substep')],
-      'logNote verbose' => [TRUE, 'logNote method', fn($self) => $self::logNote('Test note')],
-      'logNote silent' => [FALSE, 'logNote method', fn($self) => $self::logNote('Test note')],
-      'logStepStart verbose' => [TRUE, 'logStepStart method', fn($self) => $self::logStepStart('Test step')],
-      'logStepStart silent' => [FALSE, 'logStepStart method', fn($self) => $self::logStepStart('Test step')],
-      'logStepFinish verbose' => [TRUE, 'logStepFinish method', fn($self) => $self::logStepFinish('Test step')],
-      'logStepFinish silent' => [FALSE, 'logStepFinish method', fn($self) => $self::logStepFinish('Test step')],
-    ];
-  }
-
-  /**
    * Test various logger methods in verbose and silent modes.
    */
-  #[DataProvider('verboseModeProvider')]
+  #[DataProvider('dataProviderLoggerMethodsVerboseMode')]
   public function testLoggerMethodsVerboseMode(bool $verboseMode, string $description, callable $testMethod): void {
     static::loggerSetVerbose($verboseMode);
 
@@ -935,17 +914,23 @@ class LoggerTraitTest extends UnitTestCase {
   }
 
   /**
-   * Provides test data for step method workflow testing.
+   * Provides test data for verbose mode testing.
    *
-   * @return array<string, array{string, string|null, array<string>}>
-   *   Test cases: [step_name, message, expected_output_contains]
+   * @return array<string, array{bool, string, callable}>
+   *   Test cases: [verbose_mode, test_description, test_method]
    */
-  public static function stepMethodProvider(): array {
+  public static function dataProviderLoggerMethodsVerboseMode(): array {
     return [
-      'basic step start' => ['testStep', 'Starting process', ['STEP START | testStepMethods', 'Starting process']],
-      'step finish with message' => ['testStep', 'Process completed', ['STEP DONE | testStepMethods', 'Process completed', '0s']],
-      'step start no message' => ['testStep', NULL, ['STEP START | testStepMethods']],
-      'step finish no message' => ['testStep', NULL, ['STEP DONE | testStepMethods', '0s']],
+      'log verbose' => [TRUE, 'log method', fn($self) => $self::log('Test message')],
+      'log silent' => [FALSE, 'log method', fn($self) => $self::log('Test message')],
+      'logSubstep verbose' => [TRUE, 'logSubstep method', fn($self) => $self::logSubstep('Test substep')],
+      'logSubstep silent' => [FALSE, 'logSubstep method', fn($self) => $self::logSubstep('Test substep')],
+      'logNote verbose' => [TRUE, 'logNote method', fn($self) => $self::logNote('Test note')],
+      'logNote silent' => [FALSE, 'logNote method', fn($self) => $self::logNote('Test note')],
+      'logStepStart verbose' => [TRUE, 'logStepStart method', fn($self) => $self::logStepStart('Test step')],
+      'logStepStart silent' => [FALSE, 'logStepStart method', fn($self) => $self::logStepStart('Test step')],
+      'logStepFinish verbose' => [TRUE, 'logStepFinish method', fn($self) => $self::logStepFinish('Test step')],
+      'logStepFinish silent' => [FALSE, 'logStepFinish method', fn($self) => $self::logStepFinish('Test step')],
     ];
   }
 
@@ -954,7 +939,7 @@ class LoggerTraitTest extends UnitTestCase {
    *
    * @param array<string> $expectedOutput
    */
-  #[DataProvider('stepMethodProvider')]
+  #[DataProvider('dataProviderStepMethods')]
   public function testStepMethods(string $stepName, ?string $message, array $expectedOutput): void {
     static::loggerSetVerbose(TRUE);
 
@@ -970,23 +955,23 @@ class LoggerTraitTest extends UnitTestCase {
 
     $output = $this->getCapturedOutput();
 
-    foreach ($expectedOutput as $expectedString) {
-      $this->assertStringContainsString($expectedString, $output, sprintf("Expected to find '%s' in output", $expectedString));
+    foreach ($expectedOutput as $expected_string) {
+      $this->assertStringContainsString($expected_string, $output, sprintf("Expected to find '%s' in output", $expected_string));
     }
   }
 
   /**
-   * Provides test data for section formatting.
+   * Provides test data for step method workflow testing.
    *
-   * @return array<string, array{string, string|null, bool, int, array<string>}>
-   *   Test cases: [title, message, doubleBorder, minWidth, expectedStrings]
+   * @return array<string, array{string, string|null, array<string>}>
+   *   Test cases: [step_name, message, expected_output_contains]
    */
-  public static function sectionFormattingProvider(): array {
+  public static function dataProviderStepMethods(): array {
     return [
-      'basic title only' => ['BASIC TITLE', NULL, FALSE, 60, ['BASIC TITLE', '---']],
-      'title with message' => ['TITLE', 'Message content', FALSE, 60, ['TITLE', 'Message content', '---']],
-      'double border' => ['DOUBLE', 'Double message', TRUE, 60, ['DOUBLE', 'Double message', '===']],
-      'wide section' => ['WIDE', NULL, FALSE, 100, ['WIDE', '---']],
+      'basic step start' => ['testStep', 'Starting process', ['STEP START | testStepMethods', 'Starting process']],
+      'step finish with message' => ['testStep', 'Process completed', ['STEP DONE | testStepMethods', 'Process completed', '0s']],
+      'step start no message' => ['testStep', NULL, ['STEP START | testStepMethods']],
+      'step finish no message' => ['testStep', NULL, ['STEP DONE | testStepMethods', '0s']],
     ];
   }
 
@@ -995,7 +980,7 @@ class LoggerTraitTest extends UnitTestCase {
    *
    * @param array<string> $expectedStrings
    */
-  #[DataProvider('sectionFormattingProvider')]
+  #[DataProvider('dataProviderSectionFormatting')]
   public function testSectionFormatting(string $title, ?string $message, bool $doubleBorder, int $minWidth, array $expectedStrings): void {
     static::loggerSetVerbose(TRUE);
 
@@ -1010,9 +995,24 @@ class LoggerTraitTest extends UnitTestCase {
     static::logSection($title, $message, $doubleBorder, $minWidth);
 
     $output = $this->getCapturedOutput();
-    foreach ($expectedStrings as $expectedString) {
-      $this->assertStringContainsString($expectedString, $output, 'Failed for title: ' . $title);
+    foreach ($expectedStrings as $expected_string) {
+      $this->assertStringContainsString($expected_string, $output, 'Failed for title: ' . $title);
     }
+  }
+
+  /**
+   * Provides test data for section formatting.
+   *
+   * @return array<string, array{string, string|null, bool, int, array<string>}>
+   *   Test cases: [title, message, doubleBorder, minWidth, expectedStrings]
+   */
+  public static function dataProviderSectionFormatting(): array {
+    return [
+      'basic title only' => ['BASIC TITLE', NULL, FALSE, 60, ['BASIC TITLE', '---']],
+      'title with message' => ['TITLE', 'Message content', FALSE, 60, ['TITLE', 'Message content', '---']],
+      'double border' => ['DOUBLE', 'Double message', TRUE, 60, ['DOUBLE', 'Double message', '===']],
+      'wide section' => ['WIDE', NULL, FALSE, 100, ['WIDE', '---']],
+    ];
   }
 
   /**
