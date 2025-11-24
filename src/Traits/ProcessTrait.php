@@ -176,8 +176,8 @@ trait ProcessTrait {
       $this->process->run($this->processStreamOutput ? $this->processStreamingOutputCallback() : NULL);
     }
     // @codeCoverageIgnoreStart
-    catch (ProcessTimedOutException $processTimedOutException) {
-      print 'PROCESS TIMED OUT: ' . PHP_EOL . $processTimedOutException->getMessage() . PHP_EOL;
+    catch (ProcessTimedOutException $process_timed_out_exception) {
+      print 'PROCESS TIMED OUT: ' . PHP_EOL . $process_timed_out_exception->getMessage() . PHP_EOL;
     }
     catch (\Exception $exception) {
       print 'PROCESS ERROR: ' . PHP_EOL . $exception->getMessage() . PHP_EOL;
