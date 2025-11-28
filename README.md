@@ -168,6 +168,13 @@ class MyApplicationTest extends TestCase {
     $this->assertApplicationOutputContainsOrNot(['* Expected', '! Unexpected']);
     $this->assertApplicationErrorOutputContainsOrNot(['* Expected error', '! Unexpected error']);
 
+    // Assert that combined output (standard + error) contains or does not contain string(s)
+    // Use '---' prefix for strings that should NOT be present
+    $this->assertApplicationAnyOutputContainsOrNot([
+      'Expected in either output',
+      '---Should not be in any output',
+    ]);
+
     // Get debug info about the application (output, error output)
     echo $this->applicationInfo();
   }

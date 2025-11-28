@@ -6,6 +6,7 @@ namespace AlexSkrypnyk\PhpunitHelpers\Tests\Unit;
 
 use Symfony\Component\Console\Exception\LogicException;
 use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\Application\Command\ErrorOutputCommand;
+use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\Application\Command\ExceptionOutputCommand;
 use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\Application\Command\GreetingCommand;
 use AlexSkrypnyk\PhpunitHelpers\Traits\ApplicationTrait;
 use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
@@ -566,6 +567,72 @@ class ApplicationTraitTest extends UnitTestCase {
     $this->expectExceptionMessage('Application is not initialized');
 
     $this->assertApplicationErrorOutputContainsOrNot('test');
+  }
+
+  public function testAssertApplicationAnyOutputContainsOrNotWhenNull(): void {
+    $this->applicationTester = NULL;
+
+    $this->expectException(ExpectationFailedException::class);
+    $this->expectExceptionMessage('Application is not initialized');
+
+    $this->assertApplicationAnyOutputContainsOrNot('test');
+  }
+
+  public function testApplicationAnyOutputErrorCommandAssertions(): void {
+    // Use the dedicated command that generates error output
+    $this->applicationInitFromCommand(ErrorOutputCommand::class);
+    $output = $this->applicationRun([]);
+
+    $this->assertApplicationSuccessful();
+
+    // Assert that returned output contain expected strings.
+    $this->assertStringContainsString('Output message', $output);
+    $this->assertStringContainsString('Test Error', $output);
+
+    // Assert that individual output assertions work as expected.
+    $this->assertApplicationOutputContains('Output message');
+    $this->assertApplicationOutputNotContains('Test Error');
+
+    // Assert that individual error output assertions work as expected.
+    $this->assertApplicationErrorOutputNotContains('Output message');
+    $this->assertApplicationErrorOutputContains('Test Error');
+
+    // Test that both standard and error output are checked together
+    $this->assertApplicationAnyOutputContainsOrNot([
+      'Test Error',
+      'Output message',
+      '---Nonexistent String',
+    ]);
+  }
+
+  public function testApplicationAnyOutputExceptionCommandAssertions(): void {
+    // Use the dedicated command that generates error output
+    $this->applicationInitFromCommand(ExceptionOutputCommand::class);
+    $output = $this->applicationRun([], [], TRUE);
+
+    $this->assertApplicationFailed();
+
+    // Assert that returned output contain expected strings.
+    $this->assertStringContainsString('Standard output before exception', $output);
+    $this->assertStringContainsString('Error output before exception', $output);
+    $this->assertStringContainsString('Test exception message', $output);
+
+    // Assert that individual output assertions work as expected.
+    $this->assertApplicationOutputContains('Standard output before exception');
+    $this->assertApplicationOutputNotContains('Error output before exception');
+    $this->assertApplicationOutputNotContains('Test exception message');
+
+    // Assert that individual error output assertions work as expected.
+    $this->assertApplicationErrorOutputNotContains('Standard output before exception');
+    $this->assertApplicationErrorOutputContains('Error output before exception');
+    $this->assertApplicationErrorOutputContains('Test exception message');
+
+    // Assert using the combined output assertion method.
+    $this->assertApplicationAnyOutputContainsOrNot([
+      'Standard output before exception',
+      'Error output before exception',
+      'Test exception message',
+    ]);
   }
 
 }

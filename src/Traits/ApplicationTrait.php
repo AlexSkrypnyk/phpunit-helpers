@@ -103,7 +103,7 @@ trait ApplicationTrait {
     }
 
     $this->application->setAutoExit(FALSE);
-    $this->application->setCatchExceptions(FALSE);
+    $this->application->setCatchExceptions(TRUE);
 
     // Change the working directory if specified.
     if ($this->applicationCwd !== NULL) {
@@ -134,7 +134,7 @@ trait ApplicationTrait {
    * @return \Symfony\Component\Console\Tester\ApplicationTester
    *   The initialized application tester.
    */
-  public function applicationInitFromCommand(string|object $object_or_class, bool $is_single_command = TRUE): ApplicationTester {
+  public function applicationInitFromCommand(string | object $object_or_class, bool $is_single_command = TRUE): ApplicationTester {
     $this->application = new Application();
 
     $instance = is_object($object_or_class) ? $object_or_class : new $object_or_class();
@@ -153,7 +153,7 @@ trait ApplicationTrait {
     $this->application->setDefaultCommand($name, $is_single_command);
 
     $this->application->setAutoExit(FALSE);
-    $this->application->setCatchExceptions(FALSE);
+    $this->application->setCatchExceptions(TRUE);
 
     // Change the working directory if specified.
     if ($this->applicationCwd !== NULL) {
@@ -204,25 +204,36 @@ trait ApplicationTrait {
         // @codeCoverageIgnoreEnd
       }
 
+      // Expected to succeed, but failed.
       if ($this->applicationTester->getStatusCode() !== 0) {
         throw new \Exception(sprintf("Application exited with non-zero code.\nThe output was:\n%s\nThe error output was:\n%s", $this->applicationTester->getDisplay(), $this->applicationTester->getErrorOutput()));
       }
 
+      // Expected to fail, but succeeded (was called with expect_fail = TRUE).
       if ($expect_fail) {
         throw new AssertionFailedError(sprintf("Application exited successfully but should not.\nThe output was:\n%s\nThe error output was:\n%s", $this->applicationTester->getDisplay(), $this->applicationTester->getErrorOutput()));
       }
     }
     catch (\RuntimeException $exception) {
+      // Expected to succeed, but failed.
       if (!$expect_fail) {
         throw new AssertionFailedError('Application exited with an error:' . PHP_EOL . $exception->getMessage());
       }
+      // Expected to fail, so capture the output.
       $output = $exception->getMessage();
     }
     catch (\Exception $exception) {
+      // Caught exception, check if we expected failure.
       if (!$expect_fail) {
+        // Expecting success (was called with expect_fail = FALSE).
         throw new AssertionFailedError('Application exited with an error:' . PHP_EOL . $exception->getMessage());
       }
+      // Expected to fail, so capture the output.
+      $output = $exception->getMessage();
     }
+
+    // Append error output. Internally, error output is captured separately.
+    $output .= $this->applicationTester->getErrorOutput();
 
     return $output;
   }
@@ -269,7 +280,7 @@ trait ApplicationTrait {
    * @param ?string $message
    *   Optional failure message.
    */
-  public function assertApplicationOutputContains(array|string $expected, ?string $message = NULL): void {
+  public function assertApplicationOutputContains(array | string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
     $output = $this->applicationTester->getDisplay();
 
@@ -296,7 +307,7 @@ trait ApplicationTrait {
    * @param ?string $message
    *   Optional failure message.
    */
-  public function assertApplicationOutputNotContains(array|string $expected, ?string $message = NULL): void {
+  public function assertApplicationOutputNotContains(array | string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
     $output = $this->applicationTester->getDisplay();
 
@@ -323,7 +334,7 @@ trait ApplicationTrait {
    * @param ?string $message
    *   Optional failure message.
    */
-  public function assertApplicationErrorOutputContains(array|string $expected, ?string $message = NULL): void {
+  public function assertApplicationErrorOutputContains(array | string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
     $output = $this->applicationTester->getErrorOutput();
 
@@ -350,7 +361,7 @@ trait ApplicationTrait {
    * @param ?string $message
    *   Optional failure message.
    */
-  public function assertApplicationErrorOutputNotContains(array|string $expected, ?string $message = NULL): void {
+  public function assertApplicationErrorOutputNotContains(array | string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
     $output = $this->applicationTester->getErrorOutput();
 
@@ -380,7 +391,7 @@ trait ApplicationTrait {
    * @param ?string $message
    *   Optional failure message.
    */
-  public function assertApplicationOutputContainsOrNot(string|array $expected, ?string $message = NULL): void {
+  public function assertApplicationOutputContainsOrNot(string | array $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
     $output = $this->applicationTester->getDisplay();
 
@@ -422,7 +433,7 @@ trait ApplicationTrait {
    * @param ?string $message
    *   Optional failure message.
    */
-  public function assertApplicationErrorOutputContainsOrNot(string|array $expected, ?string $message = NULL): void {
+  public function assertApplicationErrorOutputContainsOrNot(string | array $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
     $output = $this->applicationTester->getErrorOutput();
 
@@ -443,6 +454,47 @@ trait ApplicationTrait {
       else {
         $this->assertStringContainsString($value, $output, $message ?: sprintf(
           "Application error output does not contain '%s'.%sOutput:%s%s",
+          $value,
+          PHP_EOL,
+          PHP_EOL,
+          $output
+        ));
+      }
+    }
+  }
+
+  /**
+   * Asserts combined output contains or does not contain strings.
+   *
+   * For strings that should NOT be in the output, prefix them with '---'.
+   *
+   * @param string|array $expected
+   *   String or array of strings to check in both standard and error output.
+   *   Prefix with '---' for strings that should not be present.
+   * @param ?string $message
+   *   Optional failure message.
+   */
+  public function assertApplicationAnyOutputContainsOrNot(string | array $expected, ?string $message = NULL): void {
+    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
+    $output = $this->applicationTester->getDisplay() . $this->applicationTester->getErrorOutput();
+
+    $expected = is_array($expected) ? $expected : [$expected];
+
+    foreach ($expected as $value) {
+      if (str_starts_with($value, '---')) {
+        $value = substr($value, 4);
+
+        $this->assertStringNotContainsString($value, $output, $message ?: sprintf(
+          "Application output (standard + error) contains '%s' but should not.%sOutput:%s%s",
+          $value,
+          PHP_EOL,
+          PHP_EOL,
+          $output
+        ));
+      }
+      else {
+        $this->assertStringContainsString($value, $output, $message ?: sprintf(
+          "Application output (standard + error) does not contain '%s'.%sOutput:%s%s",
           $value,
           PHP_EOL,
           PHP_EOL,
