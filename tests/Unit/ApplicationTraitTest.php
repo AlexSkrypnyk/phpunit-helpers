@@ -454,9 +454,9 @@ class ApplicationTraitTest extends UnitTestCase {
     $this->assertApplicationOutputNotContains(['Nonexistent1', 'Nonexistent2']);
 
     $this->assertApplicationOutputContainsOrNot([
-      'Hello',
-      'Test',
-      '---Nonexistent String',
+      '* Hello',
+      '* Test',
+      '! Nonexistent String',
     ]);
   }
 
@@ -472,9 +472,9 @@ class ApplicationTraitTest extends UnitTestCase {
     $this->assertApplicationErrorOutputNotContains(['NoError1', 'NoError2']);
 
     $this->assertApplicationErrorOutputContainsOrNot([
-      'Test',
-      'Error',
-      '---Nonexistent Error',
+      '* Test',
+      '* Error',
+      '! Nonexistent Error',
     ]);
   }
 
@@ -599,9 +599,9 @@ class ApplicationTraitTest extends UnitTestCase {
 
     // Test that both standard and error output are checked together
     $this->assertApplicationAnyOutputContainsOrNot([
-      'Test Error',
-      'Output message',
-      '---Nonexistent String',
+      '* Test Error',
+      '* Output message',
+      '! Nonexistent String',
     ]);
   }
 
@@ -632,6 +632,168 @@ class ApplicationTraitTest extends UnitTestCase {
       'Standard output before exception',
       'Error output before exception',
       'Test exception message',
+    ]);
+  }
+
+  public function testApplicationOutputContainsOrNotShortcutMode(): void {
+    $this->applicationInitFromCommand(GreetingCommand::class);
+    $this->applicationRun(['name' => 'Test']);
+
+    $this->assertApplicationSuccessful();
+
+    // Test shortcut mode - no prefixes, all should be present as substrings
+    $this->assertApplicationAnyOutputContainsOrNot([
+      'Hello',
+      'Test',
+    ]);
+  }
+
+  public function testApplicationOutputContainsOrNotExactMatch(): void {
+    $this->applicationInitFromCommand(GreetingCommand::class);
+    $this->applicationRun(['name' => 'World']);
+
+    $this->assertApplicationSuccessful();
+
+    // Test exact match present (trailing whitespace is trimmed)
+    $this->assertApplicationOutputContainsOrNot([
+      '+ Hello, World!',
+    ]);
+
+    // Test exact match absent
+    $this->assertApplicationOutputContainsOrNot([
+      '- Not exact match',
+    ]);
+  }
+
+  public function testApplicationOutputContainsOrNotInconsistentPrefixUsage(): void {
+    $this->applicationInitFromCommand(GreetingCommand::class);
+    $this->applicationRun(['name' => 'Test']);
+
+    $this->expectException(\RuntimeException::class);
+    $this->expectExceptionMessage('All strings must have valid prefixes in mixed mode');
+
+    // This should fail - mixed usage (some with prefix, some without)
+    $this->assertApplicationOutputContainsOrNot([
+      '* Hello',
+      'Missing prefix',
+    ]);
+  }
+
+  public function testApplicationErrorOutputContainsOrNotInconsistentPrefixUsage(): void {
+    $this->applicationInitFromCommand(ErrorOutputCommand::class);
+    $this->applicationRun([]);
+
+    $this->expectException(\RuntimeException::class);
+    $this->expectExceptionMessage('All strings must have valid prefixes in mixed mode');
+
+    // This should fail - mixed usage (some with prefix, some without)
+    $this->assertApplicationErrorOutputContainsOrNot([
+      '* Test Error',
+      'Missing prefix',
+    ]);
+  }
+
+  public function testApplicationAnyOutputContainsOrNotShortcutMode(): void {
+    $this->applicationInitFromCommand(ErrorOutputCommand::class);
+    $this->applicationRun([]);
+
+    $this->assertApplicationSuccessful();
+
+    // Test shortcut mode - no prefixes, all should be present as substrings
+    $this->assertApplicationAnyOutputContainsOrNot([
+      'Test Error',
+      'Output message',
+    ]);
+  }
+
+  public function testApplicationAnyOutputContainsOrNotInconsistentPrefixUsage(): void {
+    $this->applicationInitFromCommand(ErrorOutputCommand::class);
+    $this->applicationRun([]);
+
+    $this->expectException(\RuntimeException::class);
+    $this->expectExceptionMessage('All strings must have valid prefixes in mixed mode');
+
+    // This should fail - mixed usage (some with prefix, some without)
+    $this->assertApplicationAnyOutputContainsOrNot([
+      '* Test Error',
+      'Missing prefix',
+    ]);
+  }
+
+  public function testApplicationOutputTrimsTrailingWhitespace(): void {
+    $this->applicationInitFromCommand(GreetingCommand::class);
+    $this->applicationRun(['name' => 'World']);
+
+    $this->assertApplicationSuccessful();
+
+    // Exact match works without needing to add \n
+    $this->assertApplicationOutputContainsOrNot([
+      '+ Hello, World!',
+    ]);
+
+    // Should not match if there's content after the newline
+    $this->assertApplicationOutputContainsOrNot([
+      '- Hello, World!\nExtra',
+    ]);
+  }
+
+  public function testApplicationErrorOutputTrimsTrailingWhitespace(): void {
+    $this->applicationInitFromCommand(ErrorOutputCommand::class);
+    $this->applicationRun([]);
+
+    $this->assertApplicationSuccessful();
+
+    // Exact match works without needing to add \n
+    $this->assertApplicationErrorOutputContainsOrNot([
+      '+ Test Error',
+    ]);
+  }
+
+  public function testApplicationAnyOutputTrimsTrailingWhitespace(): void {
+    $this->applicationInitFromCommand(ErrorOutputCommand::class);
+    $this->applicationRun([]);
+
+    $this->assertApplicationSuccessful();
+
+    // Combined output is trimmed
+    $this->assertApplicationAnyOutputContainsOrNot([
+      '+ Output message' . "\n" . 'Test Error',
+    ]);
+  }
+
+  public function testApplicationOutputExactMatchWithMultipleLines(): void {
+    // Create a command that outputs multiple lines
+    $command = new class() extends Command {
+
+      protected function configure(): void {
+        $this->setName('test:multiline');
+      }
+
+      protected function execute(
+        InputInterface $input,
+        OutputInterface $output,
+      ): int {
+        $output->writeln('Line 1');
+        $output->writeln('Line 2');
+        $output->writeln('Line 3');
+        return Command::SUCCESS;
+      }
+
+    };
+
+    $this->applicationInitFromCommand($command);
+    $this->applicationRun([]);
+
+    $this->assertApplicationSuccessful();
+
+    // Exact match with multi-line output (no need for trailing \n)
+    $this->assertApplicationOutputContainsOrNot([
+      '+ Line 1' . "\n" . 'Line 2' . "\n" . 'Line 3',
+    ]);
+
+    // Partial match still works
+    $this->assertApplicationOutputContainsOrNot([
+      '* Line 2',
     ]);
   }
 

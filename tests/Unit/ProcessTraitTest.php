@@ -281,6 +281,75 @@ class ProcessTraitTest extends UnitTestCase {
     ]);
   }
 
+  public function testProcessOutputExactMatch(): void {
+    $this->processRun('echo', ['Hello World']);
+
+    $this->assertProcessSuccessful();
+
+    // Test exact match present
+    $this->assertProcessOutputContainsOrNot([
+      '+ Hello World',
+    ]);
+
+    // Test exact match absent
+    $this->assertProcessOutputContainsOrNot([
+      '- Not exact match',
+    ]);
+  }
+
+  public function testProcessErrorOutputExactMatch(): void {
+    $this->processRun('sh', ['-c', 'echo "Error Message" 1>&2']);
+
+    $this->assertProcessSuccessful();
+
+    // Test exact match present for error output
+    $this->assertProcessErrorOutputContainsOrNot([
+      '+ Error Message',
+    ]);
+
+    // Test exact match absent
+    $this->assertProcessErrorOutputContainsOrNot([
+      '- Not this error',
+    ]);
+  }
+
+  public function testProcessAnyOutputExactMatch(): void {
+    $this->processRun('sh', ['-c', 'echo "Standard"; echo "Error" 1>&2']);
+
+    $this->assertProcessSuccessful();
+
+    // Test exact match present for combined output
+    $this->assertProcessAnyOutputContainsOrNot([
+      '+ Standard' . "\n" . 'Error',
+    ]);
+
+    // Test exact match absent
+    $this->assertProcessAnyOutputContainsOrNot([
+      '- Not the output',
+    ]);
+  }
+
+  public function testProcessOutputExactMatchMultiline(): void {
+    $this->processRun('sh', ['-c', 'echo "Line 1"; echo "Line 2"; echo "Line 3"']);
+
+    $this->assertProcessSuccessful();
+
+    // Test exact match with multi-line output
+    $this->assertProcessOutputContainsOrNot([
+      '+ Line 1' . "\n" . 'Line 2' . "\n" . 'Line 3',
+    ]);
+
+    // Test substring match for individual line
+    $this->assertProcessOutputContainsOrNot([
+      '* Line 2',
+    ]);
+
+    // Exact match should fail for single line when output has multiple
+    $this->assertProcessOutputContainsOrNot([
+      '- Line 1',
+    ]);
+  }
+
   public function testProcessFailed(): void {
     $command = 'nonexistent-command';
 
