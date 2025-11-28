@@ -553,6 +553,8 @@ trait ProcessTrait {
     $this->assertNotNull($this->process, 'Process is not initialized');
 
     $output = $this->process->getOutput();
+    // Trim trailing whitespace for more intuitive exact matching.
+    $output = rtrim($output);
 
     $this->assertStringContainsOrNot(
       $output,
@@ -594,6 +596,8 @@ trait ProcessTrait {
     $this->assertNotNull($this->process, 'Process is not initialized');
 
     $output = $this->process->getErrorOutput();
+    // Trim trailing whitespace for more intuitive exact matching.
+    $output = rtrim($output);
 
     $this->assertStringContainsOrNot(
       $output,
@@ -699,6 +703,8 @@ trait ProcessTrait {
 
     $output = $this->process->getOutput();
     $output .= $this->process->getErrorOutput();
+    // Trim trailing whitespace for more intuitive exact matching.
+    $output = rtrim($output);
 
     $this->assertStringContainsOrNot(
       $output,

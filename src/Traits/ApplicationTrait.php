@@ -20,6 +20,7 @@ use Symfony\Component\Console\Tester\ApplicationTester;
 trait ApplicationTrait {
 
   use ReflectionTrait;
+  use StringTrait;
 
   /**
    * Application instance.
@@ -381,127 +382,134 @@ trait ApplicationTrait {
   }
 
   /**
-   * Asserts application output contains or does not contain specified strings.
+   * Asserts application output contains or does not contain strings.
    *
-   * For strings that should NOT be in the output, prefix them with '---'.
+   * Supports four single-character prefixes for precise matching control:
+   * - '+' = exact match present (string equals entire output)
+   * - '*' = substring present (string found within output)
+   * - '-' = exact match absent (string does not equal entire output)
+   * - '!' = substring absent (string not found within output)
+   *
+   * Supports two modes:
+   * - Shortcut mode: No prefixes, all strings treated as substring present
+   * - Mixed mode: If any string has a prefix, ALL strings must have prefixes
    *
    * @param string|array $expected
    *   String or array of strings to check in the application output.
-   *   Prefix with '---' for strings that should not be present.
+   *   Use '+ ' prefix for exact match present,
+   *   '* ' prefix for substring present,
+   *   '- ' prefix for exact match absent,
+   *   '! ' prefix for substring absent.
+   *   If any string has a prefix, ALL strings must have prefixes.
    * @param ?string $message
    *   Optional failure message.
+   *
+   * @throws \RuntimeException
+   *   When prefix usage is inconsistent (some have prefixes, others don't).
    */
-  public function assertApplicationOutputContainsOrNot(string | array $expected, ?string $message = NULL): void {
+  public function assertApplicationOutputContainsOrNot(string|array $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
+
     $output = $this->applicationTester->getDisplay();
+    // Trim trailing whitespace for more intuitive exact matching.
+    $output = rtrim($output);
 
-    $expected = is_array($expected) ? $expected : [$expected];
-
-    foreach ($expected as $value) {
-      if (str_starts_with($value, '---')) {
-        $value = substr($value, 4);
-
-        $this->assertStringNotContainsString($value, $output, $message ?: sprintf(
-          "Application output contains '%s' but should not.%sOutput:%s%s",
-          $value,
-          PHP_EOL,
-          PHP_EOL,
-          $output
-        ));
-      }
-      else {
-        $this->assertStringContainsString($value, $output, $message ?: sprintf(
-          "Application output does not contain '%s'.%sOutput:%s%s",
-          $value,
-          PHP_EOL,
-          PHP_EOL,
-          $output
-        ));
-      }
-    }
+    $this->assertStringContainsOrNot(
+      $output,
+      $expected,
+      $message ?: "Application output exact match failed for '%s'",
+      $message ?: "Application output does not contain '%s'",
+      $message ?: "Application output should not exactly match '%s'",
+      $message ?: "Application output contains '%s' but should not"
+    );
   }
 
   /**
    * Asserts application error output contains or does not contain strings.
    *
-   * For strings that should NOT be in the error output, prefix them
-   * with '---'.
+   * Supports four single-character prefixes for precise matching control:
+   * - '+' = exact match present (string equals entire error output)
+   * - '*' = substring present (string found within error output)
+   * - '-' = exact match absent (string does not equal entire error output)
+   * - '!' = substring absent (string not found within error output)
+   *
+   * Supports two modes:
+   * - Shortcut mode: No prefixes, all strings treated as substring present
+   * - Mixed mode: If any string has a prefix, ALL strings must have prefixes
    *
    * @param string|array $expected
    *   String or array of strings to check in the application error output.
-   *   Prefix with '---' for strings that should not be present.
+   *   Use '+ ' prefix for exact match present,
+   *   '* ' prefix for substring present,
+   *   '- ' prefix for exact match absent,
+   *   '! ' prefix for substring absent.
+   *   If any string has a prefix, ALL strings must have prefixes.
    * @param ?string $message
    *   Optional failure message.
+   *
+   * @throws \RuntimeException
+   *   When prefix usage is inconsistent (some have prefixes, others don't).
    */
-  public function assertApplicationErrorOutputContainsOrNot(string | array $expected, ?string $message = NULL): void {
+  public function assertApplicationErrorOutputContainsOrNot(string|array $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
+
     $output = $this->applicationTester->getErrorOutput();
+    // Trim trailing whitespace for more intuitive exact matching.
+    $output = rtrim($output);
 
-    $expected = is_array($expected) ? $expected : [$expected];
-
-    foreach ($expected as $value) {
-      if (str_starts_with($value, '---')) {
-        $value = substr($value, 4);
-
-        $this->assertStringNotContainsString($value, $output, $message ?: sprintf(
-          "Application error output contains '%s' but should not.%sOutput:%s%s",
-          $value,
-          PHP_EOL,
-          PHP_EOL,
-          $output
-        ));
-      }
-      else {
-        $this->assertStringContainsString($value, $output, $message ?: sprintf(
-          "Application error output does not contain '%s'.%sOutput:%s%s",
-          $value,
-          PHP_EOL,
-          PHP_EOL,
-          $output
-        ));
-      }
-    }
+    $this->assertStringContainsOrNot(
+      $output,
+      $expected,
+      $message ?: "Application error output exact match failed for '%s'",
+      $message ?: "Application error output does not contain '%s'",
+      $message ?: "Application error output should not exactly match '%s'",
+      $message ?: "Application error output contains '%s' but should not"
+    );
   }
 
   /**
    * Asserts combined output contains or does not contain strings.
    *
-   * For strings that should NOT be in the output, prefix them with '---'.
+   * Checks both standard output and error output combined into a single string.
+   * Supports four single-character prefixes for precise matching control:
+   * - '+' = exact match present (string equals entire combined output)
+   * - '*' = substring present (string found within combined output)
+   * - '-' = exact match absent (string does not equal entire combined output)
+   * - '!' = substring absent (string not found within combined output)
+   *
+   * Supports two modes:
+   * - Shortcut mode: No prefixes, all strings treated as substring present
+   * - Mixed mode: If any string has a prefix, ALL strings must have prefixes
    *
    * @param string|array $expected
-   *   String or array of strings to check in both standard and error output.
-   *   Prefix with '---' for strings that should not be present.
+   *   String or array of strings to check in combined process output.
+   *   Use '+ ' prefix for exact match present,
+   *   '* ' prefix for substring present,
+   *   '- ' prefix for exact match absent,
+   *   '! ' prefix for substring absent.
+   *   If any string has a prefix, ALL strings must have prefixes.
    * @param ?string $message
    *   Optional failure message.
+   *
+   * @throws \RuntimeException
+   *   When prefix usage is inconsistent (some have prefixes, others don't).
    */
-  public function assertApplicationAnyOutputContainsOrNot(string | array $expected, ?string $message = NULL): void {
+  public function assertApplicationAnyOutputContainsOrNot(string|array $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
-    $output = $this->applicationTester->getDisplay() . $this->applicationTester->getErrorOutput();
 
-    $expected = is_array($expected) ? $expected : [$expected];
+    $output = $this->applicationTester->getDisplay();
+    $output .= $this->applicationTester->getErrorOutput();
+    // Trim trailing whitespace for more intuitive exact matching.
+    $output = rtrim($output);
 
-    foreach ($expected as $value) {
-      if (str_starts_with($value, '---')) {
-        $value = substr($value, 4);
-
-        $this->assertStringNotContainsString($value, $output, $message ?: sprintf(
-          "Application output (standard + error) contains '%s' but should not.%sOutput:%s%s",
-          $value,
-          PHP_EOL,
-          PHP_EOL,
-          $output
-        ));
-      }
-      else {
-        $this->assertStringContainsString($value, $output, $message ?: sprintf(
-          "Application output (standard + error) does not contain '%s'.%sOutput:%s%s",
-          $value,
-          PHP_EOL,
-          PHP_EOL,
-          $output
-        ));
-      }
-    }
+    $this->assertStringContainsOrNot(
+      $output,
+      $expected,
+      $message ?: "Application output exact match failed for '%s'",
+      $message ?: "Application output does not contain '%s'",
+      $message ?: "Application output should not exactly match '%s'",
+      $message ?: "Application output contains '%s' but should not"
+    );
   }
 
   /**
