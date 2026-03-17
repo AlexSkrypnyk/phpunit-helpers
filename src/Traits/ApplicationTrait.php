@@ -218,7 +218,7 @@ trait ApplicationTrait {
     catch (\RuntimeException $exception) {
       // Expected to succeed, but failed.
       if (!$expect_fail) {
-        throw new AssertionFailedError('Application exited with an error:' . PHP_EOL . $exception->getMessage());
+        throw new AssertionFailedError('Application exited with an error:' . PHP_EOL . $exception->getMessage(), $exception->getCode(), $exception);
       }
       // Expected to fail, so capture the output.
       $output = $exception->getMessage();
@@ -227,7 +227,7 @@ trait ApplicationTrait {
       // Caught exception, check if we expected failure.
       if (!$expect_fail) {
         // Expecting success (was called with expect_fail = FALSE).
-        throw new AssertionFailedError('Application exited with an error:' . PHP_EOL . $exception->getMessage());
+        throw new AssertionFailedError('Application exited with an error:' . PHP_EOL . $exception->getMessage(), $exception->getCode(), $exception);
       }
       // Expected to fail, so capture the output.
       $output = $exception->getMessage();
