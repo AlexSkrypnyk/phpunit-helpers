@@ -26,7 +26,7 @@
     "require-dev": {
         "dealerdirect/phpcodesniffer-composer-installer": "^1",
         "drevops/phpcs-standard": "^0.6",
-        "drupal/coder": "^8.3",
+        "drupal/coder": "^9.0",
         "ergebnis/composer-normalize": "^2.42",
         "laravel/serializable-closure": "^2.0",
         "phpstan/phpstan": "^2",
