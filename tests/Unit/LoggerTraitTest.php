@@ -222,7 +222,8 @@ class LoggerTraitTest extends UnitTestCase {
 
     try {
       static::logFile($temp_file);
-    } finally {
+    }
+    finally {
       // Restore permissions and clean up.
       chmod($temp_file, 0644);
       unlink($temp_file);
@@ -342,7 +343,8 @@ class LoggerTraitTest extends UnitTestCase {
 
       $output = $this->getCapturedOutput();
       $this->assertStringContainsString('PROCESS START | processTest', $output);
-    } finally {
+    }
+    finally {
       // Restore original prefix.
       static::$loggerStepMethodPrefix = $original_prefix;
     }
@@ -394,7 +396,8 @@ class LoggerTraitTest extends UnitTestCase {
       $output = $this->getCapturedOutput();
       $this->assertStringContainsString('PROCESS START | processFinishTest', $output);
       $this->assertStringContainsString('PROCESS DONE | processFinishTest | 0s', $output);
-    } finally {
+    }
+    finally {
       // Restore original prefix.
       static::$loggerStepMethodPrefix = $original_prefix;
     }
