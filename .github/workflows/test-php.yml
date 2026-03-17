@@ -103,7 +103,7 @@ jobs:
 
       - name: Upload coverage report as an artifact
         if: matrix.phpunit-versions == '12'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
         with:
           name: ${{github.job}}-code-coverage-report-php-${{ matrix.php-versions }}-phpunit-${{ matrix.phpunit-versions }}-deps-${{ matrix.dependency-preference }}
           path: .logs
