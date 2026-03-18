@@ -94,7 +94,7 @@ trait LocationsTrait {
    */
   public function locationsInit(?string $cwd = NULL, ?\Closure $after = NULL): void {
     static::$root = static::locationsRealpath($cwd ?? (string) getcwd());
-    static::$workspace = static::locationsMkdir(rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'workspace-' . microtime(TRUE));
+    static::$workspace = static::locationsMkdir(rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'workspace-' . microtime(TRUE) . '-' . getmypid());
     static::$repo = static::locationsMkdir(static::$workspace . DIRECTORY_SEPARATOR . 'repo');
     static::$sut = static::locationsMkdir(static::$workspace . DIRECTORY_SEPARATOR . 'sut');
     static::$tmp = static::locationsMkdir(static::$workspace . DIRECTORY_SEPARATOR . 'tmp');
