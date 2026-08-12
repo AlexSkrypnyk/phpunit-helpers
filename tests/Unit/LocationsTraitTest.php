@@ -126,7 +126,7 @@ class LocationsTraitTest extends TestCase {
       chdir($test_cwd_no_fixtures);
 
       $mock = $this->createPartialMock(static::class, ['locationsFixturesDir']);
-      $mock->expects($this->any())
+      $mock
         ->method('locationsFixturesDir')
         ->willReturn($mock_fixture_dir);
 
