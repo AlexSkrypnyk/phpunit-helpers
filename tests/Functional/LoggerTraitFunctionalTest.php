@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AlexSkrypnyk\PhpunitHelpers\Tests\Functional;
 
+use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
 use AlexSkrypnyk\PhpunitHelpers\Traits\LoggerTrait;
 use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversTrait;
@@ -45,6 +46,7 @@ class LoggerTraitFunctionalTest extends UnitTestCase {
    *
    * This test outputs to real STDERR to show what the logging looks like.
    */
+  #[DoesNotPerformAssertions]
   public function testFunctionalBasicLogging(): void {
     // Reset to default STDERR output.
     static::loggerSetOutputStream(NULL);
@@ -52,8 +54,6 @@ class LoggerTraitFunctionalTest extends UnitTestCase {
 
     static::log('This is a basic log message');
     static::logSection('TEST SECTION', 'This is a test section with content');
-
-    $this->addToAssertionCount(1);
   }
 
   /**
@@ -61,6 +61,7 @@ class LoggerTraitFunctionalTest extends UnitTestCase {
    *
    * This test shows a complete step workflow with timing.
    */
+  #[DoesNotPerformAssertions]
   public function testFunctionalStepWorkflow(): void {
     // Reset to default STDERR output.
     static::loggerSetOutputStream(NULL);
@@ -79,8 +80,6 @@ class LoggerTraitFunctionalTest extends UnitTestCase {
     static::logStepFinish('Output generated successfully');
 
     static::logStepSummary('WORKFLOW SUMMARY');
-
-    $this->addToAssertionCount(1);
   }
 
   /**
@@ -88,6 +87,7 @@ class LoggerTraitFunctionalTest extends UnitTestCase {
    *
    * This test shows different section formatting options.
    */
+  #[DoesNotPerformAssertions]
   public function testFunctionalSectionFormatting(): void {
     // Reset to default STDERR output.
     static::loggerSetOutputStream(NULL);
@@ -97,8 +97,6 @@ class LoggerTraitFunctionalTest extends UnitTestCase {
     static::logSection('DOUBLE BORDER SECTION', 'This section uses double border characters', TRUE);
     static::logSection('WIDE SECTION', 'This section has a wider minimum width', FALSE, 90);
     static::logSection('MULTI-LINE', "This section contains\nmultiple lines of content\nto demonstrate wrapping");
-
-    $this->addToAssertionCount(1);
   }
 
   /**
@@ -106,6 +104,7 @@ class LoggerTraitFunctionalTest extends UnitTestCase {
    *
    * This test shows file content logging.
    */
+  #[DoesNotPerformAssertions]
   public function testFunctionalFileLogging(): void {
     // Reset to default STDERR output.
     static::loggerSetOutputStream(NULL);
@@ -119,8 +118,6 @@ class LoggerTraitFunctionalTest extends UnitTestCase {
 
     // Clean up.
     unlink($temp_file);
-
-    $this->addToAssertionCount(1);
   }
 
   /**
@@ -128,6 +125,7 @@ class LoggerTraitFunctionalTest extends UnitTestCase {
    *
    * This test shows nested step workflows with hierarchy visualization.
    */
+  #[DoesNotPerformAssertions]
   public function testFunctionalHierarchicalSteps(): void {
     // Reset to default STDERR output.
     static::loggerSetOutputStream(NULL);
@@ -138,8 +136,6 @@ class LoggerTraitFunctionalTest extends UnitTestCase {
 
     // Show hierarchical summary with default indentation.
     static::logStepSummary('DEPLOYMENT SUMMARY');
-
-    $this->addToAssertionCount(1);
   }
 
   /**

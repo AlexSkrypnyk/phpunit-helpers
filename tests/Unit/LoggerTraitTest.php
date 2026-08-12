@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AlexSkrypnyk\PhpunitHelpers\Tests\Unit;
 
+use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
 use AlexSkrypnyk\PhpunitHelpers\Traits\LoggerTrait;
 use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversTrait;
@@ -187,6 +188,7 @@ class LoggerTraitTest extends UnitTestCase {
   /**
    * Test logFile method with existing file.
    */
+  #[DoesNotPerformAssertions]
   public function testLogFileWithExistingFile(): void {
     static::loggerSetVerbose(TRUE);
 
@@ -200,8 +202,6 @@ class LoggerTraitTest extends UnitTestCase {
 
     // Clean up.
     unlink($temp_file);
-
-    $this->addToAssertionCount(1); // Method executed without exceptions.
   }
 
   /**
@@ -244,6 +244,7 @@ class LoggerTraitTest extends UnitTestCase {
   /**
    * Test logFile method when verbose mode is disabled.
    */
+  #[DoesNotPerformAssertions]
   public function testLogFileWithVerboseDisabled(): void {
     static::loggerSetVerbose(FALSE);
 
@@ -256,27 +257,23 @@ class LoggerTraitTest extends UnitTestCase {
 
     // Clean up.
     unlink($temp_file);
-
-    // Method executed silently without exceptions.
-    $this->addToAssertionCount(1);
   }
 
   /**
    * Test logSection method when verbose mode is disabled.
    */
+  #[DoesNotPerformAssertions]
   public function testLogSectionWithVerboseDisabled(): void {
     static::loggerSetVerbose(FALSE);
 
     // This should not output anything and not throw exceptions.
     static::logSection('TEST TITLE', 'Test message');
-
-    // Method executed silently without exceptions.
-    $this->addToAssertionCount(1);
   }
 
   /**
    * Test that methods are silent when verbose mode is disabled.
    */
+  #[DoesNotPerformAssertions]
   public function testSilentModeForAllMethods(): void {
     static::loggerSetVerbose(FALSE);
 
@@ -289,14 +286,12 @@ class LoggerTraitTest extends UnitTestCase {
     file_put_contents($temp_file, 'Test content');
     static::logFile($temp_file);
     unlink($temp_file);
-
-    // All methods executed silently without exceptions.
-    $this->addToAssertionCount(1);
   }
 
   /**
    * Test verbose mode persistence across method calls.
    */
+  #[DoesNotPerformAssertions]
   public function testVerboseModePersistence(): void {
     // Set verbose mode.
     static::loggerSetVerbose(TRUE);
@@ -309,8 +304,6 @@ class LoggerTraitTest extends UnitTestCase {
 
     // Call methods again.
     static::log('Message 2');
-
-    $this->addToAssertionCount(1); // Verbose mode changes work correctly.
   }
 
   /**
@@ -351,15 +344,13 @@ class LoggerTraitTest extends UnitTestCase {
   /**
    * Test logStepStart method with verbose mode disabled.
    */
+  #[DoesNotPerformAssertions]
   public function testLogStepStartSilentMode(): void {
     static::loggerSetVerbose(FALSE);
 
     // This should not output anything and not throw exceptions.
     static::logStepStart();
     static::logStepStart('Silent step start');
-
-    // Method executed silently without exceptions.
-    $this->addToAssertionCount(1);
   }
 
   /**
@@ -403,67 +394,59 @@ class LoggerTraitTest extends UnitTestCase {
   /**
    * Test logStepFinish method with verbose mode disabled.
    */
+  #[DoesNotPerformAssertions]
   public function testLogStepFinishSilentMode(): void {
     static::loggerSetVerbose(FALSE);
 
     // This should not output anything and not throw exceptions.
     static::logStepFinish();
     static::logStepFinish('Silent step finish');
-
-    // Method executed silently without exceptions.
-    $this->addToAssertionCount(1);
   }
 
   /**
    * Test logSubstep method with verbose mode enabled.
    */
+  #[DoesNotPerformAssertions]
   public function testLogSubstepVerboseMode(): void {
     static::loggerSetVerbose(TRUE);
 
     // Test substep logging.
     static::logSubstep('Processing substep 1');
     static::logSubstep('Processing substep 2');
-
-    $this->addToAssertionCount(1); // Method executed without exceptions.
   }
 
   /**
    * Test logSubstep method with verbose mode disabled.
    */
+  #[DoesNotPerformAssertions]
   public function testLogSubstepSilentMode(): void {
     static::loggerSetVerbose(FALSE);
 
     // This should not output anything and not throw exceptions.
     static::logSubstep('Silent substep');
-
-    // Method executed silently without exceptions.
-    $this->addToAssertionCount(1);
   }
 
   /**
    * Test logNote method with verbose mode enabled.
    */
+  #[DoesNotPerformAssertions]
   public function testLogNoteVerboseMode(): void {
     static::loggerSetVerbose(TRUE);
 
     // Test note logging.
     static::logNote('Important note about the process');
     static::logNote('Another note with details');
-
-    $this->addToAssertionCount(1); // Method executed without exceptions.
   }
 
   /**
    * Test logNote method with verbose mode disabled.
    */
+  #[DoesNotPerformAssertions]
   public function testLogNoteSilentMode(): void {
     static::loggerSetVerbose(FALSE);
 
     // This should not output anything and not throw exceptions.
     static::logNote('Silent note');
-
-    // Method executed silently without exceptions.
-    $this->addToAssertionCount(1);
   }
 
   /**
@@ -544,6 +527,7 @@ class LoggerTraitTest extends UnitTestCase {
   /**
    * Test elapsed time calculation and formatting.
    */
+  #[DoesNotPerformAssertions]
   public function testElapsedTimeCalculation(): void {
     static::loggerSetVerbose(TRUE);
 
@@ -551,27 +535,23 @@ class LoggerTraitTest extends UnitTestCase {
     static::logStepStart('Timed step');
     usleep(1500000); // Sleep for 1.5 seconds to show measurable elapsed time.
     static::logStepFinish('Timed step completed');
-
-    // Test completed without exceptions.
-    $this->addToAssertionCount(1);
   }
 
   /**
    * Test logStepFinish without corresponding logStepStart.
    */
+  #[DoesNotPerformAssertions]
   public function testLogStepFinishWithoutStart(): void {
     static::loggerSetVerbose(TRUE);
 
     // This should not show elapsed time and not throw exceptions.
     static::logStepFinish('Orphan step');
-
-    // Method executed without exceptions.
-    $this->addToAssertionCount(1);
   }
 
   /**
    * Test step restart behavior.
    */
+  #[DoesNotPerformAssertions]
   public function testStepRestart(): void {
     static::loggerSetVerbose(TRUE);
 
@@ -584,14 +564,12 @@ class LoggerTraitTest extends UnitTestCase {
 
     // Finish second step (should show elapsed time for second step).
     static::logStepFinish('Second step completed');
-
-    // Test completed without exceptions.
-    $this->addToAssertionCount(1);
   }
 
   /**
    * Test step name mismatch behavior.
    */
+  #[DoesNotPerformAssertions]
   public function testStepNameMismatch(): void {
     static::loggerSetVerbose(TRUE);
 
@@ -612,9 +590,6 @@ class LoggerTraitTest extends UnitTestCase {
 
     // This should not show elapsed time since method names don't match.
     static::logStepFinish('Current method');
-
-    // Method executed without exceptions.
-    $this->addToAssertionCount(1);
   }
 
   /**
