@@ -54,14 +54,22 @@ final class ApplicationTraitTest extends UnitTestCase {
     $this->applicationInitFromLoader('/invalid/path/loader.php');
   }
 
-  public function testApplicationInitFromLoaderInvalidReturn(): void {
+  #[DataProvider('dataProviderApplicationInitFromLoaderInvalidReturn')]
+  public function testApplicationInitFromLoaderInvalidReturn(string $returned): void {
     $temp_file = self::$tmp . '/invalid_loader.php';
-    file_put_contents($temp_file, '<?php return null;');
+    file_put_contents($temp_file, '<?php return ' . $returned . ';');
 
     $this->expectException(\InvalidArgumentException::class);
     $this->expectExceptionMessage('Loader must return an instance of Application');
 
     $this->applicationInitFromLoader($temp_file);
+  }
+
+  public static function dataProviderApplicationInitFromLoaderInvalidReturn(): \Iterator {
+    yield 'null' => ['null'];
+    yield 'object_of_other_type' => ['new \stdClass()'];
+    yield 'scalar' => ["'not an application'"];
+    yield 'array' => ['[]'];
   }
 
   public function testApplicationInitWithCustomWorkingDirectory(): void {

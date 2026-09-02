@@ -103,11 +103,15 @@ trait ApplicationTrait {
       throw new \InvalidArgumentException(sprintf('Loader file not found: %s', $loader_path));
     }
 
-    $this->application = require $loader_path;
+    // Validate before assigning: the property is typed, so assigning a wrong
+    // type raises a TypeError before this guard can run.
+    $application = require $loader_path;
 
-    if (!$this->application instanceof Application) {
+    if (!$application instanceof Application) {
       throw new \InvalidArgumentException('Loader must return an instance of Application');
     }
+
+    $this->application = $application;
 
     $this->application->setAutoExit(FALSE);
     $this->application->setCatchExceptions(TRUE);
