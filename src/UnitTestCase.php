@@ -19,8 +19,8 @@ use PHPUnit\Framework\TestStatus\Failure;
  */
 abstract class UnitTestCase extends TestCase {
 
-  use ReflectionTrait;
   use LocationsTrait;
+  use ReflectionTrait;
 
   /**
    * {@inheritdoc}
