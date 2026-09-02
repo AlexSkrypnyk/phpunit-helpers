@@ -1510,4 +1510,41 @@ $test->processRun("echo", ["test output"]);
     $this->assertProcessOutputContains('nonexistent', $custom_message);
   }
 
+  #[DataProvider('dataProviderDim')]
+  public function testDim(string $text, string $eol, string $expected): void {
+    $this->assertSame($expected, self::dim($text, $eol));
+  }
+
+  public static function dataProviderDim(): \Iterator {
+    yield 'empty' => [
+      '',
+      "\n",
+      "\033[2m\033[22m",
+    ];
+
+    yield 'single_line' => [
+      'test',
+      "\n",
+      "\033[2mtest\033[22m",
+    ];
+
+    yield 'multiple_lines' => [
+      "one\ntwo",
+      "\n",
+      "\033[2mone\033[22m\n\033[2mtwo\033[22m",
+    ];
+
+    yield 'custom_eol' => [
+      "one\r\ntwo",
+      "\r\n",
+      "\033[2mone\033[22m\r\n\033[2mtwo\033[22m",
+    ];
+
+    yield 'empty_eol_falls_back_to_newline' => [
+      "one\ntwo",
+      '',
+      "\033[2mone\033[22m\n\033[2mtwo\033[22m",
+    ];
+  }
+
 }

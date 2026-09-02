@@ -478,6 +478,18 @@ class LocationsTraitTest extends TestCase {
     $this->assertDirectoryDoesNotExist(self::$workspace, 'Workspace should be removed even with chmod exception.');
   }
 
+  public function testLocationsTearDownIgnoresChmodFailure(): void {
+    // chmod() fails on a path that does not exist, so pointing the workspace
+    // at a missing directory exercises the swallowed-exception path.
+    self::$workspace = $this->testTmp . DIRECTORY_SEPARATOR . 'missing_workspace_' . uniqid();
+
+    $this->assertDirectoryDoesNotExist(self::$workspace);
+
+    $this->locationsTearDown();
+
+    $this->assertDirectoryDoesNotExist(self::$workspace);
+  }
+
   public function testLocationsFixtureDirThrowsExceptionWhenFixturesDirectoryMissing(): void {
     // Create a temporary directory without fixtures subdirectory.
     $test_cwd_no_fixtures = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('locations_trait_test_no_fixtures_dir_', TRUE);
