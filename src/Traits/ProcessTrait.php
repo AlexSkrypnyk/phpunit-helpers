@@ -352,7 +352,7 @@ trait ProcessTrait {
    * Checks if the process completed with a successful exit code and provides
    * detailed error output if it failed.
    *
-   * @param string|null $message
+   * @param ?string $message
    *   Optional message to include in the failure output if the process failed.
    */
   public function assertProcessSuccessful(?string $message = NULL): void {
@@ -369,7 +369,7 @@ trait ProcessTrait {
    * Checks if the process failed and provides detailed output if it
    * unexpectedly succeeded.
    *
-   * @param string|null $message
+   * @param ?string $message
    *   Optional message to include in the failure output if the process
    *   succeeded.
    */
@@ -470,7 +470,7 @@ trait ProcessTrait {
   /**
    * Asserts that the process error output contains an expected string.
    *
-   * @param string $expected
+   * @param array|string $expected
    *   Expected string to check for in the process error output.
    * @param ?string $message
    *   Optional failure message.
@@ -497,7 +497,7 @@ trait ProcessTrait {
   /**
    * Asserts that the process error output does not contain an expected string.
    *
-   * @param string $expected
+   * @param array|string $expected
    *   String that should not be in the process error output.
    * @param ?string $message
    *   Optional failure message.
@@ -534,7 +534,7 @@ trait ProcessTrait {
    * - Shortcut mode: No prefixes, all strings treated as substring present
    * - Mixed mode: If any string has a prefix, ALL strings must have prefixes
    *
-   * @param string|array $expected
+   * @param array|string $expected
    *   String or array of strings to check in the process output.
    *   Use '+ ' prefix for exact match present,
    *   '* ' prefix for substring present,
@@ -547,7 +547,7 @@ trait ProcessTrait {
    * @throws \RuntimeException
    *   When prefix usage is inconsistent (some have prefixes, others don't).
    */
-  public function assertProcessOutputContainsOrNot(string|array $expected, ?string $message = NULL): void {
+  public function assertProcessOutputContainsOrNot(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
 
     $output = $this->process->getOutput();
@@ -577,7 +577,7 @@ trait ProcessTrait {
    * - Shortcut mode: No prefixes, all strings treated as substring present
    * - Mixed mode: If any string has a prefix, ALL strings must have prefixes
    *
-   * @param string|array $expected
+   * @param array|string $expected
    *   String or array of strings to check in the process error output.
    *   Use '+ ' prefix for exact match present,
    *   '* ' prefix for substring present,
@@ -590,7 +590,7 @@ trait ProcessTrait {
    * @throws \RuntimeException
    *   When prefix usage is inconsistent (some have prefixes, others don't).
    */
-  public function assertProcessErrorOutputContainsOrNot(string|array $expected, ?string $message = NULL): void {
+  public function assertProcessErrorOutputContainsOrNot(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
 
     $output = $this->process->getErrorOutput();
@@ -683,7 +683,7 @@ trait ProcessTrait {
    * - Shortcut mode: No prefixes, all strings treated as substring present
    * - Mixed mode: If any string has a prefix, ALL strings must have prefixes
    *
-   * @param string|array $expected
+   * @param array|string $expected
    *   String or array of strings to check in combined process output.
    *   Use '+ ' prefix for exact match present,
    *   '* ' prefix for substring present,
@@ -696,7 +696,7 @@ trait ProcessTrait {
    * @throws \RuntimeException
    *   When prefix usage is inconsistent (some have prefixes, others don't).
    */
-  public function assertProcessAnyOutputContainsOrNot(string|array $expected, ?string $message = NULL): void {
+  public function assertProcessAnyOutputContainsOrNot(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
 
     $output = $this->process->getOutput();

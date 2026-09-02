@@ -24,7 +24,7 @@ trait StringTrait {
    *
    * @param string $haystack
    *   The string to search in.
-   * @param string|array $expected
+   * @param array|string $expected
    *   String or array of strings to check with optional prefixes.
    * @param string $message_present_exact
    *   Message template for failed exact match present assertions.
@@ -54,7 +54,7 @@ trait StringTrait {
    */
   protected function assertStringContainsOrNot(
     string $haystack,
-    string|array $expected,
+    array|string $expected,
     string $message_present_exact = 'Expected exact match for "%s" in haystack',
     string $message_present_contains = 'Expected substring "%s" in haystack',
     string $message_absent_exact = 'Expected no exact match for "%s" in haystack',

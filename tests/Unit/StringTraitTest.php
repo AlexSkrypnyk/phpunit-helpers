@@ -19,7 +19,7 @@ final class StringTraitTest extends UnitTestCase {
   public function testAssertStringContainsOrNot(
     string $name,
     string $haystack,
-    string|array $expected,
+    array|string $expected,
     bool $case_insensitive,
     ?array $custom_prefixes,
     ?array $custom_messages,

@@ -135,7 +135,7 @@ trait ApplicationTrait {
    * @return \Symfony\Component\Console\Tester\ApplicationTester
    *   The initialized application tester.
    */
-  public function applicationInitFromCommand(string | object $object_or_class, bool $is_single_command = TRUE): ApplicationTester {
+  public function applicationInitFromCommand(string|object $object_or_class, bool $is_single_command = TRUE): ApplicationTester {
     $this->application = new Application();
 
     $instance = is_object($object_or_class) ? $object_or_class : new $object_or_class();
@@ -281,7 +281,7 @@ trait ApplicationTrait {
    * @param ?string $message
    *   Optional failure message.
    */
-  public function assertApplicationOutputContains(array | string $expected, ?string $message = NULL): void {
+  public function assertApplicationOutputContains(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
     $output = $this->applicationTester->getDisplay();
 
@@ -308,7 +308,7 @@ trait ApplicationTrait {
    * @param ?string $message
    *   Optional failure message.
    */
-  public function assertApplicationOutputNotContains(array | string $expected, ?string $message = NULL): void {
+  public function assertApplicationOutputNotContains(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
     $output = $this->applicationTester->getDisplay();
 
@@ -335,7 +335,7 @@ trait ApplicationTrait {
    * @param ?string $message
    *   Optional failure message.
    */
-  public function assertApplicationErrorOutputContains(array | string $expected, ?string $message = NULL): void {
+  public function assertApplicationErrorOutputContains(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
     $output = $this->applicationTester->getErrorOutput();
 
@@ -362,7 +362,7 @@ trait ApplicationTrait {
    * @param ?string $message
    *   Optional failure message.
    */
-  public function assertApplicationErrorOutputNotContains(array | string $expected, ?string $message = NULL): void {
+  public function assertApplicationErrorOutputNotContains(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
     $output = $this->applicationTester->getErrorOutput();
 
@@ -394,7 +394,7 @@ trait ApplicationTrait {
    * - Shortcut mode: No prefixes, all strings treated as substring present
    * - Mixed mode: If any string has a prefix, ALL strings must have prefixes
    *
-   * @param string|array $expected
+   * @param array|string $expected
    *   String or array of strings to check in the application output.
    *   Use '+ ' prefix for exact match present,
    *   '* ' prefix for substring present,
@@ -407,7 +407,7 @@ trait ApplicationTrait {
    * @throws \RuntimeException
    *   When prefix usage is inconsistent (some have prefixes, others don't).
    */
-  public function assertApplicationOutputContainsOrNot(string|array $expected, ?string $message = NULL): void {
+  public function assertApplicationOutputContainsOrNot(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
 
     $output = $this->applicationTester->getDisplay();
@@ -437,7 +437,7 @@ trait ApplicationTrait {
    * - Shortcut mode: No prefixes, all strings treated as substring present
    * - Mixed mode: If any string has a prefix, ALL strings must have prefixes
    *
-   * @param string|array $expected
+   * @param array|string $expected
    *   String or array of strings to check in the application error output.
    *   Use '+ ' prefix for exact match present,
    *   '* ' prefix for substring present,
@@ -450,7 +450,7 @@ trait ApplicationTrait {
    * @throws \RuntimeException
    *   When prefix usage is inconsistent (some have prefixes, others don't).
    */
-  public function assertApplicationErrorOutputContainsOrNot(string|array $expected, ?string $message = NULL): void {
+  public function assertApplicationErrorOutputContainsOrNot(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
 
     $output = $this->applicationTester->getErrorOutput();
@@ -481,7 +481,7 @@ trait ApplicationTrait {
    * - Shortcut mode: No prefixes, all strings treated as substring present
    * - Mixed mode: If any string has a prefix, ALL strings must have prefixes
    *
-   * @param string|array $expected
+   * @param array|string $expected
    *   String or array of strings to check in combined process output.
    *   Use '+ ' prefix for exact match present,
    *   '* ' prefix for substring present,
@@ -494,7 +494,7 @@ trait ApplicationTrait {
    * @throws \RuntimeException
    *   When prefix usage is inconsistent (some have prefixes, others don't).
    */
-  public function assertApplicationAnyOutputContainsOrNot(string|array $expected, ?string $message = NULL): void {
+  public function assertApplicationAnyOutputContainsOrNot(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
 
     $output = $this->applicationTester->getDisplay();

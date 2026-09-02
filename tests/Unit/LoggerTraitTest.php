@@ -933,7 +933,7 @@ final class LoggerTraitTest extends UnitTestCase {
   /**
    * Provides test data for step method workflow testing.
    *
-   * @return \Iterator<string, array{string, (string | null), array<string>}>
+   * @return \Iterator<string, array{string, (string|null), array<string>}>
    *   Test cases: [step_name, message, expected_output_contains]
    */
   public static function dataProviderStepMethods(): \Iterator {
@@ -971,7 +971,7 @@ final class LoggerTraitTest extends UnitTestCase {
   /**
    * Provides test data for section formatting.
    *
-   * @return \Iterator<string, array{string, (string | null), bool, int, array<string>}>
+   * @return \Iterator<string, array{string, (string|null), bool, int, array<string>}>
    *   Test cases: [title, message, double_border, min_width, expected_strings]
    */
   public static function dataProviderSectionFormatting(): \Iterator {
