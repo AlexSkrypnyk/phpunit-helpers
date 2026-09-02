@@ -90,7 +90,7 @@ final class ProcessTraitFunctionalTest extends UnitTestCase {
     $phpunit_bin = $vendor_dir . '/bin/phpunit';
 
     $env = $with_debug ? 'DEBUG=1' : 'DEBUG=0';
-    $cmd = sprintf('%s %s --no-coverage --group=manual', $env, $phpunit_bin);
+    $command = sprintf('%s %s --no-coverage --group=manual', $env, $phpunit_bin);
 
     $descriptors = [
       0 => ['pipe', 'r'],
@@ -98,7 +98,7 @@ final class ProcessTraitFunctionalTest extends UnitTestCase {
       2 => ['pipe', 'w'],
     ];
 
-    $process = proc_open($cmd, $descriptors, $pipes);
+    $process = proc_open($command, $descriptors, $pipes);
 
     if (!is_resource($process)) {
       $this->fail('Failed to start PHPUnit process');

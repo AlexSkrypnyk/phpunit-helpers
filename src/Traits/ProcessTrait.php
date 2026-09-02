@@ -153,7 +153,7 @@ trait ProcessTrait {
       }
     }
 
-    $cmd = array_merge([$base_command], $all_arguments);
+    $full_command = array_merge([$base_command], $all_arguments);
 
     $inputs = empty($inputs) ? NULL : implode(PHP_EOL, $inputs) . PHP_EOL;
 
@@ -163,7 +163,7 @@ trait ProcessTrait {
     }
 
     $this->process = new Process(
-      $cmd,
+      $full_command,
       $this->processCwd,
       $env,
       $inputs,
