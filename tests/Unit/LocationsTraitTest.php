@@ -262,13 +262,7 @@ class LocationsTraitTest extends TestCase {
   }
 
   #[DataProvider('dataProviderLocationsCopy')]
-  public function testLocationsCopy(
-    array $source_files,
-    array $include_files,
-    array $exclude_dirs,
-    bool $use_before_callback,
-    int $expected_count,
-  ): void {
+  public function testLocationsCopy(array $source_files, array $include_files, array $exclude_dirs, bool $use_before_callback, int $expected_count): void {
     $this->locationsInit($this->testCwd);
 
     $source_dir = $this->testTmp . DIRECTORY_SEPARATOR . 'copy_source_' . uniqid();

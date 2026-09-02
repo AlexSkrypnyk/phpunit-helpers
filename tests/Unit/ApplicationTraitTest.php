@@ -780,10 +780,7 @@ final class ApplicationTraitTest extends UnitTestCase {
         $this->setName('test:multiline');
       }
 
-      protected function execute(
-        InputInterface $input,
-        OutputInterface $output,
-      ): int {
+      protected function execute(InputInterface $input, OutputInterface $output): int {
         $output->writeln('Line 1');
         $output->writeln('Line 2');
         $output->writeln('Line 3');
