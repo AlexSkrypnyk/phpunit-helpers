@@ -22,6 +22,8 @@ class LocationsTraitTest extends TestCase {
   protected string $testFixtures;
 
   protected function setUp(): void {
+    parent::setUp();
+
     $this->testTmp = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('locations_trait_test_tmp_', TRUE);
     mkdir($this->testTmp, 0777, TRUE);
 
@@ -42,6 +44,8 @@ class LocationsTraitTest extends TestCase {
     if (is_dir($this->testFixtures)) {
       rmdir($this->testFixtures);
     }
+
+    parent::tearDown();
   }
 
   public function testLocationsInit(): void {

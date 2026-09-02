@@ -492,9 +492,6 @@ final class LoggerTraitTest extends UnitTestCase {
     self::logStepFinish('Silent step end');
 
     $silent_output = $this->getCapturedOutput();
-    if (!empty($silent_output)) {
-      echo "DEBUG: Unexpected output: " . json_encode($silent_output) . "\n";
-    }
     $this->assertEmpty($silent_output);
 
     // Reset buffer and steps tracking, then test with verbose enabled.
@@ -1102,7 +1099,6 @@ final class LoggerTraitTest extends UnitTestCase {
 
     $result = self::logStepSummary();
 
-    $this->addToAssertionCount(1);
     $this->assertStringContainsString('testLogStepSummaryReturn', $result);
     $this->assertStringContainsString('Complete', $result);
   }

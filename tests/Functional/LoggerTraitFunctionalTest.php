@@ -25,10 +25,13 @@ final class LoggerTraitFunctionalTest extends UnitTestCase {
     // Reset verbose state for each test.
     self::loggerSetVerbose(FALSE);
 
-    // Reset steps tracking array for each test.
+    // Reset steps tracking arrays for each test.
     $reflection_class = new \ReflectionClass(self::class);
     $steps_property = $reflection_class->getProperty('loggerSteps');
     $steps_property->setValue(NULL, []);
+
+    $stack_property = $reflection_class->getProperty('loggerStepStack');
+    $stack_property->setValue(NULL, []);
   }
 
   /**

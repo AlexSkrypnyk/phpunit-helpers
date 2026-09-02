@@ -499,9 +499,6 @@ final class ProcessTraitTest extends UnitTestCase {
 
     $command = self::$fixtures . '/shell-command-failing.sh';
 
-    // Create a temporary file to capture the streaming output.
-    tempnam(sys_get_temp_dir(), 'test_stream_output');
-
     // Override processStreamingOutputCallback method temporarily.
     $reflection = new \ReflectionClass($this);
     $property = $reflection->getProperty('processStreamOutput');
@@ -752,9 +749,6 @@ EOL;
       $test_callback(Process::ERR, $input);
     }
 
-    // If we get here without exceptions, the callback handled input correctly.
-    $this->addToAssertionCount(count($test_inputs) * 2);
-
     // Verify some expected output was captured.
     $this->assertStringContainsString(self::$processStreamingStandardOutputChars, $captured_output);
     $this->assertStringContainsString(self::$processStreamingErrorOutputChars, $captured_output);
@@ -784,9 +778,6 @@ EOL;
     // Call with error type - should not throw exceptions.
     $test_callback(Process::ERR, "error message\n");
     $test_callback(Process::OUT, "standard message\n");
-
-    // If we get here without exceptions, the callback is working.
-    $this->addToAssertionCount(1);
 
     // Verify expected output was captured with correct prefixes.
     $this->assertStringContainsString(self::$processStreamingErrorOutputChars . 'error message', $captured_output);
@@ -1290,9 +1281,6 @@ EOL;
     // Test with empty strings to avoid visible output.
     $callback(Process::OUT, "");
     $callback(Process::ERR, "");
-
-    // If we reach here, the callback executed without errors.
-    $this->addToAssertionCount(1);
   }
 
   public function testProcessRunWithZeroArguments(): void {

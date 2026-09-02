@@ -16,6 +16,8 @@ final class ReflectionTraitTest extends TestCase {
   protected object $testObject;
 
   protected function setUp(): void {
+    parent::setUp();
+
     $this->testObject = new class() {
 
       protected static function staticProtectedMethod(string $arg): string {

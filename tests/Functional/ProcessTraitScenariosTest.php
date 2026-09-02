@@ -28,8 +28,8 @@ final class ProcessTraitScenariosTest extends UnitTestCase {
   }
 
   protected function tearDown(): void {
-    parent::tearDown();
     $this->processTearDown();
+    parent::tearDown();
   }
 
   /**
