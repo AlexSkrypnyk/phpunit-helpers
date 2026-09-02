@@ -423,8 +423,11 @@ final class ApplicationTraitTest extends UnitTestCase {
   }
 
   public function testApplicationInitFromLoaderWithWorkingDirectory(): void {
-    // Save a copy of the current working directory.
-    getcwd();
+    $original_cwd = getcwd();
+
+    if ($original_cwd === FALSE) {
+      $this->markTestSkipped('Could not determine current working directory.');
+    }
 
     // Set a specific working directory for the application.
     $this->applicationCwd = self::$tmp;
@@ -433,16 +436,22 @@ final class ApplicationTraitTest extends UnitTestCase {
       throw new \RuntimeException('Fixtures directory is not set.');
     }
 
-    // Initialize the application from the loader.
-    $loader_path = self::$fixtures . '/Application/loader.php';
-    $this->applicationInitFromLoader($loader_path);
+    try {
+      // Initialize the application from the loader.
+      $loader_path = self::$fixtures . '/Application/loader.php';
+      $this->applicationInitFromLoader($loader_path);
 
-    // Assert the application was properly initialized.
-    $this->assertInstanceOf(Application::class, $this->application);
-    $this->assertInstanceOf(ApplicationTester::class, $this->applicationTester);
+      // Assert the application was properly initialized.
+      $this->assertInstanceOf(Application::class, $this->application);
+      $this->assertInstanceOf(ApplicationTester::class, $this->applicationTester);
 
-    // Assert we're back in the original directory.
-    $this->assertDirectoryExists(self::$tmp);
+      // The original directory is restored on shutdown, so the process is
+      // still in the configured directory at this point.
+      $this->assertSame(realpath(self::$tmp), realpath((string) getcwd()));
+    }
+    finally {
+      chdir($original_cwd);
+    }
   }
 
   public function testApplicationOutputAssertions(): void {
