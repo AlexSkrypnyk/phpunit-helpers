@@ -599,12 +599,12 @@ final class LoggerTraitTest extends UnitTestCase {
    * Test formatElapsedTime method with various durations.
    */
   #[DataProvider('dataProviderFormatElapsedTime')]
-  public function testFormatElapsedTime(float $inputSeconds, string $expectedOutput): void {
+  public function testFormatElapsedTime(float $input_seconds, string $expected_output): void {
     $reflection_class = new \ReflectionClass(self::class);
     $method = $reflection_class->getMethod('formatElapsedTime');
 
-    $result = $method->invoke(NULL, $inputSeconds);
-    $this->assertEquals($expectedOutput, $result);
+    $result = $method->invoke(NULL, $input_seconds);
+    $this->assertEquals($expected_output, $result);
   }
 
   /**
@@ -870,14 +870,14 @@ final class LoggerTraitTest extends UnitTestCase {
    * Test various logger methods in verbose and silent modes.
    */
   #[DataProvider('dataProviderLoggerMethodsVerboseMode')]
-  public function testLoggerMethodsVerboseMode(bool $verboseMode, string $description, callable $testMethod): void {
-    self::loggerSetVerbose($verboseMode);
+  public function testLoggerMethodsVerboseMode(bool $verbose_mode, string $description, callable $test_method): void {
+    self::loggerSetVerbose($verbose_mode);
 
-    $testMethod(self::class);
+    $test_method(self::class);
 
     $output = $this->getCapturedOutput();
 
-    if ($verboseMode) {
+    if ($verbose_mode) {
       $this->assertNotEmpty($output, sprintf('Expected output for %s in verbose mode', $description));
     }
     else {
@@ -907,14 +907,14 @@ final class LoggerTraitTest extends UnitTestCase {
   /**
    * Test step methods with various parameters.
    *
-   * @param array<string> $expectedOutput
+   * @param array<string> $expected_output
    */
   #[DataProvider('dataProviderStepMethods')]
-  public function testStepMethods(string $stepName, ?string $message, array $expectedOutput): void {
+  public function testStepMethods(string $step_name, ?string $message, array $expected_output): void {
     self::loggerSetVerbose(TRUE);
 
     // Test both start and finish for completeness.
-    if (str_contains($expectedOutput[0], 'START')) {
+    if (str_contains($expected_output[0], 'START')) {
       self::logStepStart($message);
     }
     else {
@@ -925,7 +925,7 @@ final class LoggerTraitTest extends UnitTestCase {
 
     $output = $this->getCapturedOutput();
 
-    foreach ($expectedOutput as $expected_string) {
+    foreach ($expected_output as $expected_string) {
       $this->assertStringContainsString($expected_string, $output, sprintf("Expected to find '%s' in output", $expected_string));
     }
   }
@@ -946,10 +946,10 @@ final class LoggerTraitTest extends UnitTestCase {
   /**
    * Test section formatting with various parameters.
    *
-   * @param array<string> $expectedStrings
+   * @param array<string> $expected_strings
    */
   #[DataProvider('dataProviderSectionFormatting')]
-  public function testSectionFormatting(string $title, ?string $message, bool $doubleBorder, int $minWidth, array $expectedStrings): void {
+  public function testSectionFormatting(string $title, ?string $message, bool $double_border, int $min_width, array $expected_strings): void {
     self::loggerSetVerbose(TRUE);
 
     // Reset buffer for each test case.
@@ -960,10 +960,10 @@ final class LoggerTraitTest extends UnitTestCase {
     $this->logBuffer = $buffer;
     self::loggerSetOutputStream($this->logBuffer);
 
-    self::logSection($title, $message, $doubleBorder, $minWidth);
+    self::logSection($title, $message, $double_border, $min_width);
 
     $output = $this->getCapturedOutput();
-    foreach ($expectedStrings as $expected_string) {
+    foreach ($expected_strings as $expected_string) {
       $this->assertStringContainsString($expected_string, $output, 'Failed for title: ' . $title);
     }
   }
@@ -972,7 +972,7 @@ final class LoggerTraitTest extends UnitTestCase {
    * Provides test data for section formatting.
    *
    * @return \Iterator<string, array{string, (string | null), bool, int, array<string>}>
-   *   Test cases: [title, message, doubleBorder, minWidth, expectedStrings]
+   *   Test cases: [title, message, double_border, min_width, expected_strings]
    */
   public static function dataProviderSectionFormatting(): \Iterator {
     yield 'basic title only' => ['BASIC TITLE', NULL, FALSE, 60, ['BASIC TITLE', '---']];
