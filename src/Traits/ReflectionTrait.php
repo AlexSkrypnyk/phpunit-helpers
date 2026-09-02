@@ -8,6 +8,8 @@ namespace AlexSkrypnyk\PhpunitHelpers\Traits;
  * Trait ReflectionTrait.
  *
  * Provides methods to work with class reflection.
+ *
+ * @mixin \PHPUnit\Framework\TestCase
  */
 trait ReflectionTrait {
 

@@ -39,6 +39,8 @@ namespace AlexSkrypnyk\PhpunitHelpers\Traits;
  * // Convert entries to keystrokes if needed.
  * my_tui_run_keystrokes(static::tuiKeystrokes($entries_set1));
  * @endcode
+ *
+ * @mixin \PHPUnit\Framework\TestCase
  */
 trait TuiTrait {
 

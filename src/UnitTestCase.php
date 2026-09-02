@@ -40,6 +40,9 @@ abstract class UnitTestCase extends TestCase {
 
   /**
    * Determine if tearDown should clean up the temporary directories.
+   *
+   * @return bool
+   *   TRUE if the temporary directories should be cleaned up.
    */
   protected function tearDownShouldCleanup(): bool {
     return !$this->status() instanceof Failure && !$this->status() instanceof Error && !static::isDebug();
@@ -62,6 +65,9 @@ abstract class UnitTestCase extends TestCase {
    *
    * Collects and returns information from all methods in the class that end
    * with 'Info'.
+   *
+   * @return string
+   *   The additional information.
    */
   public function info(): string {
     // Collect all methods of the class that end with 'Info'.
@@ -102,6 +108,9 @@ abstract class UnitTestCase extends TestCase {
    * onNotSuccessfulTest() currently only allows to print to stdout/stderr
    * right after the test failure rather than collecting all information and
    * appending it to the failure message.
+   *
+   * @return string
+   *   The assertion suffix.
    */
   protected function assertionSuffix(): string {
     return $this->info();
@@ -109,6 +118,9 @@ abstract class UnitTestCase extends TestCase {
 
   /**
    * Check if the test is running in debug mode.
+   *
+   * @return bool
+   *   TRUE if debug mode is enabled, FALSE otherwise.
    */
   public static function isDebug(): bool {
     return getenv('DEBUG') || in_array('--debug', (array) ($_SERVER['argv'] ?? []));

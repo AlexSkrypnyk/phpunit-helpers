@@ -6,6 +6,8 @@ namespace AlexSkrypnyk\PhpunitHelpers\Traits;
 
 /**
  * Provides logging functionality.
+ *
+ * @mixin \PHPUnit\Framework\TestCase
  */
 trait LoggerTrait {
 
@@ -316,6 +318,9 @@ trait LoggerTrait {
    *
    * @param string $indent
    *   Indentation string for hierarchical display (e.g., '  ', '    ', '\t').
+   *
+   * @return string
+   *   The formatted summary table.
    */
   public static function logStepSummary(string $indent = '  '): string {
     if (empty(static::$loggerSteps)) {
