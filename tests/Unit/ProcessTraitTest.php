@@ -381,7 +381,7 @@ final class ProcessTraitTest extends UnitTestCase {
     $this->process = NULL;
 
     $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Process should be initialized');
+    $this->expectExceptionMessage('Process is not initialized');
 
     $this->assertProcessSuccessful();
   }

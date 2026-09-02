@@ -356,7 +356,7 @@ trait ProcessTrait {
    *   Optional message to include in the failure output if the process failed.
    */
   public function assertProcessSuccessful(?string $message = NULL): void {
-    $this->assertNotNull($this->process, 'Process should be initialized');
+    $this->assertNotNull($this->process, 'Process is not initialized');
 
     if (!$this->process->isSuccessful()) {
       $this->fail('PROCESS FAILED' . PHP_EOL . ($message ? 'Message: ' . $message . PHP_EOL : '') . $this->processFormatOutput() . $this->assertionSuffix());
