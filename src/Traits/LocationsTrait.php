@@ -188,6 +188,7 @@ trait LocationsTrait {
    *   The locations' info.
    */
   public static function locationsInfo(): string {
+    $lines = [];
     $lines[] = 'LOCATIONS';
     $lines[] = '---------';
     $lines[] = 'Root       : ' . static::$root;
@@ -257,6 +258,8 @@ trait LocationsTrait {
       })
       ->exclude($exclusions);
 
+    $fs = new Filesystem();
+
     foreach ($finder as $file) {
       $src_path = $file->getRealPath();
       $dst_path = $dst . DIRECTORY_SEPARATOR . $file->getRelativePathname();
@@ -265,7 +268,7 @@ trait LocationsTrait {
         $before($src_path, $dst_path);
       }
 
-      (new Filesystem())->copy($src_path, $dst_path);
+      $fs->copy($src_path, $dst_path);
       $created[] = static::locationsRealpath($dst_path);
     }
 

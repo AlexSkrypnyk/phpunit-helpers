@@ -54,7 +54,7 @@ trait ApplicationTrait {
    *   If the application is not initialized.
    */
   public function applicationGet(): Application {
-    if ($this->application === NULL) {
+    if (!$this->application instanceof Application) {
       throw new \RuntimeException('Application is not initialized. Call applicationInit* first.');
     }
     return $this->application;
@@ -70,7 +70,7 @@ trait ApplicationTrait {
    *   If the application tester is not initialized.
    */
   public function applicationGetTester(): ApplicationTester {
-    if ($this->applicationTester === NULL) {
+    if (!$this->applicationTester instanceof ApplicationTester) {
       throw new \RuntimeException('Application tester is not initialized. Call applicationInit* first.');
     }
     return $this->applicationTester;
@@ -202,7 +202,7 @@ trait ApplicationTrait {
    *   When the application outcome does not match the expectation.
    */
   public function applicationRun(array $input = [], array $options = [], bool $expect_fail = FALSE): string {
-    if ($this->applicationTester === NULL) {
+    if (!$this->applicationTester instanceof ApplicationTester) {
       throw new \RuntimeException('Application is not initialized. Call applicationInit* first.');
     }
 
@@ -533,9 +533,10 @@ trait ApplicationTrait {
    *   The application info.
    */
   public function applicationInfo(): string {
-    if ($this->applicationTester === NULL) {
+    if (!$this->applicationTester instanceof ApplicationTester) {
       return 'APPLICATION: Not initialized' . PHP_EOL;
     }
+    $lines = [];
     $lines[] = 'APPLICATION';
     $lines[] = 'Output:';
     $output = $this->applicationTester->getDisplay();

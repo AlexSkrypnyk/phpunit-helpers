@@ -119,14 +119,8 @@ trait LoggerTrait {
     if (!static::$loggerIsVerbose) {
       return;
     }
-    if ($double_border) {
-      $delimiter_char = '=';
-      $header_format = '[ %s ]';
-    }
-    else {
-      $delimiter_char = '-';
-      $header_format = '[ %s ]';
-    }
+    $delimiter_char = $double_border ? '=' : '-';
+    $header_format = '[ %s ]';
 
     $header = sprintf($header_format, $title);
     $header_length = strlen($header);
