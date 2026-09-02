@@ -431,7 +431,7 @@ class LocationsTraitTest extends TestCase {
     ];
   }
 
-  public function testLocationGetters(): void {
+  public function testLocationsGetters(): void {
     $this->locationsInit($this->testCwd);
 
     // Test all getter methods return the same values as direct property access.
@@ -490,7 +490,7 @@ class LocationsTraitTest extends TestCase {
     $this->assertDirectoryDoesNotExist(self::$workspace);
   }
 
-  public function testLocationsFixtureDirThrowsExceptionWhenFixturesDirectoryMissing(): void {
+  public function testLocationsFixtureDirThrowsExceptionWhenFixturesDirMissing(): void {
     // Create a temporary directory without fixtures subdirectory.
     $test_cwd_no_fixtures = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('locations_trait_test_no_fixtures_dir_', TRUE);
     mkdir($test_cwd_no_fixtures, 0777, TRUE);
