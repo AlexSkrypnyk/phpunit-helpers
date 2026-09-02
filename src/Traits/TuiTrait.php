@@ -93,7 +93,7 @@ trait TuiTrait {
    * An entry will not be included in the resulting array of entries if it has
    * this value.
    *
-   * @var null|string
+   * @var string
    */
   const TUI_SKIP = '__SKIP__';
 
