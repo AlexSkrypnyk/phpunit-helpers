@@ -2,11 +2,11 @@
 <ruleset name="custom">
     <description>Custom PHPCS standard.</description>
 
-    <!-- Using Drupal coding standard as a base-fix. -->
+    <!-- Using Drupal coding standard as a base. -->
     <rule ref="Drupal"/>
-    <!-- Checks that the strict_types has been declared. -->
-    <rule ref="Generic.PHP.RequireStrictTypes" />
     <rule ref="DrevOps"/>
+    <!-- Checks that the strict_types has been declared. -->
+    <rule ref="Generic.PHP.RequireStrictTypes"/>
 
     <!-- Show sniff codes in all reports -->
     <arg value="s"/>
@@ -25,7 +25,7 @@
     </rule>
 
     <!-- Allow missing function names in tests. -->
-    <rule ref="Drupal.Commenting">
+    <rule ref="Drupal.Commenting.FunctionComment.Missing">
         <exclude-pattern>*.Test\.php</exclude-pattern>
         <exclude-pattern>*.TestCase\.php</exclude-pattern>
         <exclude-pattern>*.test</exclude-pattern>
