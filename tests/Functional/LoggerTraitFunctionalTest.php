@@ -13,7 +13,7 @@ use PHPUnit\Framework\Attributes\CoversTrait;
  * Functional tests for LoggerTrait that output to real STDERR.
  */
 #[CoversTrait(LoggerTrait::class)]
-class LoggerTraitFunctionalTest extends UnitTestCase {
+final class LoggerTraitFunctionalTest extends UnitTestCase {
 
   use LoggerTrait;
 
@@ -23,12 +23,11 @@ class LoggerTraitFunctionalTest extends UnitTestCase {
   protected function setUp(): void {
     parent::setUp();
     // Reset verbose state for each test.
-    static::loggerSetVerbose(FALSE);
+    self::loggerSetVerbose(FALSE);
 
     // Reset steps tracking array for each test.
-    $reflection_class = new \ReflectionClass(static::class);
+    $reflection_class = new \ReflectionClass(self::class);
     $steps_property = $reflection_class->getProperty('loggerSteps');
-    $steps_property->setAccessible(TRUE);
     $steps_property->setValue(NULL, []);
   }
 
@@ -37,7 +36,7 @@ class LoggerTraitFunctionalTest extends UnitTestCase {
    */
   protected function tearDown(): void {
     // Reset output stream to default.
-    static::loggerSetOutputStream(NULL);
+    self::loggerSetOutputStream(NULL);
     parent::tearDown();
   }
 
@@ -49,11 +48,11 @@ class LoggerTraitFunctionalTest extends UnitTestCase {
   #[DoesNotPerformAssertions]
   public function testFunctionalBasicLogging(): void {
     // Reset to default STDERR output.
-    static::loggerSetOutputStream(NULL);
-    static::loggerSetVerbose(TRUE);
+    self::loggerSetOutputStream(NULL);
+    self::loggerSetVerbose(TRUE);
 
-    static::log('This is a basic log message');
-    static::logSection('TEST SECTION', 'This is a test section with content');
+    self::log('This is a basic log message');
+    self::logSection('TEST SECTION', 'This is a test section with content');
   }
 
   /**
@@ -64,22 +63,24 @@ class LoggerTraitFunctionalTest extends UnitTestCase {
   #[DoesNotPerformAssertions]
   public function testFunctionalStepWorkflow(): void {
     // Reset to default STDERR output.
-    static::loggerSetOutputStream(NULL);
-    static::loggerSetVerbose(TRUE);
+    self::loggerSetOutputStream(NULL);
+    self::loggerSetVerbose(TRUE);
 
-    static::logStepStart('Processing data');
-    static::logSubstep('Loading configuration');
-    static::logNote('Using default settings');
-    static::logSubstep('Validating input');
-    usleep(500000); // 0.5 second delay to show elapsed time.
-    static::logStepFinish('Data processing complete');
+    self::logStepStart('Processing data');
+    self::logSubstep('Loading configuration');
+    self::logNote('Using default settings');
+    self::logSubstep('Validating input');
+    // 0.5 second delay to show elapsed time.
+    usleep(500000);
+    self::logStepFinish('Data processing complete');
 
-    static::logStepStart('Generating output');
-    static::logNote('Creating report format');
-    usleep(200000); // 0.2 second delay.
-    static::logStepFinish('Output generated successfully');
+    self::logStepStart('Generating output');
+    self::logNote('Creating report format');
+    // 0.2 second delay.
+    usleep(200000);
+    self::logStepFinish('Output generated successfully');
 
-    static::logStepSummary('WORKFLOW SUMMARY');
+    self::logStepSummary('WORKFLOW SUMMARY');
   }
 
   /**
@@ -90,13 +91,13 @@ class LoggerTraitFunctionalTest extends UnitTestCase {
   #[DoesNotPerformAssertions]
   public function testFunctionalSectionFormatting(): void {
     // Reset to default STDERR output.
-    static::loggerSetOutputStream(NULL);
-    static::loggerSetVerbose(TRUE);
+    self::loggerSetOutputStream(NULL);
+    self::loggerSetVerbose(TRUE);
 
-    static::logSection('STANDARD SECTION', 'This is a standard section with single border');
-    static::logSection('DOUBLE BORDER SECTION', 'This section uses double border characters', TRUE);
-    static::logSection('WIDE SECTION', 'This section has a wider minimum width', FALSE, 90);
-    static::logSection('MULTI-LINE', "This section contains\nmultiple lines of content\nto demonstrate wrapping");
+    self::logSection('STANDARD SECTION', 'This is a standard section with single border');
+    self::logSection('DOUBLE BORDER SECTION', 'This section uses double border characters', TRUE);
+    self::logSection('WIDE SECTION', 'This section has a wider minimum width', FALSE, 90);
+    self::logSection('MULTI-LINE', "This section contains\nmultiple lines of content\nto demonstrate wrapping");
   }
 
   /**
@@ -107,14 +108,14 @@ class LoggerTraitFunctionalTest extends UnitTestCase {
   #[DoesNotPerformAssertions]
   public function testFunctionalFileLogging(): void {
     // Reset to default STDERR output.
-    static::loggerSetOutputStream(NULL);
-    static::loggerSetVerbose(TRUE);
+    self::loggerSetOutputStream(NULL);
+    self::loggerSetVerbose(TRUE);
 
     // Create a temporary test file.
     $temp_file = tempnam(sys_get_temp_dir(), 'logger_functional_test');
     file_put_contents($temp_file, "Sample file content\nLine 2\nLine 3\n");
 
-    static::logFile($temp_file, 'Test configuration file');
+    self::logFile($temp_file, 'Test configuration file');
 
     // Clean up.
     unlink($temp_file);
@@ -128,23 +129,23 @@ class LoggerTraitFunctionalTest extends UnitTestCase {
   #[DoesNotPerformAssertions]
   public function testFunctionalHierarchicalSteps(): void {
     // Reset to default STDERR output.
-    static::loggerSetOutputStream(NULL);
-    static::loggerSetVerbose(TRUE);
+    self::loggerSetOutputStream(NULL);
+    self::loggerSetVerbose(TRUE);
 
     // Start the main deployment process.
     $this->stepDeploymentProcess();
 
     // Show hierarchical summary with default indentation.
-    static::logStepSummary('DEPLOYMENT SUMMARY');
+    self::logStepSummary('DEPLOYMENT SUMMARY');
   }
 
   /**
    * Main deployment process step.
    */
   private function stepDeploymentProcess(): void {
-    static::logStepStart('Starting main deployment workflow');
-    static::log('Initializing deployment environment');
-    static::logSection('DEPLOYMENT CONFIGURATION', 'Production environment settings loaded');
+    self::logStepStart('Starting main deployment workflow');
+    self::log('Initializing deployment environment');
+    self::logSection('DEPLOYMENT CONFIGURATION', 'Production environment settings loaded');
 
     // Run database migration.
     $this->stepDatabaseMigration();
@@ -155,24 +156,25 @@ class LoggerTraitFunctionalTest extends UnitTestCase {
     // Run health checks.
     $this->stepHealthChecks();
 
-    static::log('All deployment steps completed successfully');
-    static::logStepFinish('Main deployment process completed');
+    self::log('All deployment steps completed successfully');
+    self::logStepFinish('Main deployment process completed');
   }
 
   /**
    * Database migration step.
    */
   private function stepDatabaseMigration(): void {
-    static::logStepStart('Preparing database migration');
-    static::log('Connecting to production database');
-    static::logNote('Using read-only backup connection');
+    self::logStepStart('Preparing database migration');
+    self::log('Connecting to production database');
+    self::logNote('Using read-only backup connection');
 
-    static::logSubstep('Backing up current database');
-    static::log('Creating backup: prod_backup_2025_01_15.sql');
-    sleep(1); // 1 second delay.
+    self::logSubstep('Backing up current database');
+    self::log('Creating backup: prod_backup_2025_01_15.sql');
+    // 1 second delay.
+    sleep(1);
 
-    static::logSubstep('Running migration scripts');
-    static::logNote('Applying schema changes from v2.1 to v2.2');
+    self::logSubstep('Running migration scripts');
+    self::logNote('Applying schema changes from v2.1 to v2.2');
 
     // Create a temporary migration log file to demonstrate logFile.
     $temp_file = tempnam(sys_get_temp_dir(), 'migration_log');
@@ -182,46 +184,50 @@ class LoggerTraitFunctionalTest extends UnitTestCase {
       "2025-01-15 10:30:32 - Table orders: Modified index on 'created_at'\n" .
       "2025-01-15 10:30:45 - Migration completed successfully\n");
 
-    static::logFile($temp_file, 'Database migration log');
-    unlink($temp_file); // Clean up.
+    self::logFile($temp_file, 'Database migration log');
+    // Clean up.
+    unlink($temp_file);
 
-    sleep(2); // 2 second delay.
-    static::log('Database schema updated successfully');
-    static::logStepFinish('Database migration completed');
+    // 2 second delay.
+    sleep(2);
+    self::log('Database schema updated successfully');
+    self::logStepFinish('Database migration completed');
   }
 
   /**
    * Application deployment step.
    */
   private function stepApplicationDeployment(): void {
-    static::logStepStart('Deploying application to production');
-    static::logSection('APPLICATION SERVER', 'Preparing production deployment', TRUE);
-    static::logNote('Deploying to production server cluster');
-    static::log('Uploading application files to web servers');
-    sleep(1); // 1 second delay.
+    self::logStepStart('Deploying application to production');
+    self::logSection('APPLICATION SERVER', 'Preparing production deployment', TRUE);
+    self::logNote('Deploying to production server cluster');
+    self::log('Uploading application files to web servers');
+    // 1 second delay.
+    sleep(1);
 
     // Run asset compilation as a nested step.
     $this->stepAssetCompilation();
 
-    static::log('Restarting application services');
-    static::logNote('All services restarted successfully');
-    static::logStepFinish('Application deployment finished');
+    self::log('Restarting application services');
+    self::logNote('All services restarted successfully');
+    self::logStepFinish('Application deployment finished');
   }
 
   /**
    * Asset compilation step (deeply nested).
    */
   private function stepAssetCompilation(): void {
-    static::logStepStart('Compiling and optimizing assets');
-    static::log('Initializing build environment');
+    self::logStepStart('Compiling and optimizing assets');
+    self::log('Initializing build environment');
 
-    static::logSubstep('Compiling CSS files');
-    static::logNote('Processing SCSS with node-sass compiler');
-    static::log('Generated: dist/css/main.min.css (compressed, 45KB)');
-    sleep(2); // 2 second delay.
+    self::logSubstep('Compiling CSS files');
+    self::logNote('Processing SCSS with node-sass compiler');
+    self::log('Generated: dist/css/main.min.css (compressed, 45KB)');
+    // 2 second delay.
+    sleep(2);
 
-    static::logSubstep('Minifying JavaScript');
-    static::logNote('Using terser for JS optimization');
+    self::logSubstep('Minifying JavaScript');
+    self::logNote('Using terser for JS optimization');
 
     // Create a temporary build log file.
     $build_file = tempnam(sys_get_temp_dir(), 'build_log');
@@ -234,31 +240,34 @@ class LoggerTraitFunctionalTest extends UnitTestCase {
       "  - src/utils.js → dist/js/utils.min.js (34KB)\n\n" .
       "Total savings: 67% reduction in file size\n");
 
-    static::logFile($build_file, 'Asset compilation report');
-    unlink($build_file); // Clean up.
+    self::logFile($build_file, 'Asset compilation report');
+    // Clean up.
+    unlink($build_file);
 
-    sleep(1); // 1 second delay.
-    static::log('Asset optimization completed successfully');
-    static::logStepFinish('Asset compilation completed');
+    // 1 second delay.
+    sleep(1);
+    self::log('Asset optimization completed successfully');
+    self::logStepFinish('Asset compilation completed');
   }
 
   /**
    * Health checks step.
    */
   private function stepHealthChecks(): void {
-    static::logStepStart('Running system health checks');
-    static::logSection('POST-DEPLOYMENT VERIFICATION', 'Validating system functionality');
+    self::logStepStart('Running system health checks');
+    self::logSection('POST-DEPLOYMENT VERIFICATION', 'Validating system functionality');
 
-    static::logSubstep('Testing database connection');
-    static::log('Connecting to production database cluster');
-    static::logNote('Connection successful - latency: 2ms');
-    sleep(1); // 1 second delay.
+    self::logSubstep('Testing database connection');
+    self::log('Connecting to production database cluster');
+    self::logNote('Connection successful - latency: 2ms');
+    // 1 second delay.
+    sleep(1);
 
-    static::logSubstep('Verifying API endpoints');
-    static::log('Testing critical API endpoints:');
-    static::logNote('  • GET /api/health → 200 OK');
-    static::logNote('  • GET /api/users → 200 OK');
-    static::logNote('  • POST /api/auth → 200 OK');
+    self::logSubstep('Verifying API endpoints');
+    self::log('Testing critical API endpoints:');
+    self::logNote('  • GET /api/health → 200 OK');
+    self::logNote('  • GET /api/users → 200 OK');
+    self::logNote('  • POST /api/auth → 200 OK');
 
     // Create a health check results file.
     $health_file = tempnam(sys_get_temp_dir(), 'health_check');
@@ -277,12 +286,14 @@ class LoggerTraitFunctionalTest extends UnitTestCase {
       "Disk Usage: 45% (Normal)\n\n" .
       "Overall Status: ✓ ALL SYSTEMS OPERATIONAL\n");
 
-    static::logFile($health_file, 'System health check results');
-    unlink($health_file); // Clean up.
+    self::logFile($health_file, 'System health check results');
+    // Clean up.
+    unlink($health_file);
 
-    sleep(2); // 2 second delay.
-    static::log('All health checks completed successfully');
-    static::logStepFinish('Health checks passed');
+    // 2 second delay.
+    sleep(2);
+    self::log('All health checks completed successfully');
+    self::logStepFinish('Health checks passed');
   }
 
 }

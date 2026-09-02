@@ -28,7 +28,7 @@ class LocationsTraitTest extends TestCase {
     $this->testCwd = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('locations_trait_test_cwd_', TRUE);
     mkdir($this->testCwd, 0777, TRUE);
 
-    $this->testFixtures = $this->testCwd . DIRECTORY_SEPARATOR . static::locationsFixturesDir();
+    $this->testFixtures = $this->testCwd . DIRECTORY_SEPARATOR . self::locationsFixturesDir();
     mkdir($this->testFixtures, 0777, TRUE);
   }
 
@@ -47,15 +47,15 @@ class LocationsTraitTest extends TestCase {
   public function testLocationsInit(): void {
     $this->locationsInit($this->testCwd);
 
-    $this->assertSame(static::locationsRealpath($this->testCwd), static::locationsRealpath(static::$root));
-    $this->assertDirectoryExists(static::$workspace);
-    $this->assertStringContainsString('workspace-', static::$workspace);
-    $this->assertDirectoryExists(static::$repo);
-    $this->assertDirectoryExists(static::$sut);
-    $this->assertDirectoryExists(static::$tmp);
+    $this->assertSame(self::locationsRealpath($this->testCwd), self::locationsRealpath(self::$root));
+    $this->assertDirectoryExists(self::$workspace);
+    $this->assertStringContainsString('workspace-', self::$workspace);
+    $this->assertDirectoryExists(self::$repo);
+    $this->assertDirectoryExists(self::$sut);
+    $this->assertDirectoryExists(self::$tmp);
 
-    $this->assertNotEmpty(static::$fixtures);
-    $this->assertSame(static::locationsRealpath($this->testFixtures), static::locationsRealpath(static::$fixtures ?? ''));
+    $this->assertNotEmpty(self::$fixtures);
+    $this->assertSame(self::locationsRealpath($this->testFixtures), self::locationsRealpath(self::$fixtures ?? ''));
 
     $after_called = FALSE;
     $after = function () use (&$after_called): void {
@@ -96,11 +96,11 @@ class LocationsTraitTest extends TestCase {
     try {
       $this->locationsInit();
 
-      $this->assertSame(static::locationsRealpath($this->testCwd), static::locationsRealpath(static::$root));
-      $this->assertDirectoryExists(static::$workspace);
-      $this->assertDirectoryExists(static::$repo);
-      $this->assertDirectoryExists(static::$sut);
-      $this->assertDirectoryExists(static::$tmp);
+      $this->assertSame(self::locationsRealpath($this->testCwd), self::locationsRealpath(self::$root));
+      $this->assertDirectoryExists(self::$workspace);
+      $this->assertDirectoryExists(self::$repo);
+      $this->assertDirectoryExists(self::$sut);
+      $this->assertDirectoryExists(self::$tmp);
     }
     finally {
       // Restore original working directory.
@@ -113,32 +113,31 @@ class LocationsTraitTest extends TestCase {
     mkdir($test_cwd_no_fixtures, 0777, TRUE);
 
     $mock_fixture_dir = 'nonexistent_fixtures_directory';
-    $original_fixtures = static::$fixtures;
+    $original_fixtures = self::$fixtures;
     $original_cwd = getcwd();
     if ($original_cwd === FALSE) {
       $this->markTestSkipped('Could not determine current working directory.');
     }
 
-    static::$fixtures = NULL;
+    self::$fixtures = NULL;
 
     try {
       // Change to the test directory.
       chdir($test_cwd_no_fixtures);
 
-      $mock = $this->createPartialMock(static::class, ['locationsFixturesDir']);
+      $mock = $this->createPartialMock(self::class, ['locationsFixturesDir']);
       $mock
         ->method('locationsFixturesDir')
         ->willReturn($mock_fixture_dir);
 
-      $reflection_method = new \ReflectionMethod(static::class, 'locationsInit');
-      $reflection_method->setAccessible(TRUE);
+      $reflection_method = new \ReflectionMethod(self::class, 'locationsInit');
       $reflection_method->invoke($this);
 
-      $this->assertNull(static::$fixtures, 'Fixtures property should be null when directory does not exist.');
+      $this->assertNull(self::$fixtures, 'Fixtures property should be null when directory does not exist.');
     }
     finally {
       // Restore original state.
-      static::$fixtures = $original_fixtures;
+      self::$fixtures = $original_fixtures;
       chdir($original_cwd);
 
       if (is_dir($test_cwd_no_fixtures)) {
@@ -187,14 +186,12 @@ class LocationsTraitTest extends TestCase {
     }
   }
 
-  public static function dataProviderLocationsFixtureDirTestNameWithDataSetNames(): array {
-    return [
-      'simple name' => ['simple_name'],
-      'Complex-Name' => ['complex_name'],
-      'name with spaces' => ['name_with_spaces'],
-      'name_with_underscores' => ['name_with_underscores'],
-      'name@with#special$chars' => ['namewithspecialchars'],
-    ];
+  public static function dataProviderLocationsFixtureDirTestNameWithDataSetNames(): \Iterator {
+    yield 'simple name' => ['simple_name'];
+    yield 'Complex-Name' => ['complex_name'];
+    yield 'name with spaces' => ['name_with_spaces'];
+    yield 'name_with_underscores' => ['name_with_underscores'];
+    yield 'name@with#special$chars' => ['namewithspecialchars'];
   }
 
   public function testLocationsCopyFilesToSut(): void {
@@ -221,9 +218,9 @@ class LocationsTraitTest extends TestCase {
     $this->assertCount(2, $copied_files);
     foreach ($copied_files as $copied_file) {
       $this->assertFileExists($copied_file);
-      $this->assertNotEmpty(static::$sut);
-      if (static::$sut !== '') {
-        $this->assertStringStartsWith(static::$sut, $copied_file);
+      $this->assertNotEmpty(self::$sut);
+      if (self::$sut !== '') {
+        $this->assertStringStartsWith(self::$sut, $copied_file);
       }
       $filename = basename($copied_file);
       $this->assertContains($filename, ['file1.txt', 'file2.txt'], 'No random suffix was added');
@@ -232,21 +229,21 @@ class LocationsTraitTest extends TestCase {
 
   public function testLocationsTearDown(): void {
     // Create a workspace directory with some content to test removal.
-    static::$workspace = $this->testTmp . DIRECTORY_SEPARATOR . 'test_workspace_' . uniqid();
-    mkdir(static::$workspace, 0777, TRUE);
-    touch(static::$workspace . DIRECTORY_SEPARATOR . 'test_file.txt');
+    self::$workspace = $this->testTmp . DIRECTORY_SEPARATOR . 'test_workspace_' . uniqid();
+    mkdir(self::$workspace, 0777, TRUE);
+    touch(self::$workspace . DIRECTORY_SEPARATOR . 'test_file.txt');
     $this->locationsTearDown();
-    $this->assertDirectoryDoesNotExist(static::$workspace, 'Workspace should be removed.');
+    $this->assertDirectoryDoesNotExist(self::$workspace, 'Workspace should be removed.');
   }
 
   public function testLocationsTearDownWithRestrictedPermissions(): void {
     // Create a workspace directory with restricted permissions to test chmod
     // handling.
-    static::$workspace = $this->testTmp . DIRECTORY_SEPARATOR . 'test_workspace_restricted_' . uniqid();
-    mkdir(static::$workspace, 0777, TRUE);
+    self::$workspace = $this->testTmp . DIRECTORY_SEPARATOR . 'test_workspace_restricted_' . uniqid();
+    mkdir(self::$workspace, 0777, TRUE);
 
     // Create a subdirectory structure with files.
-    $subdir = static::$workspace . DIRECTORY_SEPARATOR . 'subdir';
+    $subdir = self::$workspace . DIRECTORY_SEPARATOR . 'subdir';
     mkdir($subdir, 0777, TRUE);
     touch($subdir . DIRECTORY_SEPARATOR . 'test_file.txt');
 
@@ -254,14 +251,14 @@ class LocationsTraitTest extends TestCase {
     chmod($subdir, 0555);
 
     // Verify the directory is read-only.
-    $this->assertFalse(is_writable($subdir), 'Subdirectory should be read-only.');
+    $this->assertIsNotWritable($subdir, 'Subdirectory should be read-only.');
 
     // locationsTearDown should handle the chmod and remove the directory
     // successfully.
     $this->locationsTearDown();
 
     // Verify the workspace was completely removed.
-    $this->assertDirectoryDoesNotExist(static::$workspace, 'Workspace with restricted permissions should be removed.');
+    $this->assertDirectoryDoesNotExist(self::$workspace, 'Workspace with restricted permissions should be removed.');
   }
 
   #[DataProvider('dataProviderLocationsCopy')]
@@ -318,7 +315,7 @@ class LocationsTraitTest extends TestCase {
       };
     }
 
-    $result = static::locationsCopy(
+    $result = self::locationsCopy(
       $source_dir,
       $dest_dir,
       $processed_include_files,
@@ -339,135 +336,133 @@ class LocationsTraitTest extends TestCase {
     (new Filesystem())->remove($dest_dir);
   }
 
-  public static function dataProviderLocationsCopy(): array {
-    return [
-      'empty_include' => [
-        [
-          'file1.txt' => 'content1',
-          'file2.txt' => 'content2',
-          'subdir/file3.txt' => 'content3',
-        ],
-        [],
-        [],
-        FALSE,
-        3,
+  public static function dataProviderLocationsCopy(): \Iterator {
+    yield 'empty_include' => [
+      [
+        'file1.txt' => 'content1',
+        'file2.txt' => 'content2',
+        'subdir/file3.txt' => 'content3',
       ],
-      'include_specific_files' => [
-        [
-          'file1.txt' => 'content1',
-          'file2.txt' => 'content2',
-          'subdir/file3.txt' => 'content3',
-        ],
-        ['file1.txt'],
-        [],
-        FALSE,
-        1,
+      [],
+      [],
+      FALSE,
+      3,
+    ];
+    yield 'include_specific_files' => [
+      [
+        'file1.txt' => 'content1',
+        'file2.txt' => 'content2',
+        'subdir/file3.txt' => 'content3',
       ],
-      'include_multiple_files' => [
-        [
-          'file1.txt' => 'content1',
-          'file2.txt' => 'content2',
-          'subdir/file3.txt' => 'content3',
-        ],
-        ['file1.txt', 'file2.txt'],
-        [],
-        FALSE,
-        2,
+      ['file1.txt'],
+      [],
+      FALSE,
+      1,
+    ];
+    yield 'include_multiple_files' => [
+      [
+        'file1.txt' => 'content1',
+        'file2.txt' => 'content2',
+        'subdir/file3.txt' => 'content3',
       ],
-      'include_with_exclude' => [
-        [
-          'file1.txt' => 'content1',
-          'file2.txt' => 'content2',
-          'subdir/file3.txt' => 'content3',
-        ],
-        ['file1.txt', 'file2.txt', 'subdir/file3.txt'],
-        ['subdir'],
-        FALSE,
-        2,
+      ['file1.txt', 'file2.txt'],
+      [],
+      FALSE,
+      2,
+    ];
+    yield 'include_with_exclude' => [
+      [
+        'file1.txt' => 'content1',
+        'file2.txt' => 'content2',
+        'subdir/file3.txt' => 'content3',
       ],
-      'with_before_callback' => [
-        [
-          'file1.txt' => 'content1',
-          'file2.txt' => 'content2',
-        ],
-        ['file1.txt', 'file2.txt'],
-        [],
-        TRUE,
-        2,
+      ['file1.txt', 'file2.txt', 'subdir/file3.txt'],
+      ['subdir'],
+      FALSE,
+      2,
+    ];
+    yield 'with_before_callback' => [
+      [
+        'file1.txt' => 'content1',
+        'file2.txt' => 'content2',
       ],
-      'empty_source' => [
-        [],
-        [],
-        [],
-        FALSE,
-        0,
+      ['file1.txt', 'file2.txt'],
+      [],
+      TRUE,
+      2,
+    ];
+    yield 'empty_source' => [
+      [],
+      [],
+      [],
+      FALSE,
+      0,
+    ];
+    yield 'include_nested_files' => [
+      [
+        'file1.txt' => 'content1',
+        'subdir/file2.txt' => 'content2',
+        'subdir/nested/file3.txt' => 'content3',
       ],
-      'include_nested_files' => [
-        [
-          'file1.txt' => 'content1',
-          'subdir/file2.txt' => 'content2',
-          'subdir/nested/file3.txt' => 'content3',
-        ],
-        ['subdir/file2.txt', 'subdir/nested/file3.txt'],
-        [],
-        FALSE,
-        2,
+      ['subdir/file2.txt', 'subdir/nested/file3.txt'],
+      [],
+      FALSE,
+      2,
+    ];
+    yield 'dotfiles_included' => [
+      [
+        '.file1.txt' => 'content1',
+        '.hidden/file2.txt' => 'content2',
       ],
-      'dotfiles_included' => [
-        [
-          '.file1.txt' => 'content1',
-          '.hidden/file2.txt' => 'content2',
-        ],
-        ['.file1.txt', '.hidden/file2.txt'],
-        [],
-        FALSE,
-        2,
+      ['.file1.txt', '.hidden/file2.txt'],
+      [],
+      FALSE,
+      2,
+    ];
+    yield 'symlink_handling' => [
+      [
+        'file1.txt' => 'content1',
+        'link_target.txt' => 'target content',
       ],
-      'symlink_handling' => [
-        [
-          'file1.txt' => 'content1',
-          'link_target.txt' => 'target content',
-        ],
-        ['file1.txt', 'link_target.txt', 'symlink.txt'],
-        [],
-        FALSE,
-        3,
-      ],
+      ['file1.txt', 'link_target.txt', 'symlink.txt'],
+      [],
+      FALSE,
+      3,
     ];
   }
 
   public function testLocationGetters(): void {
     $this->locationsInit($this->testCwd);
 
-    // Test all getter methods return the same values as direct property access
-    $this->assertSame(static::$root, static::locationsRoot());
-    $this->assertSame(static::$fixtures, static::locationsFixtures());
-    $this->assertSame(static::$workspace, static::locationsWorkspace());
-    $this->assertSame(static::$repo, static::locationsRepo());
-    $this->assertSame(static::$sut, static::locationsSut());
-    $this->assertSame(static::$tmp, static::locationsTmp());
+    // Test all getter methods return the same values as direct property access.
+    $this->assertSame(self::$root, self::locationsRoot());
+    $this->assertSame(self::$fixtures, self::locationsFixtures());
+    $this->assertSame(self::$workspace, self::locationsWorkspace());
+    $this->assertSame(self::$repo, self::locationsRepo());
+    $this->assertSame(self::$sut, self::locationsSut());
+    $this->assertSame(self::$tmp, self::locationsTmp());
 
-    // Test that getters return expected directory types
-    $this->assertDirectoryExists(static::locationsRoot());
-    $this->assertDirectoryExists(static::locationsWorkspace());
-    $this->assertDirectoryExists(static::locationsRepo());
-    $this->assertDirectoryExists(static::locationsSut());
-    $this->assertDirectoryExists(static::locationsTmp());
+    // Test that getters return expected directory types.
+    $this->assertDirectoryExists(self::locationsRoot());
+    $this->assertDirectoryExists(self::locationsWorkspace());
+    $this->assertDirectoryExists(self::locationsRepo());
+    $this->assertDirectoryExists(self::locationsSut());
+    $this->assertDirectoryExists(self::locationsTmp());
 
     // Test fixtures getter specifically (can be null)
-    if (static::locationsFixtures() !== NULL) {
-      $this->assertDirectoryExists(static::locationsFixtures());
+    if (self::locationsFixtures() !== NULL) {
+      $this->assertDirectoryExists(self::locationsFixtures());
     }
   }
 
   public function testLocationsTearDownWithChmodException(): void {
     // Create a workspace directory with restricted permissions to simulate
     // chmod issues.
-    static::$workspace = $this->testTmp . DIRECTORY_SEPARATOR . 'test_workspace_chmod_fail_' . uniqid();
-    mkdir(static::$workspace, 0777, TRUE);
+    self::$workspace = $this->testTmp . DIRECTORY_SEPARATOR . 'test_workspace_chmod_fail_' . uniqid();
+    mkdir(self::$workspace, 0777, TRUE);
 
     // Create a subdirectory and file structure that might cause chmod issues.
-    $subdir = static::$workspace . DIRECTORY_SEPARATOR . 'readonly_subdir';
+    $subdir = self::$workspace . DIRECTORY_SEPARATOR . 'readonly_subdir';
     mkdir($subdir, 0777, TRUE);
     touch($subdir . DIRECTORY_SEPARATOR . 'test_file.txt');
 
@@ -480,7 +475,19 @@ class LocationsTraitTest extends TestCase {
     $this->locationsTearDown();
 
     // Verify the workspace was removed despite potential chmod exceptions.
-    $this->assertDirectoryDoesNotExist(static::$workspace, 'Workspace should be removed even with chmod exception.');
+    $this->assertDirectoryDoesNotExist(self::$workspace, 'Workspace should be removed even with chmod exception.');
+  }
+
+  public function testLocationsTearDownIgnoresChmodFailure(): void {
+    // chmod() fails on a path that does not exist, so pointing the workspace
+    // at a missing directory exercises the swallowed-exception path.
+    self::$workspace = $this->testTmp . DIRECTORY_SEPARATOR . 'missing_workspace_' . uniqid();
+
+    $this->assertDirectoryDoesNotExist(self::$workspace);
+
+    $this->locationsTearDown();
+
+    $this->assertDirectoryDoesNotExist(self::$workspace);
   }
 
   public function testLocationsFixtureDirThrowsExceptionWhenFixturesDirectoryMissing(): void {
@@ -490,7 +497,7 @@ class LocationsTraitTest extends TestCase {
 
     try {
       $this->locationsInit($test_cwd_no_fixtures);
-      static::$fixtures = NULL;
+      self::$fixtures = NULL;
 
       $this->expectException(\RuntimeException::class);
       $this->expectExceptionMessage('Fixtures directory');
@@ -521,12 +528,10 @@ class LocationsTraitTest extends TestCase {
     $this->assertStringEndsWith($expected_suffix, $fixture_dir);
   }
 
-  public static function dataProviderLocationsFixtureDirWithBaselineDataset(): array {
-    return [
-      static::BASELINE_DATASET => [static::BASELINE_DIR],
-      'custom-dataset' => ['custom_dataset'],
-      'another-test-case' => ['another_test_case'],
-    ];
+  public static function dataProviderLocationsFixtureDirWithBaselineDataset(): \Iterator {
+    yield self::BASELINE_DATASET => [self::BASELINE_DIR];
+    yield 'custom-dataset' => ['custom_dataset'];
+    yield 'another-test-case' => ['another_test_case'];
   }
 
   public function testLocationsCopyWithNonExistentIncludeFile(): void {
@@ -545,7 +550,7 @@ class LocationsTraitTest extends TestCase {
     // Try to include a non-existent file along with the existing one.
     $include_files = [$existing_file, $source_dir . DIRECTORY_SEPARATOR . 'nonexistent.txt'];
 
-    $result = static::locationsCopy($source_dir, $dest_dir, $include_files);
+    $result = self::locationsCopy($source_dir, $dest_dir, $include_files);
 
     // Should only copy the existing file.
     $this->assertCount(1, $result);

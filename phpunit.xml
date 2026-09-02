@@ -11,8 +11,7 @@
          displayDetailsOnTestsThatTriggerWarnings="true"
          displayDetailsOnTestsThatTriggerErrors="true"
          displayDetailsOnTestsThatTriggerNotices="true"
-         displayDetailsOnTestsThatTriggerDeprecations="true"
-         >
+         displayDetailsOnTestsThatTriggerDeprecations="true">
     <testsuites>
         <testsuite name="default">
             <directory>tests</directory>
@@ -25,7 +24,7 @@
     </groups>
     <source restrictNotices="true"
             restrictWarnings="true"
-            >
+            ignoreIndirectDeprecations="true">
         <include>
             <directory>src</directory>
         </include>
@@ -34,11 +33,11 @@
         </exclude>
     </source>
     <coverage pathCoverage="false"
-              includeUncoveredFiles="true"
               ignoreDeprecatedCodeUnits="true"
               disableCodeCoverageIgnore="false">
         <report>
             <html outputDirectory=".logs/.coverage-html" lowUpperBound="50" highLowerBound="90"/>
+            <text outputFile=".logs/coverage.txt"/>
             <cobertura outputFile=".logs/cobertura.xml"/>
         </report>
     </coverage>

@@ -21,7 +21,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\ApplicationTester;
 
 #[CoversTrait(ApplicationTrait::class)]
-class ApplicationTraitTest extends UnitTestCase {
+final class ApplicationTraitTest extends UnitTestCase {
 
   use ApplicationTrait;
 
@@ -36,15 +36,15 @@ class ApplicationTraitTest extends UnitTestCase {
   }
 
   public function testApplicationInitFromLoader(): void {
-    if (!static::$fixtures) {
+    if (!self::$fixtures) {
       throw new \RuntimeException('Fixtures directory is not set.');
     }
 
-    $loader_path = static::$fixtures . '/Application/loader.php';
+    $loader_path = self::$fixtures . '/Application/loader.php';
     $this->applicationInitFromLoader($loader_path);
 
-    $this->assertNotNull($this->application);
-    $this->assertNotNull($this->applicationTester);
+    $this->assertInstanceOf(Application::class, $this->application);
+    $this->assertInstanceOf(ApplicationTester::class, $this->applicationTester);
   }
 
   public function testApplicationInitFromLoaderInvalidPath(): void {
@@ -55,8 +55,8 @@ class ApplicationTraitTest extends UnitTestCase {
   }
 
   public function testApplicationInitFromLoaderInvalidReturn(): void {
-    // Create a temporary file that returns null instead of an Application
-    $temp_file = static::$tmp . '/invalid_loader.php';
+    // Create a temporary file that returns null instead of an Application.
+    $temp_file = self::$tmp . '/invalid_loader.php';
     file_put_contents($temp_file, '<?php return null;');
 
     $this->expectException(\InvalidArgumentException::class);
@@ -66,28 +66,28 @@ class ApplicationTraitTest extends UnitTestCase {
   }
 
   public function testApplicationInitWithCustomWorkingDirectory(): void {
-    // Set a custom working directory
-    $this->applicationCwd = static::$tmp;
+    // Set a custom working directory.
+    $this->applicationCwd = self::$tmp;
 
-    // Initialize from command
+    // Initialize from command.
     $this->applicationInitFromCommand(GreetingCommand::class);
 
-    // Run a simple command
+    // Run a simple command.
     $this->applicationRun([]);
 
-    // Assert the command ran successfully
+    // Assert the command ran successfully.
     $this->assertApplicationSuccessful();
 
     // Verify custom working directory was used (we can't directly check the
     // current directory because it's reset by the shutdown function)
-    $this->assertNotNull($this->applicationTester);
+    $this->assertInstanceOf(ApplicationTester::class, $this->applicationTester);
   }
 
   public function testApplicationInitFromCommand(): void {
     $this->applicationInitFromCommand(GreetingCommand::class);
 
-    $this->assertNotNull($this->application);
-    $this->assertNotNull($this->applicationTester);
+    $this->assertInstanceOf(Application::class, $this->application);
+    $this->assertInstanceOf(ApplicationTester::class, $this->applicationTester);
   }
 
   public function testApplicationInitFromCommandInvalidClass(): void {
@@ -98,7 +98,7 @@ class ApplicationTraitTest extends UnitTestCase {
   }
 
   public function testApplicationInitFromCommandWithDefaultName(): void {
-    // Create a command with name set through configuration
+    // Create a command with name set through configuration.
     $command = new class() extends Command {
 
       protected function configure(): void {
@@ -107,14 +107,14 @@ class ApplicationTraitTest extends UnitTestCase {
 
     };
 
-    // Initialize with this command
+    // Initialize with this command.
     $this->applicationInitFromCommand($command);
 
-    $this->assertNotNull($this->application);
-    $this->assertNotNull($this->applicationTester);
+    $this->assertInstanceOf(Application::class, $this->application);
+    $this->assertInstanceOf(ApplicationTester::class, $this->applicationTester);
 
-    // The application should have the command available
-    $this->assertNotNull($this->application);
+    // The application should have the command available.
+    $this->assertInstanceOf(Application::class, $this->application);
     $commands = $this->application->all();
     $this->assertArrayHasKey('test:configured-name', $commands);
   }
@@ -129,7 +129,7 @@ class ApplicationTraitTest extends UnitTestCase {
 
     };
 
-    // Symfony's Application class throws this before our null check
+    // Symfony's Application class throws this before our null check.
     $this->expectException(LogicException::class);
     $this->expectExceptionMessage('cannot have an empty name');
 
@@ -137,13 +137,13 @@ class ApplicationTraitTest extends UnitTestCase {
   }
 
   public function testApplicationInitFromCommandNotSingleCommand(): void {
-    // Test with is_single_command = FALSE
+    // Test with is_single_command = FALSE.
     $this->applicationInitFromCommand(GreetingCommand::class, FALSE);
 
-    $this->assertNotNull($this->application);
-    $this->assertNotNull($this->applicationTester);
+    $this->assertInstanceOf(Application::class, $this->application);
+    $this->assertInstanceOf(ApplicationTester::class, $this->applicationTester);
 
-    // With is_single_command = FALSE, we should be able to run commands by name
+    // With is_single_command = FALSE, commands can be run by name.
     $this->applicationRun(['command' => 'app:greet']);
     $this->assertApplicationSuccessful();
     $this->assertApplicationOutputContains('Hello, World!');
@@ -151,34 +151,35 @@ class ApplicationTraitTest extends UnitTestCase {
 
   public function testApplicationInitFromLoaderWithGetcwdFailure(): void {
     // Mock a scenario where getcwd() returns FALSE (which is hard to test
-    // directly). This tests the conditional branch in applicationInitFromLoader
-    if (!static::$fixtures) {
+    // directly). This covers the conditional branch in
+    // applicationInitFromLoader().
+    if (!self::$fixtures) {
       throw new \RuntimeException('Fixtures directory is not set.');
     }
 
-    // Set a custom working directory
-    $this->applicationCwd = static::$tmp;
+    // Set a custom working directory.
+    $this->applicationCwd = self::$tmp;
 
     // Initialize from loader (this will trigger the getcwd check)
-    $loader_path = static::$fixtures . '/Application/loader.php';
+    $loader_path = self::$fixtures . '/Application/loader.php';
     $this->applicationInitFromLoader($loader_path);
 
-    $this->assertNotNull($this->application);
-    $this->assertNotNull($this->applicationTester);
+    $this->assertInstanceOf(Application::class, $this->application);
+    $this->assertInstanceOf(ApplicationTester::class, $this->applicationTester);
   }
 
   public function testApplicationRunWithShowOutput(): void {
-    // Test that the applicationShowOutput flag can be set
+    // Test that the applicationShowOutput flag can be set.
     $this->applicationShowOutput = TRUE;
     $this->assertTrue($this->applicationShowOutput);
 
-    // Reset to FALSE to avoid output during test
+    // Reset to FALSE to avoid output during test.
     $this->applicationShowOutput = FALSE;
 
     $this->applicationInitFromCommand(GreetingCommand::class);
 
     // The fwrite(STDOUT, ...) call is excluded from coverage, so we can't test
-    // it directly. But we can verify the application runs successfully
+    // it directly. But we can verify the application runs successfully.
     $this->applicationRun(['name' => 'TestUser']);
     $this->assertApplicationSuccessful();
     $this->assertApplicationOutputContains('Hello, TestUser!');
@@ -188,7 +189,7 @@ class ApplicationTraitTest extends UnitTestCase {
    * Test other code paths in applicationTrait.
    */
   public function testApplicationRunExceptionHandling(): void {
-    // Create an application that will throw an exception from a command
+    // Create an application that will throw an exception from a command.
     $this->application = new Application();
 
     // Add a command that will throw an Exception (not RuntimeException)
@@ -211,10 +212,10 @@ class ApplicationTraitTest extends UnitTestCase {
 
     $this->applicationTester = new ApplicationTester($this->application);
 
-    // With expect_fail as true, the exception should be caught
+    // With expect_fail as true, the exception should be caught.
     $this->applicationRun([], [], TRUE);
 
-    // Without expect_fail, we should get an AssertionFailedError
+    // Without expect_fail, we should get an AssertionFailedError.
     $this->expectException(AssertionFailedError::class);
     $this->applicationRun([]);
   }
@@ -229,24 +230,22 @@ class ApplicationTraitTest extends UnitTestCase {
     $this->assertApplicationOutputContains($expected);
   }
 
-  public static function dataProviderApplicationRun(): array {
-    return [
-      'default' => [
-        [],
-        ['Hello, World!'],
-      ],
-      'with_name' => [
-        ['name' => 'John'],
-        ['Hello, John!'],
-      ],
-      'with_yell' => [
-        ['--yell' => TRUE],
-        ['HELLO, WORLD!'],
-      ],
-      'with_name_and_yell' => [
-        ['name' => 'John', '--yell' => TRUE],
-        ['HELLO, JOHN!'],
-      ],
+  public static function dataProviderApplicationRun(): \Iterator {
+    yield 'default' => [
+      [],
+      ['Hello, World!'],
+    ];
+    yield 'with_name' => [
+      ['name' => 'John'],
+      ['Hello, John!'],
+    ];
+    yield 'with_yell' => [
+      ['--yell' => TRUE],
+      ['HELLO, WORLD!'],
+    ];
+    yield 'with_name_and_yell' => [
+      ['name' => 'John', '--yell' => TRUE],
+      ['HELLO, JOHN!'],
     ];
   }
 
@@ -300,7 +299,7 @@ class ApplicationTraitTest extends UnitTestCase {
   }
 
   public function testApplicationRunWithExpectedFailure(): void {
-    // Create a test command that throws an exception
+    // Create a test command that throws an exception.
     $command = new class() extends Command {
 
       protected function configure(): void {
@@ -315,19 +314,19 @@ class ApplicationTraitTest extends UnitTestCase {
 
     $this->applicationInitFromCommand($command);
 
-    // The applicationRun should not throw an exception when expect_fail is TRUE
+    // applicationRun() does not throw when expect_fail is TRUE.
     $output = $this->applicationRun([], [], TRUE);
 
-    // The output should contain the error message
+    // The output should contain the error message.
     $this->assertStringContainsString('Test exception message', $output);
 
-    // Try again without expect_fail, which should throw an exception
+    // Try again without expect_fail, which should throw an exception.
     $this->expectException(AssertionFailedError::class);
     $this->applicationRun([]);
   }
 
   public function testApplicationRunWithNonZeroExitCode(): void {
-    // Create a test command that returns a non-zero exit code
+    // Create a test command that returns a non-zero exit code.
     $command = new class() extends Command {
 
       protected function configure(): void {
@@ -336,7 +335,8 @@ class ApplicationTraitTest extends UnitTestCase {
 
       protected function execute(InputInterface $input, OutputInterface $output): int {
         $output->writeln('Non-zero exit');
-        return 1; // Error exit code
+        // Error exit code.
+        return 1;
       }
 
     };
@@ -350,7 +350,7 @@ class ApplicationTraitTest extends UnitTestCase {
   }
 
   public function testApplicationRunWithNonZeroExitCodeAndExpectedFailure(): void {
-    // Create a test command that returns a non-zero exit code
+    // Create a test command that returns a non-zero exit code.
     $command = new class() extends Command {
 
       protected function configure(): void {
@@ -359,7 +359,8 @@ class ApplicationTraitTest extends UnitTestCase {
 
       protected function execute(InputInterface $input, OutputInterface $output): int {
         $output->writeln('Non-zero exit');
-        return 1; // Error exit code
+        // Error exit code.
+        return 1;
       }
 
     };
@@ -370,12 +371,12 @@ class ApplicationTraitTest extends UnitTestCase {
     // a non-zero exit code but expect_fail is TRUE.
     $output = $this->applicationRun([], [], TRUE);
 
-    // The output should still contain the command output
+    // The output should still contain the command output.
     $this->assertStringContainsString('Non-zero exit', $output);
   }
 
   public function testAssertApplicationFailed(): void {
-    // Create a test command that returns a non-zero exit code
+    // Create a test command that returns a non-zero exit code.
     $command = new class() extends Command {
 
       protected function configure(): void {
@@ -383,19 +384,20 @@ class ApplicationTraitTest extends UnitTestCase {
       }
 
       protected function execute(InputInterface $input, OutputInterface $output): int {
-        return 1; // Error exit code
+        // Error exit code.
+        return 1;
       }
 
     };
 
-    // Initialize the application with our test command
+    // Initialize the application with our test command.
     $this->applicationInitFromCommand($command);
 
     // Run the command, which will return a non-zero exit code
-    // Use expect_fail to prevent an exception
+    // Use expect_fail to prevent an exception.
     $this->applicationRun([], [], TRUE);
 
-    // Now assert that the application actually failed as expected
+    // Now assert that the application actually failed as expected.
     $this->assertApplicationFailed();
   }
 
@@ -403,44 +405,53 @@ class ApplicationTraitTest extends UnitTestCase {
    * Test that assertApplicationFailed throws an exception for success status.
    */
   public function testAssertApplicationFailedWithSuccessStatus(): void {
-    // Create a command that succeeds
+    // Create a command that succeeds.
     $command = new GreetingCommand();
 
-    // Initialize the application with the command
+    // Initialize the application with the command.
     $this->applicationInitFromCommand($command);
 
-    // Run the command to set up the successful status
+    // Run the command to set up the successful status.
     $this->applicationRun([]);
 
-    // Expect the assertion to fail since the application succeeded
+    // Expect the assertion to fail since the application succeeded.
     $this->expectException(ExpectationFailedException::class);
     $this->expectExceptionMessage('Application succeeded when failure was expected');
 
-    // This should fail because the application ran successfully
+    // This should fail because the application ran successfully.
     $this->assertApplicationFailed();
   }
 
   public function testApplicationInitFromLoaderWithWorkingDirectory(): void {
-    // Save a copy of the current working directory
-    getcwd();
+    $original_cwd = getcwd();
 
-    // Set a specific working directory for the application
-    $this->applicationCwd = static::$tmp;
+    if ($original_cwd === FALSE) {
+      $this->markTestSkipped('Could not determine current working directory.');
+    }
 
-    if (!static::$fixtures) {
+    // Set a specific working directory for the application.
+    $this->applicationCwd = self::$tmp;
+
+    if (!self::$fixtures) {
       throw new \RuntimeException('Fixtures directory is not set.');
     }
 
-    // Initialize the application from the loader
-    $loader_path = static::$fixtures . '/Application/loader.php';
-    $this->applicationInitFromLoader($loader_path);
+    try {
+      // Initialize the application from the loader.
+      $loader_path = self::$fixtures . '/Application/loader.php';
+      $this->applicationInitFromLoader($loader_path);
 
-    // Assert the application was properly initialized
-    $this->assertNotNull($this->application);
-    $this->assertNotNull($this->applicationTester);
+      // Assert the application was properly initialized.
+      $this->assertInstanceOf(Application::class, $this->application);
+      $this->assertInstanceOf(ApplicationTester::class, $this->applicationTester);
 
-    // Assert we're back in the original directory
-    $this->assertDirectoryExists(static::$tmp);
+      // The original directory is restored on shutdown, so the process is
+      // still in the configured directory at this point.
+      $this->assertSame(realpath(self::$tmp), realpath((string) getcwd()));
+    }
+    finally {
+      chdir($original_cwd);
+    }
   }
 
   public function testApplicationOutputAssertions(): void {
@@ -461,7 +472,7 @@ class ApplicationTraitTest extends UnitTestCase {
   }
 
   public function testApplicationErrorOutputAssertions(): void {
-    // Use the dedicated command that generates error output
+    // Use the dedicated command that generates error output.
     $this->applicationInitFromCommand(ErrorOutputCommand::class);
     $this->applicationRun([]);
 
@@ -579,7 +590,7 @@ class ApplicationTraitTest extends UnitTestCase {
   }
 
   public function testApplicationAnyOutputErrorCommandAssertions(): void {
-    // Use the dedicated command that generates error output
+    // Use the dedicated command that generates error output.
     $this->applicationInitFromCommand(ErrorOutputCommand::class);
     $output = $this->applicationRun([]);
 
@@ -597,7 +608,7 @@ class ApplicationTraitTest extends UnitTestCase {
     $this->assertApplicationErrorOutputNotContains('Output message');
     $this->assertApplicationErrorOutputContains('Test Error');
 
-    // Test that both standard and error output are checked together
+    // Test that both standard and error output are checked together.
     $this->assertApplicationAnyOutputContainsOrNot([
       '* Test Error',
       '* Output message',
@@ -606,7 +617,7 @@ class ApplicationTraitTest extends UnitTestCase {
   }
 
   public function testApplicationAnyOutputExceptionCommandAssertions(): void {
-    // Use the dedicated command that generates error output
+    // Use the dedicated command that generates error output.
     $this->applicationInitFromCommand(ExceptionOutputCommand::class);
     $output = $this->applicationRun([], [], TRUE);
 
@@ -641,7 +652,7 @@ class ApplicationTraitTest extends UnitTestCase {
 
     $this->assertApplicationSuccessful();
 
-    // Test shortcut mode - no prefixes, all should be present as substrings
+    // Test shortcut mode - no prefixes, all should be present as substrings.
     $this->assertApplicationAnyOutputContainsOrNot([
       'Hello',
       'Test',
@@ -659,7 +670,7 @@ class ApplicationTraitTest extends UnitTestCase {
       '+ Hello, World!',
     ]);
 
-    // Test exact match absent
+    // Test exact match absent.
     $this->assertApplicationOutputContainsOrNot([
       '- Not exact match',
     ]);
@@ -699,7 +710,7 @@ class ApplicationTraitTest extends UnitTestCase {
 
     $this->assertApplicationSuccessful();
 
-    // Test shortcut mode - no prefixes, all should be present as substrings
+    // Test shortcut mode - no prefixes, all should be present as substrings.
     $this->assertApplicationAnyOutputContainsOrNot([
       'Test Error',
       'Output message',
@@ -726,12 +737,12 @@ class ApplicationTraitTest extends UnitTestCase {
 
     $this->assertApplicationSuccessful();
 
-    // Exact match works without needing to add \n
+    // Exact match works without needing to add \n.
     $this->assertApplicationOutputContainsOrNot([
       '+ Hello, World!',
     ]);
 
-    // Should not match if there's content after the newline
+    // Should not match if there's content after the newline.
     $this->assertApplicationOutputContainsOrNot([
       '- Hello, World!\nExtra',
     ]);
@@ -743,7 +754,7 @@ class ApplicationTraitTest extends UnitTestCase {
 
     $this->assertApplicationSuccessful();
 
-    // Exact match works without needing to add \n
+    // Exact match works without needing to add \n.
     $this->assertApplicationErrorOutputContainsOrNot([
       '+ Test Error',
     ]);
@@ -755,14 +766,14 @@ class ApplicationTraitTest extends UnitTestCase {
 
     $this->assertApplicationSuccessful();
 
-    // Combined output is trimmed
+    // Combined output is trimmed.
     $this->assertApplicationAnyOutputContainsOrNot([
       '+ Output message' . "\n" . 'Test Error',
     ]);
   }
 
   public function testApplicationOutputExactMatchWithMultipleLines(): void {
-    // Create a command that outputs multiple lines
+    // Create a command that outputs multiple lines.
     $command = new class() extends Command {
 
       protected function configure(): void {
@@ -791,7 +802,7 @@ class ApplicationTraitTest extends UnitTestCase {
       '+ Line 1' . "\n" . 'Line 2' . "\n" . 'Line 3',
     ]);
 
-    // Partial match still works
+    // Partial match still works.
     $this->assertApplicationOutputContainsOrNot([
       '* Line 2',
     ]);

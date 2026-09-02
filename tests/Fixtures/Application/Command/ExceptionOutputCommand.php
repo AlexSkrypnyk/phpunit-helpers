@@ -23,10 +23,10 @@ class ExceptionOutputCommand extends Command {
    * {@inheritdoc}
    */
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    // Write to standard output
+    // Write to standard output.
     $output->writeln('Standard output before exception');
 
-    // Write to error output
+    // Write to error output.
     if ($output instanceof ConsoleOutputInterface) {
       $error_output = $output->getErrorOutput();
       $error_output->writeln('Error output before exception');
@@ -35,7 +35,7 @@ class ExceptionOutputCommand extends Command {
       fwrite(STDERR, "Error output before exception" . PHP_EOL);
     }
 
-    // Throw an exception
+    // Throw an exception.
     throw new \RuntimeException('Test exception message');
   }
 

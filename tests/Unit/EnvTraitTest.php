@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\CoversTrait;
 use PHPUnit\Framework\TestCase;
 
 #[CoversTrait(EnvTrait::class)]
-class EnvTraitTest extends TestCase {
+final class EnvTraitTest extends TestCase {
 
   use EnvTrait;
 

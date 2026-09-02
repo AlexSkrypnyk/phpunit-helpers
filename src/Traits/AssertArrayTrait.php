@@ -94,7 +94,7 @@ trait AssertArrayTrait {
                 $found = TRUE;
                 break;
               }
-              catch (\Throwable $e) {
+              catch (\Throwable) {
                 // Continue searching.
               }
             }
@@ -147,7 +147,7 @@ trait AssertArrayTrait {
             try {
               $this->assertArrayNotContainsArray($item, [$value], $message);
             }
-            catch (\Throwable $e) {
+            catch (\Throwable) {
               $this->fail($message ?: 'Unexpected sub-array found.');
             }
           }
