@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\CoversTrait;
 use PHPUnit\Framework\TestCase;
 
 #[CoversTrait(ReflectionTrait::class)]
-class ReflectionTraitTest extends TestCase {
+final class ReflectionTraitTest extends TestCase {
 
   use ReflectionTrait;
 
@@ -71,7 +71,6 @@ class ReflectionTraitTest extends TestCase {
   public function testSetProtectedValue(): void {
     $reflection = new \ReflectionClass($this->testObject);
     $property = $reflection->getProperty('protectedProperty');
-    $property->setAccessible(TRUE);
     $this->assertSame('initial value', $property->getValue($this->testObject), 'Property should have initial value');
 
     self::setProtectedValue($this->testObject, 'protectedProperty', 'new value');
@@ -82,7 +81,6 @@ class ReflectionTraitTest extends TestCase {
   public function testGetProtectedValue(): void {
     $reflection = new \ReflectionClass($this->testObject);
     $property = $reflection->getProperty('protectedProperty');
-    $property->setAccessible(TRUE);
     $property->setValue($this->testObject, 'test value');
 
     $value = self::getProtectedValue($this->testObject, 'protectedProperty');

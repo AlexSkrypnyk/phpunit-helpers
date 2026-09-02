@@ -160,8 +160,8 @@ trait TuiTrait {
    *   The processed TUI entries as keystrokes.
    */
   public static function tuiKeystrokes(array $entries, int $clear_size = 0, ?string $accept_key = NULL, ?string $clear_key = NULL): array {
-    $accept_key = $accept_key ?? static::KEYS['ENTER'];
-    $clear_key = $clear_key ?? static::KEYS['BACKSPACE'];
+    $accept_key ??= static::KEYS['ENTER'];
+    $clear_key ??= static::KEYS['BACKSPACE'];
 
     $entries = static::tuiEntries($entries, static::TUI_DEFAULT);
 

@@ -96,12 +96,12 @@ trait StringTrait {
         $prefix_with_separator = $prefix . $prefix_separator;
         if ($prefix_separator === '') {
           // When separator is empty, check only prefix.
-          if (substr($value, 0, strlen($prefix)) === $prefix) {
+          if (str_starts_with($value, $prefix)) {
             $has_prefix_count++;
             break;
           }
         }
-        elseif (substr($value, 0, strlen($prefix_with_separator)) === $prefix_with_separator) {
+        elseif (str_starts_with($value, $prefix_with_separator)) {
           // When separator exists, check prefix + separator.
           $has_prefix_count++;
           break;
@@ -120,12 +120,12 @@ trait StringTrait {
           $prefix_with_separator = $prefix . $prefix_separator;
           if ($prefix_separator === '') {
             // When separator is empty, check only prefix.
-            if (substr($value, 0, strlen($prefix)) === $prefix) {
+            if (str_starts_with($value, $prefix)) {
               $has_valid_prefix = TRUE;
               break;
             }
           }
-          elseif (substr($value, 0, strlen($prefix_with_separator)) === $prefix_with_separator) {
+          elseif (str_starts_with($value, $prefix_with_separator)) {
             // When separator exists, check prefix + separator.
             $has_valid_prefix = TRUE;
             break;
@@ -149,13 +149,13 @@ trait StringTrait {
           $prefix_with_separator = $test_prefix . $prefix_separator;
           if ($prefix_separator === '') {
             // When separator is empty, check only prefix.
-            if (substr($expected_value, 0, strlen($test_prefix)) === $test_prefix) {
+            if (str_starts_with($expected_value, $test_prefix)) {
               $prefix = $test_prefix;
               $value = substr($expected_value, strlen($test_prefix));
               break;
             }
           }
-          elseif (substr($expected_value, 0, strlen($prefix_with_separator)) === $prefix_with_separator) {
+          elseif (str_starts_with($expected_value, $prefix_with_separator)) {
             // When separator exists, check prefix + separator.
             $prefix = $test_prefix;
             $value = substr($expected_value, strlen($prefix_with_separator));

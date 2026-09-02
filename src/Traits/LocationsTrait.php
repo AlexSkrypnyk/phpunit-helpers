@@ -119,7 +119,7 @@ trait LocationsTrait {
     try {
       $fs->chmod(static::$workspace, 0777, 0000, TRUE);
     }
-    catch (\Exception $exception) {
+    catch (\Exception) {
       // Ignore errors if the directory is not writable.
     }
 
@@ -289,7 +289,7 @@ trait LocationsTrait {
       throw new \RuntimeException(sprintf('The base directory "%s" does not exist.', $basedir));
     }
     return static::locationsCopy($basedir, static::$sut, $files, [], function (string &$src, string &$dst) use ($append_rand): void {
-      $dst .= ($append_rand ? rand(1000, 9999) : '');
+      $dst .= ($append_rand ? random_int(1000, 9999) : '');
     });
   }
 

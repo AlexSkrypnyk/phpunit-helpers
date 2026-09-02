@@ -11,43 +11,43 @@ use PHPUnit\Framework\Attributes\CoversNothing;
  * Meta-test for ProcessTrait streaming and assertion suffix functionality.
  */
 #[CoversNothing]
-class ProcessTraitFunctionalTest extends UnitTestCase {
+final class ProcessTraitFunctionalTest extends UnitTestCase {
 
   public function testProcessTraitStreamingWithDebugEnabled(): void {
     $output = $this->runPhpunit(TRUE);
     $combined = $output['combined'];
 
-    // Assert streaming output appears when DEBUG=1
-    $this->assertStringContainsString('>> Success stdout', $combined);
-    $this->assertStringContainsString('XX Success stderr', $combined);
-    $this->assertStringContainsString('>> Failed stdout', $combined);
-    $this->assertStringContainsString('XX Failed stderr', $combined);
+    // Assert streaming output appears when DEBUG=1.
+    $this->assertStringContainsString('>> Success stdout', (string) $combined);
+    $this->assertStringContainsString('XX Success stderr', (string) $combined);
+    $this->assertStringContainsString('>> Failed stdout', (string) $combined);
+    $this->assertStringContainsString('XX Failed stderr', (string) $combined);
 
-    // Assert onNotSuccessfulTest() debug output appears in stderr
-    $this->assertStringContainsString('Error: ', $output['stderr']);
-    $this->assertStringContainsString('Additional information:', $output['stderr']);
+    // Assert onNotSuccessfulTest() debug output appears in stderr.
+    $this->assertStringContainsString('Error: ', (string) $output['stderr']);
+    $this->assertStringContainsString('Additional information:', (string) $output['stderr']);
 
-    // Assert common failure output
-    $this->assertStringContainsString('PROCESS FAILED', $combined);
-    $this->assertStringContainsString('PROCESS SUCCEEDED but failure was expected', $combined);
-    $this->assertStringContainsString('Additional information:', $combined);
-    $this->assertStringContainsString('LOCATIONS', $combined);
-    $this->assertStringContainsString('Tests: 4', $combined);
-    $this->assertStringContainsString('Failures: 2', $combined);
+    // Assert common failure output.
+    $this->assertStringContainsString('PROCESS FAILED', (string) $combined);
+    $this->assertStringContainsString('PROCESS SUCCEEDED but failure was expected', (string) $combined);
+    $this->assertStringContainsString('Additional information:', (string) $combined);
+    $this->assertStringContainsString('LOCATIONS', (string) $combined);
+    $this->assertStringContainsString('Tests: 4', (string) $combined);
+    $this->assertStringContainsString('Failures: 2', (string) $combined);
 
-    // Assert that actual process output appears in failure messages
-    $this->assertStringContainsString('Success stdout', $combined);
-    $this->assertStringContainsString('Success stderr', $combined);
-    $this->assertStringContainsString('Failed stdout', $combined);
-    $this->assertStringContainsString('Failed stderr', $combined);
+    // Assert that actual process output appears in failure messages.
+    $this->assertStringContainsString('Success stdout', (string) $combined);
+    $this->assertStringContainsString('Success stderr', (string) $combined);
+    $this->assertStringContainsString('Failed stdout', (string) $combined);
+    $this->assertStringContainsString('Failed stderr', (string) $combined);
 
-    // Assert that process output headers and footers appear
-    $this->assertStringContainsString('⬇⬇⬇ STANDARD OUTPUT ⬇⬇⬇', $combined);
-    $this->assertStringContainsString('⬆⬆⬆ STANDARD OUTPUT ⬆⬆⬆', $combined);
-    $this->assertStringContainsString('▼▼▼ ERROR OUTPUT ▼▼▼', $combined);
-    $this->assertStringContainsString('▲▲▲ ERROR OUTPUT ▲▲▲', $combined);
+    // Assert that process output headers and footers appear.
+    $this->assertStringContainsString('⬇⬇⬇ STANDARD OUTPUT ⬇⬇⬇', (string) $combined);
+    $this->assertStringContainsString('⬆⬆⬆ STANDARD OUTPUT ⬆⬆⬆', (string) $combined);
+    $this->assertStringContainsString('▼▼▼ ERROR OUTPUT ▼▼▼', (string) $combined);
+    $this->assertStringContainsString('▲▲▲ ERROR OUTPUT ▲▲▲', (string) $combined);
 
-    // Assert streaming timing
+    // Assert streaming timing.
     $this->assertStreamingTiming($output['real_time_output']);
   }
 
@@ -55,34 +55,34 @@ class ProcessTraitFunctionalTest extends UnitTestCase {
     $output = $this->runPhpunit(FALSE);
     $combined = $output['combined'];
 
-    // Assert streaming output does NOT appear when DEBUG=0
-    $this->assertStringNotContainsString('>> Success stdout', $combined);
-    $this->assertStringNotContainsString('XX Success stderr', $combined);
-    $this->assertStringNotContainsString('>> Failed stdout', $combined);
-    $this->assertStringNotContainsString('XX Failed stderr', $combined);
+    // Assert streaming output does NOT appear when DEBUG=0.
+    $this->assertStringNotContainsString('>> Success stdout', (string) $combined);
+    $this->assertStringNotContainsString('XX Success stderr', (string) $combined);
+    $this->assertStringNotContainsString('>> Failed stdout', (string) $combined);
+    $this->assertStringNotContainsString('XX Failed stderr', (string) $combined);
 
-    // Assert onNotSuccessfulTest() debug output does NOT appear when DEBUG=0
-    $this->assertStringNotContainsString('Error: ', $output['stderr']);
+    // Assert onNotSuccessfulTest() debug output does NOT appear when DEBUG=0.
+    $this->assertStringNotContainsString('Error: ', (string) $output['stderr']);
 
-    // Assert common failure output still appears
-    $this->assertStringContainsString('PROCESS FAILED', $combined);
-    $this->assertStringContainsString('PROCESS SUCCEEDED but failure was expected', $combined);
-    $this->assertStringContainsString('Additional information:', $combined);
-    $this->assertStringContainsString('LOCATIONS', $combined);
-    $this->assertStringContainsString('Tests: 4', $combined);
-    $this->assertStringContainsString('Failures: 2', $combined);
+    // Assert common failure output still appears.
+    $this->assertStringContainsString('PROCESS FAILED', (string) $combined);
+    $this->assertStringContainsString('PROCESS SUCCEEDED but failure was expected', (string) $combined);
+    $this->assertStringContainsString('Additional information:', (string) $combined);
+    $this->assertStringContainsString('LOCATIONS', (string) $combined);
+    $this->assertStringContainsString('Tests: 4', (string) $combined);
+    $this->assertStringContainsString('Failures: 2', (string) $combined);
 
-    // Assert that actual process output appears in failure messages
-    $this->assertStringContainsString('Success stdout', $combined);
-    $this->assertStringContainsString('Success stderr', $combined);
-    $this->assertStringContainsString('Failed stdout', $combined);
-    $this->assertStringContainsString('Failed stderr', $combined);
+    // Assert that actual process output appears in failure messages.
+    $this->assertStringContainsString('Success stdout', (string) $combined);
+    $this->assertStringContainsString('Success stderr', (string) $combined);
+    $this->assertStringContainsString('Failed stdout', (string) $combined);
+    $this->assertStringContainsString('Failed stderr', (string) $combined);
 
-    // Assert that process output headers and footers appear
-    $this->assertStringContainsString('⬇⬇⬇ STANDARD OUTPUT ⬇⬇⬇', $combined);
-    $this->assertStringContainsString('⬆⬆⬆ STANDARD OUTPUT ⬆⬆⬆', $combined);
-    $this->assertStringContainsString('▼▼▼ ERROR OUTPUT ▼▼▼', $combined);
-    $this->assertStringContainsString('▲▲▲ ERROR OUTPUT ▲▲▲', $combined);
+    // Assert that process output headers and footers appear.
+    $this->assertStringContainsString('⬇⬇⬇ STANDARD OUTPUT ⬇⬇⬇', (string) $combined);
+    $this->assertStringContainsString('⬆⬆⬆ STANDARD OUTPUT ⬆⬆⬆', (string) $combined);
+    $this->assertStringContainsString('▼▼▼ ERROR OUTPUT ▼▼▼', (string) $combined);
+    $this->assertStringContainsString('▲▲▲ ERROR OUTPUT ▲▲▲', (string) $combined);
   }
 
   private function runPhpunit(bool $with_debug): array {
@@ -179,8 +179,8 @@ class ProcessTraitFunctionalTest extends UnitTestCase {
     }
 
     foreach ($streaming_phase as $item) {
-      $this->assertStringNotContainsString('Additional information:', $item['data']);
-      $this->assertStringNotContainsString('LOCATIONS', $item['data']);
+      $this->assertStringNotContainsString('Additional information:', (string) $item['data']);
+      $this->assertStringNotContainsString('LOCATIONS', (string) $item['data']);
     }
 
     $final_output = implode('', array_column($final_phase, 'data'));

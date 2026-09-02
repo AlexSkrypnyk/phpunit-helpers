@@ -10,33 +10,29 @@ use PHPUnit\Framework\Attributes\CoversTrait;
 use PHPUnit\Framework\TestCase;
 
 #[CoversTrait(SerializableClosureTrait::class)]
-class SerializableClosureTraitTest extends TestCase {
+final class SerializableClosureTraitTest extends TestCase {
 
   use SerializableClosureTrait;
 
   public function testCwClosure(): void {
-    $closure = function (): string {
-      return 'test';
-    };
+    $closure = (fn(): string => 'test');
 
-    $actual = static::cw($closure);
+    $actual = self::cw($closure);
 
     $this->assertInstanceOf(SerializableClosure::class, $actual);
     $this->assertEquals('test', $actual());
   }
 
   public function testCwSerializedClosure(): void {
-    $closure = function (): string {
-      return 'test';
-    };
+    $closure = (fn(): string => 'test');
 
-    $wrapper = static::cw($closure);
+    $wrapper = self::cw($closure);
     $serialized = serialize($wrapper);
     $unserialized = unserialize($serialized);
     if (!$unserialized instanceof SerializableClosure) {
       throw new \RuntimeException('Failed to unserialize the closure.');
     }
-    $actual = static::cu($unserialized);
+    $actual = self::cu($unserialized);
 
     $this->assertInstanceOf(\Closure::class, $actual);
     $this->assertEquals('test', $actual());
@@ -47,20 +43,20 @@ class SerializableClosureTraitTest extends TestCase {
   }
 
   public function testCwCallable(): void {
-    $actual = static::cw([$this, 'fixtureCallable']);
+    $actual = self::cw($this->fixtureCallable(...));
 
     $this->assertInstanceOf(SerializableClosure::class, $actual);
     $this->assertEquals('test', $actual());
   }
 
   public function testCwSerializedCallable(): void {
-    $wrapper = static::cw([$this, 'fixtureCallable']);
+    $wrapper = self::cw($this->fixtureCallable(...));
     $serialized = serialize($wrapper);
     $unserialized = unserialize($serialized);
     if (!$unserialized instanceof SerializableClosure) {
       throw new \RuntimeException('Failed to unserialize the closure.');
     }
-    $actual = static::cu($unserialized);
+    $actual = self::cu($unserialized);
 
     $this->assertInstanceOf(\Closure::class, $actual);
     $this->assertEquals('test', $actual());

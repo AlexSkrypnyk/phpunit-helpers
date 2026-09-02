@@ -12,19 +12,19 @@ use PHPUnit\Framework\Attributes\CoversClass;
  * Tests for UnitTestCase.
  */
 #[CoversClass(UnitTestCase::class)]
-class UnitTestCaseTest extends UnitTestCase {
+final class UnitTestCaseTest extends UnitTestCase {
 
   use InfoMethodsTrait;
 
   public function testLocations(): void {
-    $this->assertDirectoryExists(static::$workspace);
-    $this->assertDirectoryExists(static::$repo);
-    $this->assertDirectoryExists(static::$sut);
-    $this->assertDirectoryExists(static::$tmp);
-    $this->assertNotEmpty(static::$root);
-    $this->assertStringEndsWith('/phpunit-helpers', static::$root);
-    $this->assertNotNull(static::$fixtures);
-    $this->assertDirectoryExists(static::$fixtures);
+    $this->assertDirectoryExists(self::$workspace);
+    $this->assertDirectoryExists(self::$repo);
+    $this->assertDirectoryExists(self::$sut);
+    $this->assertDirectoryExists(self::$tmp);
+    $this->assertNotEmpty(self::$root);
+    $this->assertStringEndsWith('/phpunit-helpers', self::$root);
+    $this->assertNotNull(self::$fixtures);
+    $this->assertDirectoryExists(self::$fixtures);
   }
 
   public function testInfo(): void {

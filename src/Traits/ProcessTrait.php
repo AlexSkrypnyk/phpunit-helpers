@@ -342,9 +342,7 @@ trait ProcessTrait {
     // Ensure $eol is non-empty for explode().
     $eol = $eol ?: "\n";
     $lines = explode($eol, $text);
-    $colored_lines = array_map(function (string $line): string {
-      return sprintf("\033[%sm%s\033[%sm", 2, $line, 22);
-    }, $lines);
+    $colored_lines = array_map(fn(string $line): string => sprintf("\033[%sm%s\033[%sm", 2, $line, 22), $lines);
     return implode($eol, $colored_lines);
   }
 

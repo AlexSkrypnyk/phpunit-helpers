@@ -14,17 +14,17 @@ use PHPUnit\Framework\Attributes\Group;
  *
  * This test can be run manually to observe streaming behavior and assertion
  * suffix output.
- * Run with: ./vendor/bin/phpunit --group=manual
+ * Run with: ./vendor/bin/phpunit --group=manual.
  */
 #[Group('manual')]
 #[CoversNothing]
-class ProcessTraitScenariosTest extends UnitTestCase {
+final class ProcessTraitScenariosTest extends UnitTestCase {
 
   use ProcessTrait;
 
   protected function setUp(): void {
     parent::setUp();
-    $this->processStreamOutput = static::isDebug();
+    $this->processStreamOutput = self::isDebug();
   }
 
   protected function tearDown(): void {
@@ -32,25 +32,33 @@ class ProcessTraitScenariosTest extends UnitTestCase {
     $this->processTearDown();
   }
 
-  // Test 1: assertProcessSuccessful() with successful process - should PASS
+  /**
+   * Test 1: assertProcessSuccessful() with successful process - should PASS.
+   */
   public function testSuccessfulProcessWithSuccessAssertion(): void {
     $this->processRun('sh', ['-c', 'echo "Success stdout"; echo "Success stderr" >&2; exit 0']);
     $this->assertProcessSuccessful();
   }
 
-  // Test 2: assertProcessSuccessful() with failed process - should FAIL
+  /**
+   * Test 2: assertProcessSuccessful() with failed process - should FAIL.
+   */
   public function testFailedProcessWithSuccessAssertion(): void {
     $this->processRun('sh', ['-c', 'echo "Failed stdout"; echo "Failed stderr" >&2; exit 1']);
     $this->assertProcessSuccessful();
   }
 
-  // Test 3: assertProcessFailed() with failed process - should PASS
+  /**
+   * Test 3: assertProcessFailed() with failed process - should PASS.
+   */
   public function testFailedProcessWithFailAssertion(): void {
     $this->processRun('sh', ['-c', 'echo "Failed stdout"; echo "Failed stderr" >&2; exit 1']);
     $this->assertProcessFailed();
   }
 
-  // Test 4: assertProcessFailed() with successful process - should FAIL
+  /**
+   * Test 4: assertProcessFailed() with successful process - should FAIL.
+   */
   public function testSuccessfulProcessWithFailAssertion(): void {
     $this->processRun('sh', ['-c', 'echo "Success stdout"; echo "Success stderr" >&2; exit 0']);
     $this->assertProcessFailed();
