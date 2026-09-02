@@ -142,7 +142,7 @@ final class LoggerTraitFunctionalTest extends UnitTestCase {
   /**
    * Main deployment process step.
    */
-  private function stepDeploymentProcess(): void {
+  protected function stepDeploymentProcess(): void {
     self::logStepStart('Starting main deployment workflow');
     self::log('Initializing deployment environment');
     self::logSection('DEPLOYMENT CONFIGURATION', 'Production environment settings loaded');
@@ -163,7 +163,7 @@ final class LoggerTraitFunctionalTest extends UnitTestCase {
   /**
    * Database migration step.
    */
-  private function stepDatabaseMigration(): void {
+  protected function stepDatabaseMigration(): void {
     self::logStepStart('Preparing database migration');
     self::log('Connecting to production database');
     self::logNote('Using read-only backup connection');
@@ -197,7 +197,7 @@ final class LoggerTraitFunctionalTest extends UnitTestCase {
   /**
    * Application deployment step.
    */
-  private function stepApplicationDeployment(): void {
+  protected function stepApplicationDeployment(): void {
     self::logStepStart('Deploying application to production');
     self::logSection('APPLICATION SERVER', 'Preparing production deployment', TRUE);
     self::logNote('Deploying to production server cluster');
@@ -216,7 +216,7 @@ final class LoggerTraitFunctionalTest extends UnitTestCase {
   /**
    * Asset compilation step (deeply nested).
    */
-  private function stepAssetCompilation(): void {
+  protected function stepAssetCompilation(): void {
     self::logStepStart('Compiling and optimizing assets');
     self::log('Initializing build environment');
 
@@ -253,7 +253,7 @@ final class LoggerTraitFunctionalTest extends UnitTestCase {
   /**
    * Health checks step.
    */
-  private function stepHealthChecks(): void {
+  protected function stepHealthChecks(): void {
     self::logStepStart('Running system health checks');
     self::logSection('POST-DEPLOYMENT VERIFICATION', 'Validating system functionality');
 

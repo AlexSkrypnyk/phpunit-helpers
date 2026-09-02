@@ -85,7 +85,7 @@ final class ProcessTraitFunctionalTest extends UnitTestCase {
     $this->assertStringContainsString('▲▲▲ ERROR OUTPUT ▲▲▲', (string) $combined);
   }
 
-  private function runPhpunit(bool $with_debug): array {
+  protected function runPhpunit(bool $with_debug): array {
     $vendor_dir = dirname(__DIR__, 2) . '/vendor';
     $phpunit_bin = $vendor_dir . '/bin/phpunit';
 
@@ -163,7 +163,7 @@ final class ProcessTraitFunctionalTest extends UnitTestCase {
     ];
   }
 
-  private function assertStreamingTiming(array $real_time_output): void {
+  protected function assertStreamingTiming(array $real_time_output): void {
     $streaming_phase = [];
     $final_phase = [];
 

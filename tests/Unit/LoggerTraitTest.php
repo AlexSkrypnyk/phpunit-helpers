@@ -23,7 +23,7 @@ final class LoggerTraitTest extends UnitTestCase {
    *
    * @var resource
    */
-  private $logBuffer;
+  protected $logBuffer;
 
   /**
    * {@inheritdoc}
@@ -71,7 +71,7 @@ final class LoggerTraitTest extends UnitTestCase {
    * @return string
    *   The captured output.
    */
-  private function getCapturedOutput(): string {
+  protected function getCapturedOutput(): string {
     rewind($this->logBuffer);
     return stream_get_contents($this->logBuffer);
   }
@@ -964,7 +964,7 @@ final class LoggerTraitTest extends UnitTestCase {
 
     $output = $this->getCapturedOutput();
     foreach ($expected_strings as $expected_string) {
-      $this->assertStringContainsString($expected_string, $output, 'Failed for title: ' . $title);
+      $this->assertStringContainsString($expected_string, $output, sprintf('Failed for title: %s', $title));
     }
   }
 
@@ -1143,7 +1143,7 @@ final class LoggerTraitTest extends UnitTestCase {
   /**
    * Helper method that starts with 'process' prefix for testing.
    */
-  private function processTest(): void {
+  protected function processTest(): void {
     self::logStepStart('Testing process prefix');
     self::logStepFinish('Process prefix test completed');
   }
@@ -1151,7 +1151,7 @@ final class LoggerTraitTest extends UnitTestCase {
   /**
    * Helper method that starts with 'process' prefix for testing finish.
    */
-  private function processFinishTest(): void {
+  protected function processFinishTest(): void {
     self::logStepStart('Testing process finish');
     self::logStepFinish('Process finish test completed');
   }
