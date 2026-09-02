@@ -29,9 +29,9 @@
         "drupal/coder": "^9.0.1",
         "ergebnis/composer-normalize": "^2.52.0",
         "laravel/serializable-closure": "^2.0",
-        "phpstan/phpstan": "^2.2.8",
-        "rector/rector": "^2.6.3",
-        "squizlabs/php_codesniffer": "^4.0.1",
+        "phpstan/phpstan": "^2.2.12",
+        "rector/rector": "^2.6.6",
+        "squizlabs/php_codesniffer": "^4.0.4",
         "symfony/console": "^6.4 || ^7.2"
     },
     "minimum-stability": "stable",
