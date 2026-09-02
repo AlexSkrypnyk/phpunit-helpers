@@ -15,11 +15,11 @@ final class EnvTraitTest extends TestCase {
 
   protected function setUp(): void {
     parent::setUp();
-    $this->envReset();
+    self::envReset();
   }
 
   protected function tearDown(): void {
-    $this->envReset();
+    self::envReset();
     parent::tearDown();
   }
 
@@ -27,11 +27,11 @@ final class EnvTraitTest extends TestCase {
     $name = 'TEST_ENV_VAR';
     $value = 'test_value';
 
-    $this->envSet($name, $value);
+    self::envSet($name, $value);
 
-    $this->assertEquals($value, $this->envGet($name));
-    $this->assertTrue($this->envIsSet($name));
-    $this->assertFalse($this->envIsUnset($name));
+    $this->assertEquals($value, self::envGet($name));
+    $this->assertTrue(self::envIsSet($name));
+    $this->assertFalse(self::envIsUnset($name));
   }
 
   public function testEnvSetMultiple(): void {
@@ -41,11 +41,11 @@ final class EnvTraitTest extends TestCase {
       'TEST_ENV_VAR3' => 'value3',
     ];
 
-    $this->envSetMultiple($vars);
+    self::envSetMultiple($vars);
 
     foreach ($vars as $name => $value) {
-      $this->assertEquals($value, $this->envGet($name));
-      $this->assertTrue($this->envIsSet($name));
+      $this->assertEquals($value, self::envGet($name));
+      $this->assertTrue(self::envIsSet($name));
     }
   }
 
@@ -53,13 +53,13 @@ final class EnvTraitTest extends TestCase {
     $name = 'TEST_ENV_VAR';
     $value = 'test_value';
 
-    $this->envSet($name, $value);
-    $this->assertTrue($this->envIsSet($name));
+    self::envSet($name, $value);
+    $this->assertTrue(self::envIsSet($name));
 
-    $this->envUnset($name);
+    self::envUnset($name);
 
-    $this->assertFalse($this->envIsSet($name));
-    $this->assertTrue($this->envIsUnset($name));
+    $this->assertFalse(self::envIsSet($name));
+    $this->assertTrue(self::envIsUnset($name));
   }
 
   public function testEnvUnsetMultiple(): void {
@@ -70,18 +70,18 @@ final class EnvTraitTest extends TestCase {
       'TEST_ENV_VAR4' => 'value4',
     ];
 
-    $this->envSetMultiple($vars);
+    self::envSetMultiple($vars);
 
     foreach (array_keys($vars) as $name) {
-      $this->assertTrue($this->envIsSet($name));
+      $this->assertTrue(self::envIsSet($name));
     }
 
-    $this->envUnsetMultiple(['TEST_ENV_VAR1', 'TEST_ENV_VAR2', 'TEST_ENV_VAR3']);
+    self::envUnsetMultiple(['TEST_ENV_VAR1', 'TEST_ENV_VAR2', 'TEST_ENV_VAR3']);
 
-    $this->assertFalse($this->envIsSet('TEST_ENV_VAR1'));
-    $this->assertFalse($this->envIsSet('TEST_ENV_VAR2'));
-    $this->assertFalse($this->envIsSet('TEST_ENV_VAR3'));
-    $this->assertTrue($this->envIsSet('TEST_ENV_VAR4'));
+    $this->assertFalse(self::envIsSet('TEST_ENV_VAR1'));
+    $this->assertFalse(self::envIsSet('TEST_ENV_VAR2'));
+    $this->assertFalse(self::envIsSet('TEST_ENV_VAR3'));
+    $this->assertTrue(self::envIsSet('TEST_ENV_VAR4'));
   }
 
   public function testEnvUnsetPrefix(): void {
@@ -91,23 +91,23 @@ final class EnvTraitTest extends TestCase {
       'OTHER_VAR' => 'value3',
     ];
 
-    $this->envSetMultiple($vars);
+    self::envSetMultiple($vars);
 
-    $this->envUnsetPrefix('TEST_PREFIX_');
+    self::envUnsetPrefix('TEST_PREFIX_');
 
-    $this->assertFalse($this->envIsSet('TEST_PREFIX_VAR1'));
-    $this->assertFalse($this->envIsSet('TEST_PREFIX_VAR2'));
-    $this->assertTrue($this->envIsSet('OTHER_VAR'));
+    $this->assertFalse(self::envIsSet('TEST_PREFIX_VAR1'));
+    $this->assertFalse(self::envIsSet('TEST_PREFIX_VAR2'));
+    $this->assertTrue(self::envIsSet('OTHER_VAR'));
   }
 
   public function testEnvUnsetPrefixWithSystemEnv(): void {
-    $this->envReset();
+    self::envReset();
     putenv('TEST_SYS_PREFIX_VAR=test_value');
-    $this->assertTrue($this->envIsSet('TEST_SYS_PREFIX_VAR'));
+    $this->assertTrue(self::envIsSet('TEST_SYS_PREFIX_VAR'));
 
-    $this->envUnsetPrefix('TEST_SYS_PREFIX_');
+    self::envUnsetPrefix('TEST_SYS_PREFIX_');
 
-    $this->assertFalse($this->envIsSet('TEST_SYS_PREFIX_VAR'));
+    $this->assertFalse(self::envIsSet('TEST_SYS_PREFIX_VAR'));
     putenv('TEST_SYS_PREFIX_VAR');
   }
 
@@ -118,16 +118,16 @@ final class EnvTraitTest extends TestCase {
       'TEST_ENV_VAR3' => 'value3',
     ];
 
-    $this->envSetMultiple($vars);
+    self::envSetMultiple($vars);
 
     foreach (array_keys($vars) as $name) {
-      $this->assertTrue($this->envIsSet($name));
+      $this->assertTrue(self::envIsSet($name));
     }
 
-    $this->envReset();
+    self::envReset();
 
     foreach (array_keys($vars) as $name) {
-      $this->assertFalse($this->envIsSet($name));
+      $this->assertFalse(self::envIsSet($name));
     }
   }
 
@@ -140,22 +140,22 @@ final class EnvTraitTest extends TestCase {
 
     $input_copy = $input;
 
-    $this->envFromInput($input, 'TEST_PREFIX_');
+    self::envFromInput($input, 'TEST_PREFIX_');
 
-    $this->assertEquals('value1', $this->envGet('TEST_PREFIX_VAR1'));
-    $this->assertEquals('value2', $this->envGet('TEST_PREFIX_VAR2'));
-    $this->assertFalse($this->envIsSet('OTHER_VAR'));
+    $this->assertEquals('value1', self::envGet('TEST_PREFIX_VAR1'));
+    $this->assertEquals('value2', self::envGet('TEST_PREFIX_VAR2'));
+    $this->assertFalse(self::envIsSet('OTHER_VAR'));
     $this->assertArrayNotHasKey('TEST_PREFIX_VAR1', $input);
     $this->assertArrayNotHasKey('TEST_PREFIX_VAR2', $input);
     $this->assertArrayHasKey('OTHER_VAR', $input);
 
-    $this->envReset();
+    self::envReset();
     $input = $input_copy;
 
-    $this->envFromInput($input, 'TEST_PREFIX_', FALSE);
+    self::envFromInput($input, 'TEST_PREFIX_', FALSE);
 
-    $this->assertEquals('value1', $this->envGet('TEST_PREFIX_VAR1'));
-    $this->assertEquals('value2', $this->envGet('TEST_PREFIX_VAR2'));
+    $this->assertEquals('value1', self::envGet('TEST_PREFIX_VAR1'));
+    $this->assertEquals('value2', self::envGet('TEST_PREFIX_VAR2'));
     $this->assertArrayHasKey('TEST_PREFIX_VAR1', $input);
     $this->assertArrayHasKey('TEST_PREFIX_VAR2', $input);
     $this->assertArrayHasKey('OTHER_VAR', $input);

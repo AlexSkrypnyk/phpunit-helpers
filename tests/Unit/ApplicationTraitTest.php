@@ -447,7 +447,7 @@ final class ApplicationTraitTest extends UnitTestCase {
 
       // The original directory is restored on shutdown, so the process is
       // still in the configured directory at this point.
-      $this->assertSame(realpath(self::$tmp), realpath((string) getcwd()));
+      $this->assertSame(self::locationsRealpath(self::$tmp), self::locationsRealpath((string) getcwd()));
     }
     finally {
       chdir($original_cwd);
