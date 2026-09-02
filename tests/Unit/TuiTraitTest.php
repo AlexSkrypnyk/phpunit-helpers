@@ -104,7 +104,7 @@ final class TuiTraitTest extends TestCase {
     array $expected,
   ): void {
     $keystrokes = self::tuiKeystrokes($entries, $clear_size, $accept_key, $clear_key);
-    $this->assertEquals($expected, $keystrokes);
+    $this->assertSame($expected, $keystrokes);
   }
 
   public static function dataProviderTuiKeystrokes(): \Iterator {

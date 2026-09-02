@@ -20,7 +20,7 @@ final class SerializableClosureTraitTest extends TestCase {
     $actual = self::cw($closure);
 
     $this->assertInstanceOf(SerializableClosure::class, $actual);
-    $this->assertEquals('test', $actual());
+    $this->assertSame('test', $actual());
   }
 
   public function testCwSerializedClosure(): void {
@@ -35,7 +35,7 @@ final class SerializableClosureTraitTest extends TestCase {
     $actual = self::cu($unserialized);
 
     $this->assertInstanceOf(\Closure::class, $actual);
-    $this->assertEquals('test', $actual());
+    $this->assertSame('test', $actual());
   }
 
   public function fixtureCallable(): string {
@@ -46,7 +46,7 @@ final class SerializableClosureTraitTest extends TestCase {
     $actual = self::cw($this->fixtureCallable(...));
 
     $this->assertInstanceOf(SerializableClosure::class, $actual);
-    $this->assertEquals('test', $actual());
+    $this->assertSame('test', $actual());
   }
 
   public function testCwSerializedCallable(): void {
@@ -59,7 +59,7 @@ final class SerializableClosureTraitTest extends TestCase {
     $actual = self::cu($unserialized);
 
     $this->assertInstanceOf(\Closure::class, $actual);
-    $this->assertEquals('test', $actual());
+    $this->assertSame('test', $actual());
   }
 
 }

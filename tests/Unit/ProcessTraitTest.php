@@ -1022,7 +1022,7 @@ EOL;
     $result = $method->invoke($this, $command);
 
     if ($exception_message === NULL) {
-      $this->assertEquals($expected, $result);
+      $this->assertSame($expected, $result);
     }
   }
 

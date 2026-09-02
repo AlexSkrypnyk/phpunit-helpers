@@ -604,7 +604,7 @@ final class LoggerTraitTest extends UnitTestCase {
     $method = $reflection_class->getMethod('formatElapsedTime');
 
     $result = $method->invoke(NULL, $input_seconds);
-    $this->assertEquals($expected_output, $result);
+    $this->assertSame($expected_output, $result);
   }
 
   /**
@@ -733,7 +733,7 @@ final class LoggerTraitTest extends UnitTestCase {
     $this->assertIsArray($steps);
     $this->assertCount(1, $steps);
     // @phpstan-ignore-next-line offsetAccess.nonOffsetAccessible
-    $this->assertEquals('testStepArrayTracking', $steps[0]['name']);
+    $this->assertSame('testStepArrayTracking', $steps[0]['name']);
     // @phpstan-ignore-next-line offsetAccess.nonOffsetAccessible
     $this->assertNull($steps[0]['end_time']);
 
@@ -752,7 +752,7 @@ final class LoggerTraitTest extends UnitTestCase {
     $this->assertIsArray($steps);
     $this->assertCount(2, $steps);
     // @phpstan-ignore-next-line offsetAccess.nonOffsetAccessible
-    $this->assertEquals('testStepArrayTracking', $steps[1]['name']);
+    $this->assertSame('testStepArrayTracking', $steps[1]['name']);
   }
 
   /**
@@ -772,7 +772,7 @@ final class LoggerTraitTest extends UnitTestCase {
 
     rewind($custom_buffer);
     $output = stream_get_contents($custom_buffer);
-    $this->assertEquals("\nCustom stream test\n", $output);
+    $this->assertSame("\nCustom stream test\n", $output);
 
     fclose($custom_buffer);
   }
@@ -791,7 +791,7 @@ final class LoggerTraitTest extends UnitTestCase {
     $method = $reflection_class->getMethod('getOutputStream');
 
     $stream = $method->invoke(NULL);
-    $this->assertEquals(STDERR, $stream);
+    $this->assertSame(STDERR, $stream);
   }
 
   /**
@@ -847,7 +847,7 @@ final class LoggerTraitTest extends UnitTestCase {
     $method = $reflection_class->getMethod('getOutputStream');
 
     $stream = $method->invoke(NULL);
-    $this->assertEquals($valid_resource, $stream);
+    $this->assertSame($valid_resource, $stream);
 
     fclose($valid_resource);
   }
@@ -1020,7 +1020,7 @@ final class LoggerTraitTest extends UnitTestCase {
     $this->assertCount(1, $steps);
     // @phpstan-ignore-next-line offsetAccess.nonOffsetAccessible
     $this->assertEmpty($steps[0]['parent_stack']);
-    $this->assertEquals(['testHierarchicalStepTracking'], $stack);
+    $this->assertSame(['testHierarchicalStepTracking'], $stack);
 
     // Start nested step.
     self::logStepStart('Level 2');
@@ -1030,8 +1030,8 @@ final class LoggerTraitTest extends UnitTestCase {
     // @phpstan-ignore-next-line argument.type
     $this->assertCount(2, $steps);
     // @phpstan-ignore-next-line offsetAccess.nonOffsetAccessible
-    $this->assertEquals(['testHierarchicalStepTracking'], $steps[1]['parent_stack']);
-    $this->assertEquals(['testHierarchicalStepTracking', 'testHierarchicalStepTracking'], $stack);
+    $this->assertSame(['testHierarchicalStepTracking'], $steps[1]['parent_stack']);
+    $this->assertSame(['testHierarchicalStepTracking', 'testHierarchicalStepTracking'], $stack);
 
     // Start deeply nested step.
     self::logStepStart('Level 3');
@@ -1041,18 +1041,18 @@ final class LoggerTraitTest extends UnitTestCase {
     // @phpstan-ignore-next-line argument.type
     $this->assertCount(3, $steps);
     // @phpstan-ignore-next-line offsetAccess.nonOffsetAccessible
-    $this->assertEquals(['testHierarchicalStepTracking', 'testHierarchicalStepTracking'], $steps[2]['parent_stack']);
-    $this->assertEquals(['testHierarchicalStepTracking', 'testHierarchicalStepTracking', 'testHierarchicalStepTracking'], $stack);
+    $this->assertSame(['testHierarchicalStepTracking', 'testHierarchicalStepTracking'], $steps[2]['parent_stack']);
+    $this->assertSame(['testHierarchicalStepTracking', 'testHierarchicalStepTracking', 'testHierarchicalStepTracking'], $stack);
 
     // Finish level 3.
     self::logStepFinish('Level 3 done');
     $stack = $stack_property->getValue();
-    $this->assertEquals(['testHierarchicalStepTracking', 'testHierarchicalStepTracking'], $stack);
+    $this->assertSame(['testHierarchicalStepTracking', 'testHierarchicalStepTracking'], $stack);
 
     // Finish level 2.
     self::logStepFinish('Level 2 done');
     $stack = $stack_property->getValue();
-    $this->assertEquals(['testHierarchicalStepTracking'], $stack);
+    $this->assertSame(['testHierarchicalStepTracking'], $stack);
 
     // Finish level 1.
     self::logStepFinish('Level 1 done');

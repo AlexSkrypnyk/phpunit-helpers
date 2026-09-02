@@ -29,7 +29,7 @@ final class EnvTraitTest extends TestCase {
 
     self::envSet($name, $value);
 
-    $this->assertEquals($value, self::envGet($name));
+    $this->assertSame($value, self::envGet($name));
     $this->assertTrue(self::envIsSet($name));
     $this->assertFalse(self::envIsUnset($name));
   }
@@ -44,7 +44,7 @@ final class EnvTraitTest extends TestCase {
     self::envSetMultiple($vars);
 
     foreach ($vars as $name => $value) {
-      $this->assertEquals($value, self::envGet($name));
+      $this->assertSame($value, self::envGet($name));
       $this->assertTrue(self::envIsSet($name));
     }
   }
@@ -142,8 +142,8 @@ final class EnvTraitTest extends TestCase {
 
     self::envFromInput($input, 'TEST_PREFIX_');
 
-    $this->assertEquals('value1', self::envGet('TEST_PREFIX_VAR1'));
-    $this->assertEquals('value2', self::envGet('TEST_PREFIX_VAR2'));
+    $this->assertSame('value1', self::envGet('TEST_PREFIX_VAR1'));
+    $this->assertSame('value2', self::envGet('TEST_PREFIX_VAR2'));
     $this->assertFalse(self::envIsSet('OTHER_VAR'));
     $this->assertArrayNotHasKey('TEST_PREFIX_VAR1', $input);
     $this->assertArrayNotHasKey('TEST_PREFIX_VAR2', $input);
@@ -154,8 +154,8 @@ final class EnvTraitTest extends TestCase {
 
     self::envFromInput($input, 'TEST_PREFIX_', FALSE);
 
-    $this->assertEquals('value1', self::envGet('TEST_PREFIX_VAR1'));
-    $this->assertEquals('value2', self::envGet('TEST_PREFIX_VAR2'));
+    $this->assertSame('value1', self::envGet('TEST_PREFIX_VAR1'));
+    $this->assertSame('value2', self::envGet('TEST_PREFIX_VAR2'));
     $this->assertArrayHasKey('TEST_PREFIX_VAR1', $input);
     $this->assertArrayHasKey('TEST_PREFIX_VAR2', $input);
     $this->assertArrayHasKey('OTHER_VAR', $input);
