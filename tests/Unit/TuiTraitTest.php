@@ -206,7 +206,7 @@ final class TuiTraitTest extends TestCase {
         'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd', self::KEYS['ENTER'],
       ],
     ];
-    yield 'string_with_spaces_an_key' => [
+    yield 'string_with_spaces_as_key' => [
       [
         'answer1' => 'hello world',
       ],
