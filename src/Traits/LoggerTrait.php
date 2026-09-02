@@ -108,6 +108,9 @@ trait LoggerTrait {
    *   Whether to use double border characters (=) instead of single (-).
    * @param int $min_width
    *   Minimum width of the section.
+   *
+   * @throws \InvalidArgumentException
+   *   When the minimum width is not a positive integer.
    */
   public static function logSection(string $title, ?string $message = NULL, bool $double_border = FALSE, int $min_width = 60): void {
     if ($min_width <= 0) {

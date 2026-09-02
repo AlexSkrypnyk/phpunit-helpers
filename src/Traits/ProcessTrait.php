@@ -77,6 +77,9 @@ trait ProcessTrait {
    *
    * @return \Symfony\Component\Process\Process
    *   The currently running process.
+   *
+   * @throws \RuntimeException
+   *   When the process is not initialized.
    */
   public function processGet(): Process {
     if (!$this->process instanceof Process) {
@@ -116,6 +119,9 @@ trait ProcessTrait {
    *
    * @return \Symfony\Component\Process\Process
    *   The completed process.
+   *
+   * @throws \InvalidArgumentException
+   *   When the command, arguments or environment variables are invalid.
    */
   public function processRun(
     string $command,
@@ -204,6 +210,9 @@ trait ProcessTrait {
    *
    * @return array
    *   Array with command as first element and arguments as subsequent elements.
+   *
+   * @throws \InvalidArgumentException
+   *   When the command string is empty or malformed.
    */
   protected function processParseCommand(string $command): array {
     $command = trim($command);

@@ -128,6 +128,9 @@ trait TuiTrait {
    *
    * @return array
    *   The processed TUI entries.
+   *
+   * @throws \InvalidArgumentException
+   *   When an entry value is not scalar.
    */
   public static function tuiEntries(array $entries, string $default = ''): array {
     foreach ($entries as $key => $value) {
@@ -160,6 +163,9 @@ trait TuiTrait {
    *
    * @return array
    *   The processed TUI entries as keystrokes.
+   *
+   * @throws \RuntimeException
+   *   When a TUI_SKIP entry was not filtered out.
    */
   public static function tuiKeystrokes(array $entries, int $clear_size = 0, ?string $accept_key = NULL, ?string $clear_key = NULL): array {
     $accept_key ??= static::KEYS['ENTER'];

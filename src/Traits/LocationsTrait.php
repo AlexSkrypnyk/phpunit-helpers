@@ -139,6 +139,9 @@ trait LocationsTrait {
    *
    * @return string
    *   The fixtures directory path.
+   *
+   * @throws \RuntimeException
+   *   When the fixtures directory does not exist.
    */
   public function locationsFixtureDir(?string $name = NULL): string {
     $fixtures_dir = static::$root . DIRECTORY_SEPARATOR . static::locationsFixturesDir();
@@ -282,6 +285,9 @@ trait LocationsTrait {
    *
    * @return array<int, string>
    *   The list of created file paths.
+   *
+   * @throws \RuntimeException
+   *   When the base directory does not exist.
    */
   public static function locationsCopyFilesToSut(array $files, ?string $basedir = NULL, bool $append_rand = TRUE): array {
     $basedir = $basedir ?: getcwd();

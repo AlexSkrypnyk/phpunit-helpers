@@ -49,6 +49,9 @@ trait ApplicationTrait {
    *
    * @return \Symfony\Component\Console\Application
    *   The application instance.
+   *
+   * @throws \RuntimeException
+   *   If the application is not initialized.
    */
   public function applicationGet(): Application {
     if ($this->application === NULL) {
@@ -91,6 +94,9 @@ trait ApplicationTrait {
    *
    * @return \Symfony\Component\Console\Tester\ApplicationTester
    *   The initialized application tester.
+   *
+   * @throws \InvalidArgumentException
+   *   When the loader file is missing or does not return an application.
    */
   public function applicationInitFromLoader(string $loader_path): ApplicationTester {
     if (!file_exists($loader_path)) {
@@ -134,6 +140,9 @@ trait ApplicationTrait {
    *
    * @return \Symfony\Component\Console\Tester\ApplicationTester
    *   The initialized application tester.
+   *
+   * @throws \InvalidArgumentException
+   *   When the provided object or class is not a command.
    */
   public function applicationInitFromCommand(string|object $object_or_class, bool $is_single_command = TRUE): ApplicationTester {
     $this->application = new Application();
@@ -186,6 +195,11 @@ trait ApplicationTrait {
    *
    * @return string
    *   Application output.
+   *
+   * @throws \RuntimeException
+   *   When the application is not initialized.
+   * @throws \PHPUnit\Framework\AssertionFailedError
+   *   When the application outcome does not match the expectation.
    */
   public function applicationRun(array $input = [], array $options = [], bool $expect_fail = FALSE): string {
     if ($this->applicationTester === NULL) {

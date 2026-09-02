@@ -26,6 +26,10 @@ trait ReflectionTrait {
    *
    * @return mixed
    *   Method result.
+   *
+   * @throws \InvalidArgumentException
+   *   When the class or method does not exist or no object instance is
+   *   provided for a non-static method.
    */
   public static function callProtectedMethod(object|string $object, string $name, array $args = []): mixed {
     $object_or_class = is_object($object) ? $object::class : $object;
