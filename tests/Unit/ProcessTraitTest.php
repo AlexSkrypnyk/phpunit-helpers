@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace AlexSkrypnyk\PhpunitHelpers\Tests\Unit;
 
-use PHPUnit\Framework\AssertionFailedError;
-use Symfony\Component\Process\Process;
 use AlexSkrypnyk\PhpunitHelpers\Traits\ProcessTrait;
 use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
+use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\Attributes\CoversTrait;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\ExpectationFailedException;
+use Symfony\Component\Process\Process;
 
 #[CoversTrait(ProcessTrait::class)]
 final class ProcessTraitTest extends UnitTestCase {

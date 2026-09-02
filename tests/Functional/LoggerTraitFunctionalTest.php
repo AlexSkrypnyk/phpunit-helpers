@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace AlexSkrypnyk\PhpunitHelpers\Tests\Functional;
 
-use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
 use AlexSkrypnyk\PhpunitHelpers\Traits\LoggerTrait;
 use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversTrait;
+use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
 
 /**
  * Functional tests for LoggerTrait that output to real STDERR.

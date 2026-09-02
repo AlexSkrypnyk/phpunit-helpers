@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace AlexSkrypnyk\PhpunitHelpers\Tests\Unit;
 
-use PHPUnit\Framework\AssertionFailedError;
 use AlexSkrypnyk\PhpunitHelpers\Traits\StringTrait;
 use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
+use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\Attributes\CoversTrait;
 use PHPUnit\Framework\Attributes\DataProvider;
 

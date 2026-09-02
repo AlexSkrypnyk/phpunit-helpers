@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AlexSkrypnyk\PhpunitHelpers\Tests\Unit;
 
-use Symfony\Component\Console\Exception\LogicException;
 use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\Application\Command\ErrorOutputCommand;
 use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\Application\Command\ExceptionOutputCommand;
 use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\Application\Command\GreetingCommand;
@@ -16,6 +15,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\ExpectationFailedException;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Exception\LogicException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\ApplicationTester;
