@@ -17,17 +17,17 @@ final class ProcessTraitFunctionalTest extends UnitTestCase {
     $output = $this->runPhpunit(TRUE);
     $combined = $output['combined'];
 
-    // Assert streaming output appears when DEBUG=1.
+    // Streaming output appears when DEBUG=1.
     $this->assertStringContainsString('>> Success stdout', (string) $combined);
     $this->assertStringContainsString('XX Success stderr', (string) $combined);
     $this->assertStringContainsString('>> Failed stdout', (string) $combined);
     $this->assertStringContainsString('XX Failed stderr', (string) $combined);
 
-    // Assert onNotSuccessfulTest() debug output appears in stderr.
+    // The onNotSuccessfulTest() debug output appears in stderr.
     $this->assertStringContainsString('Error: ', (string) $output['stderr']);
     $this->assertStringContainsString('Additional information:', (string) $output['stderr']);
 
-    // Assert common failure output.
+    // Common failure output.
     $this->assertStringContainsString('PROCESS FAILED', (string) $combined);
     $this->assertStringContainsString('PROCESS SUCCEEDED but failure was expected', (string) $combined);
     $this->assertStringContainsString('Additional information:', (string) $combined);
@@ -35,19 +35,18 @@ final class ProcessTraitFunctionalTest extends UnitTestCase {
     $this->assertStringContainsString('Tests: 4', (string) $combined);
     $this->assertStringContainsString('Failures: 2', (string) $combined);
 
-    // Assert that actual process output appears in failure messages.
+    // Actual process output appears in failure messages.
     $this->assertStringContainsString('Success stdout', (string) $combined);
     $this->assertStringContainsString('Success stderr', (string) $combined);
     $this->assertStringContainsString('Failed stdout', (string) $combined);
     $this->assertStringContainsString('Failed stderr', (string) $combined);
 
-    // Assert that process output headers and footers appear.
+    // Process output headers and footers appear.
     $this->assertStringContainsString('⬇⬇⬇ STANDARD OUTPUT ⬇⬇⬇', (string) $combined);
     $this->assertStringContainsString('⬆⬆⬆ STANDARD OUTPUT ⬆⬆⬆', (string) $combined);
     $this->assertStringContainsString('▼▼▼ ERROR OUTPUT ▼▼▼', (string) $combined);
     $this->assertStringContainsString('▲▲▲ ERROR OUTPUT ▲▲▲', (string) $combined);
 
-    // Assert streaming timing.
     $this->assertStreamingTiming($output['real_time_output']);
   }
 
@@ -55,16 +54,16 @@ final class ProcessTraitFunctionalTest extends UnitTestCase {
     $output = $this->runPhpunit(FALSE);
     $combined = $output['combined'];
 
-    // Assert streaming output does NOT appear when DEBUG=0.
+    // Streaming output does not appear when DEBUG=0.
     $this->assertStringNotContainsString('>> Success stdout', (string) $combined);
     $this->assertStringNotContainsString('XX Success stderr', (string) $combined);
     $this->assertStringNotContainsString('>> Failed stdout', (string) $combined);
     $this->assertStringNotContainsString('XX Failed stderr', (string) $combined);
 
-    // Assert onNotSuccessfulTest() debug output does NOT appear when DEBUG=0.
+    // The onNotSuccessfulTest() debug output does not appear when DEBUG=0.
     $this->assertStringNotContainsString('Error: ', (string) $output['stderr']);
 
-    // Assert common failure output still appears.
+    // Common failure output still appears.
     $this->assertStringContainsString('PROCESS FAILED', (string) $combined);
     $this->assertStringContainsString('PROCESS SUCCEEDED but failure was expected', (string) $combined);
     $this->assertStringContainsString('Additional information:', (string) $combined);
@@ -72,13 +71,13 @@ final class ProcessTraitFunctionalTest extends UnitTestCase {
     $this->assertStringContainsString('Tests: 4', (string) $combined);
     $this->assertStringContainsString('Failures: 2', (string) $combined);
 
-    // Assert that actual process output appears in failure messages.
+    // Actual process output appears in failure messages.
     $this->assertStringContainsString('Success stdout', (string) $combined);
     $this->assertStringContainsString('Success stderr', (string) $combined);
     $this->assertStringContainsString('Failed stdout', (string) $combined);
     $this->assertStringContainsString('Failed stderr', (string) $combined);
 
-    // Assert that process output headers and footers appear.
+    // Process output headers and footers appear.
     $this->assertStringContainsString('⬇⬇⬇ STANDARD OUTPUT ⬇⬇⬇', (string) $combined);
     $this->assertStringContainsString('⬆⬆⬆ STANDARD OUTPUT ⬆⬆⬆', (string) $combined);
     $this->assertStringContainsString('▼▼▼ ERROR OUTPUT ▼▼▼', (string) $combined);

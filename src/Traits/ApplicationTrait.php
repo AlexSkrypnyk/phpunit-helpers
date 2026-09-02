@@ -112,12 +112,10 @@ trait ApplicationTrait {
     $this->application->setAutoExit(FALSE);
     $this->application->setCatchExceptions(TRUE);
 
-    // Change the working directory if specified.
     if ($this->applicationCwd !== NULL) {
       $original_cwd = getcwd();
       if ($original_cwd !== FALSE) {
         chdir($this->applicationCwd);
-        // Register shutdown function to restore original working directory.
         // @codeCoverageIgnoreStart
         register_shutdown_function(function () use ($original_cwd): void {
           chdir($original_cwd);
@@ -165,12 +163,10 @@ trait ApplicationTrait {
     $this->application->setAutoExit(FALSE);
     $this->application->setCatchExceptions(TRUE);
 
-    // Change the working directory if specified.
     if ($this->applicationCwd !== NULL) {
       $original_cwd = getcwd();
       if ($original_cwd !== FALSE) {
         chdir($this->applicationCwd);
-        // Register shutdown function to restore original working directory.
         // @codeCoverageIgnoreStart
         register_shutdown_function(function () use ($original_cwd): void {
           chdir($original_cwd);
@@ -224,7 +220,7 @@ trait ApplicationTrait {
         throw new \Exception(sprintf("Application exited with non-zero code.\nThe output was:\n%s\nThe error output was:\n%s", $this->applicationTester->getDisplay(), $this->applicationTester->getErrorOutput()));
       }
 
-      // Expected to fail, but succeeded (was called with expect_fail = TRUE).
+      // Expected to fail, but succeeded.
       if ($expect_fail) {
         throw new AssertionFailedError(sprintf("Application exited successfully but should not.\nThe output was:\n%s\nThe error output was:\n%s", $this->applicationTester->getDisplay(), $this->applicationTester->getErrorOutput()));
       }
@@ -238,16 +234,15 @@ trait ApplicationTrait {
       $output = $exception->getMessage();
     }
     catch (\Exception $exception) {
-      // Caught exception, check if we expected failure.
       if (!$expect_fail) {
-        // Expecting success (was called with expect_fail = FALSE).
+        // Expected to succeed, but failed.
         throw new AssertionFailedError('Application exited with an error:' . PHP_EOL . $exception->getMessage(), $exception->getCode(), $exception);
       }
       // Expected to fail, so capture the output.
       $output = $exception->getMessage();
     }
 
-    // Append error output. Internally, error output is captured separately.
+    // Error output is captured separately, so append it to the output.
     $output .= $this->applicationTester->getErrorOutput();
 
     return $output;

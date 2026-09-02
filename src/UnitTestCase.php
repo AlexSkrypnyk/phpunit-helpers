@@ -11,11 +11,9 @@ use PHPUnit\Framework\TestStatus\Error;
 use PHPUnit\Framework\TestStatus\Failure;
 
 /**
- * Class UnitTestCase.
- *
  * Base class for unit tests.
  *
- * Use DEBUG=1 to prevent cleanup of the temp directories
+ * DEBUG=1 prevents cleanup of the temp directories.
  */
 abstract class UnitTestCase extends TestCase {
 
@@ -70,7 +68,6 @@ abstract class UnitTestCase extends TestCase {
    *   The additional information.
    */
   public function info(): string {
-    // Collect all methods of the class that end with 'Info'.
     $methods = array_values(array_filter(get_class_methods(static::class), fn(string $m): bool => !str_contains($m, 'test') && str_ends_with($m, 'Info')));
 
     $info = '';
@@ -102,12 +99,8 @@ abstract class UnitTestCase extends TestCase {
   /**
    * Suffix to be added to all assertion failure messages.
    *
-   * This is to overcome the limitation of PHPUnit not allowing to alter
-   * the message within the assertion Throwable in onNotSuccessfulTest().
-   *
-   * onNotSuccessfulTest() currently only allows to print to stdout/stderr
-   * right after the test failure rather than collecting all information and
-   * appending it to the failure message.
+   * Works around a PHPUnit limitation: onNotSuccessfulTest() cannot alter
+   * the message within the assertion Throwable.
    *
    * @return string
    *   The assertion suffix.

@@ -36,7 +36,6 @@ class GreetingCommand extends Command {
     $name = $input->getArgument('name');
     $yell = $input->getOption('yell');
 
-    // Convert name to string safely.
     $name_str = is_scalar($name) ? (string) $name : 'Unknown';
     $greeting = sprintf('Hello, %s!', $name_str);
 

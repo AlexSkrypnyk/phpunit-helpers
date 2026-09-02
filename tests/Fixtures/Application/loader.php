@@ -12,12 +12,10 @@ require_once dirname(__DIR__, 3) . '/vendor/autoload.php';
 use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\Application\Command\GreetingCommand;
 use Symfony\Component\Console\Application;
 
-// Initialize the application.
 $application = new Application('Test Application', '1.0.0');
 $application->setAutoExit(FALSE);
 $application->setCatchExceptions(FALSE);
 
-// Add commands.
 $application->add(new GreetingCommand());
 
 // Execute the application if this file is run directly.

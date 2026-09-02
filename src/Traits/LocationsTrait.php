@@ -44,7 +44,7 @@ trait LocationsTrait {
   protected static ?string $fixtures = NULL;
 
   /**
-   * Main workspace directory where the rest of the directories located.
+   * Main workspace directory where the rest of the directories are located.
    *
    * The "workspace" in this context is a place to store assets produced by a
    * single test run.
@@ -151,12 +151,10 @@ trait LocationsTrait {
 
     $path = static::locationsRealpath($fixtures_dir);
 
-    // Set the fixtures directory based on the passed name.
     if ($name) {
       $path .= DIRECTORY_SEPARATOR . $name;
     }
     else {
-      // Set the fixtures directory based on the test name.
       $fixture_dir = $this->name();
       $fixture_dir = str_contains($fixture_dir, '::') ? explode('::', $fixture_dir)[1] : $fixture_dir;
       $fixture_dir = strtolower((string) preg_replace('/(?<!^)[A-Z]/', '_$0', $fixture_dir));
@@ -164,15 +162,12 @@ trait LocationsTrait {
       $path .= DIRECTORY_SEPARATOR . $fixture_dir;
     }
 
-    // Further adjust the fixtures directory name if the test uses a
-    // data provider with named data sets.
     $data_name = $this->dataName();
     if (!empty($data_name) && !is_numeric($data_name)) {
       if ($data_name === static::BASELINE_DATASET) {
         $path_suffix = static::BASELINE_DIR;
       }
       else {
-        // Convert the data name to a snake case string.
         $path_suffix = strtolower(str_replace(['-', ' '], '_', (string) preg_replace('/[^a-zA-Z0-9_\- ]/', '', $data_name)));
       }
       $path .= DIRECTORY_SEPARATOR . $path_suffix;

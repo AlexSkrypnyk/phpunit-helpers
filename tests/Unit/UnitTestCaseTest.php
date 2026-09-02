@@ -8,9 +8,6 @@ use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\InfoMethodsTrait;
 use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 
-/**
- * Tests for UnitTestCase.
- */
 #[CoversClass(UnitTestCase::class)]
 final class UnitTestCaseTest extends UnitTestCase {
 

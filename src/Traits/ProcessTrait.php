@@ -67,8 +67,6 @@ trait ProcessTrait {
 
   /**
    * Dim the streaming output.
-   *
-   * This makes the streaming output less prominent in the console.
    */
   protected static bool $processStreamingOutputShouldDim = TRUE;
 
@@ -131,12 +129,10 @@ trait ProcessTrait {
     int $timeout = 60,
     int $idle_timeout = 30,
   ): Process {
-    // Parse command string to extract command and arguments as a shortcut.
     $parsed_command = $this->processParseCommand($command);
     $base_command = array_shift($parsed_command);
     $parsed_arguments = $parsed_command;
 
-    // Validate the base command contains only allowed characters.
     if (preg_match('/[^a-zA-Z0-9_\-.\/]/', $base_command)) {
       throw new \InvalidArgumentException(sprintf('Invalid command: %s. Only alphanumeric characters, dots, dashes, underscores and slashes are allowed.', $base_command));
     }
@@ -151,8 +147,8 @@ trait ProcessTrait {
     }
     unset($arg);
 
-    // Processes inherit all the env vars defined in the system. This can be
-    // prevented by setting to FALSE the env vars that need to be removed.
+    // The process inherits all system env vars. Setting a var to FALSE
+    // removes it from the inherited environment.
     foreach ($env as &$env_value) {
       if (!is_scalar($env_value)) {
         throw new \InvalidArgumentException('All environment variables must be scalar values.');
@@ -200,10 +196,10 @@ trait ProcessTrait {
    * stops option parsing and treats all subsequent tokens as positional
    * arguments.
    *
-   * Note: This parser intentionally allows backslash escaping inside single
-   * quotes (e.g., 'It\'s working'), which deviates from POSIX shell behavior
-   * where backslashes are literal inside single quotes. This provides more
-   * intuitive escaping for users.
+   * The parser deliberately allows backslash escaping inside single quotes
+   * (e.g., 'It\'s working'). POSIX shells treat backslashes inside single
+   * quotes as literal; the deviation makes escaping more intuitive for
+   * users.
    *
    * @param string $command
    *   The command string to parse.
@@ -259,11 +255,9 @@ trait ProcessTrait {
 
       if (!$in_quotes && ($char === ' ' || $char === "\t")) {
         if ($current !== '' || $has_content) {
-          // Check for end-of-options marker (--) only if not already found
-          // and not inside quotes.
           if (!$end_of_options_found && $current === '--') {
             $end_of_options_found = TRUE;
-            // Add the -- marker to the parts array so it reaches the command.
+            // Keep the -- marker so the command receives it.
             $parts[] = $current;
             $current = '';
             $has_content = FALSE;

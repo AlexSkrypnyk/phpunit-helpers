@@ -15,9 +15,6 @@ final class AssertArrayTraitTest extends TestCase {
 
   use AssertArrayTrait;
 
-  /**
-   * Test assertArrayContainsString method.
-   */
   #[DataProvider('dataProviderAssertArrayContainsString')]
   public function testAssertArrayContainsString(string $needle, array $haystack, bool $should_pass, ?string $expected_exception_message = NULL): void {
     if (!$should_pass) {
@@ -34,11 +31,7 @@ final class AssertArrayTraitTest extends TestCase {
     }
   }
 
-  /**
-   * Data provider for assertArrayContainsString tests.
-   */
   public static function dataProviderAssertArrayContainsString(): \Iterator {
-    // Success cases.
     yield 'basic_string_match' => [
       'needle' => 'bar',
       'haystack' => ['foo', 'bar', 'baz'],
@@ -79,7 +72,6 @@ final class AssertArrayTraitTest extends TestCase {
       'haystack' => [0, new \stdClass(), 'test'],
       'should_pass' => TRUE,
     ];
-    // Failure cases.
     yield 'string_not_found' => [
       'needle' => 'xyz',
       'haystack' => ['foo', 'bar', 'baz'],
@@ -99,9 +91,6 @@ final class AssertArrayTraitTest extends TestCase {
     ];
   }
 
-  /**
-   * Test assertArrayNotContainsString method.
-   */
   #[DataProvider('dataProviderAssertArrayNotContainsString')]
   public function testAssertArrayNotContainsString(string $needle, array $haystack, bool $should_pass, ?string $expected_exception_message = NULL): void {
     if (!$should_pass) {
@@ -118,11 +107,7 @@ final class AssertArrayTraitTest extends TestCase {
     }
   }
 
-  /**
-   * Data provider for assertArrayNotContainsString tests.
-   */
   public static function dataProviderAssertArrayNotContainsString(): \Iterator {
-    // Success cases.
     yield 'string_not_found' => [
       'needle' => 'xyz',
       'haystack' => ['foo', 'bar', 'baz'],
@@ -143,7 +128,6 @@ final class AssertArrayTraitTest extends TestCase {
       'haystack' => ['string', new \stdClass(), 123],
       'should_pass' => TRUE,
     ];
-    // Failure cases.
     yield 'string_found' => [
       'needle' => 'ba',
       'haystack' => ['foo', 'bar', 'baz'],
@@ -157,9 +141,6 @@ final class AssertArrayTraitTest extends TestCase {
     ];
   }
 
-  /**
-   * Test assertArrayContainsArray method.
-   */
   #[DataProvider('dataProviderAssertArrayContainsArray')]
   public function testAssertArrayContainsArray(array $array, array $sub_array, bool $should_pass, ?string $expected_exception_message = NULL): void {
     if (!$should_pass) {
@@ -176,11 +157,7 @@ final class AssertArrayTraitTest extends TestCase {
     }
   }
 
-  /**
-   * Data provider for assertArrayContainsArray tests.
-   */
   public static function dataProviderAssertArrayContainsArray(): \Iterator {
-    // Success cases.
     yield 'simple_contains_success' => [
       'array' => ['a', 'b', 'c'],
       'sub_array' => ['a', 'b'],
@@ -253,7 +230,6 @@ final class AssertArrayTraitTest extends TestCase {
       'sub_array' => [['nested', 'target']],
       'should_pass' => TRUE,
     ];
-    // Failure cases.
     yield 'element_not_found_failure' => [
       'array' => ['a', 'b', 'c'],
       'sub_array' => ['d'],
@@ -283,9 +259,6 @@ final class AssertArrayTraitTest extends TestCase {
     ];
   }
 
-  /**
-   * Test assertArrayNotContainsArray method.
-   */
   #[DataProvider('dataProviderAssertArrayNotContainsArray')]
   public function testAssertArrayNotContainsArray(array $array, array $sub_array, bool $should_pass, ?string $expected_exception_message = NULL): void {
     if (!$should_pass) {
@@ -302,11 +275,7 @@ final class AssertArrayTraitTest extends TestCase {
     }
   }
 
-  /**
-   * Data provider for assertArrayNotContainsArray tests.
-   */
   public static function dataProviderAssertArrayNotContainsArray(): \Iterator {
-    // Success cases.
     yield 'element_not_found_success' => [
       'array' => ['a', 'b', 'c'],
       'sub_array' => ['d'],
@@ -345,7 +314,6 @@ final class AssertArrayTraitTest extends TestCase {
       'sub_array' => [['a', 'b', 'c']],
       'should_pass' => TRUE,
     ];
-    // Failure cases.
     yield 'partial_with_missing_failure' => [
       'array' => ['a', 'b'],
       'sub_array' => ['a', 'c'],
@@ -391,9 +359,6 @@ final class AssertArrayTraitTest extends TestCase {
     ];
   }
 
-  /**
-   * Test edge cases and special scenarios.
-   */
   #[DataProvider('dataProviderEdgeCases')]
   public function testEdgeCases(string $method, array $args, bool $should_pass, ?string $expected_exception_message = NULL): void {
     if (!$should_pass) {
@@ -415,13 +380,9 @@ final class AssertArrayTraitTest extends TestCase {
     }
   }
 
-  /**
-   * Data provider for edge cases.
-   */
   public static function dataProviderEdgeCases(): \Iterator {
     $object = new \stdClass();
     $object->property = 'test';
-    // assertArrayContainsArray edge cases.
     yield 'null_values_in_contains' => [
       'method' => 'assertArrayContainsArray',
       'args' => [[NULL, 'a', 'b'], [NULL]],
@@ -455,7 +416,6 @@ final class AssertArrayTraitTest extends TestCase {
       ],
       'should_pass' => TRUE,
     ];
-    // assertArrayNotContainsString with objects.
     yield 'objects_ignored_in_not_contains_string' => [
       'method' => 'assertArrayNotContainsString',
       'args' => ['property', ['string', $object, 123]],
@@ -463,9 +423,6 @@ final class AssertArrayTraitTest extends TestCase {
     ];
   }
 
-  /**
-   * Test custom failure messages work correctly.
-   */
   public function testCustomFailureMessages(): void {
     $custom_message = 'This is a custom failure message';
 

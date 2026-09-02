@@ -23,7 +23,6 @@ class ErrorOutputCommand extends Command {
    * {@inheritdoc}
    */
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    // Use ConsoleOutput if it's available, otherwise write to stderr.
     if ($output instanceof ConsoleOutputInterface) {
       $error_output = $output->getErrorOutput();
       $error_output->writeln('Test Error');

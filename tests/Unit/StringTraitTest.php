@@ -42,7 +42,6 @@ final class StringTraitTest extends UnitTestCase {
 
     if ($custom_prefixes) {
       if (!$custom_messages) {
-        // Add default messages if custom prefixes but no custom messages.
         $args = array_merge($args, [
           'Expected exact match for "%s" in haystack',
           'Expected substring "%s" in haystack',
@@ -280,7 +279,6 @@ final class StringTraitTest extends UnitTestCase {
       'apple',
       ['+apple'],
       TRUE,
-    // Empty separator.
       ['+', '*', '-', '!', ''],
       ['Expected exact match for "%s" in haystack', 'Expected substring "%s" in haystack', 'Expected no exact match for "%s" in haystack', 'Expected substring "%s" not in haystack'],
       NULL,
@@ -291,7 +289,6 @@ final class StringTraitTest extends UnitTestCase {
       'This contains apple and banana',
       ['*apple', '*banana'],
       TRUE,
-    // Empty separator.
       ['+', '*', '-', '!', ''],
       ['Expected exact match for "%s" in haystack', 'Expected substring "%s" in haystack', 'Expected no exact match for "%s" in haystack', 'Expected substring "%s" not in haystack'],
       NULL,
@@ -302,7 +299,6 @@ final class StringTraitTest extends UnitTestCase {
       'apple',
       ['-orange'],
       TRUE,
-    // Empty separator.
       ['+', '*', '-', '!', ''],
       ['Expected exact match for "%s" in haystack', 'Expected substring "%s" in haystack', 'Expected no exact match for "%s" in haystack', 'Expected substring "%s" not in haystack'],
       NULL,
@@ -313,7 +309,6 @@ final class StringTraitTest extends UnitTestCase {
       'This contains apple and banana',
       ['!orange', '!grape'],
       TRUE,
-    // Empty separator.
       ['+', '*', '-', '!', ''],
       ['Expected exact match for "%s" in haystack', 'Expected substring "%s" in haystack', 'Expected no exact match for "%s" in haystack', 'Expected substring "%s" not in haystack'],
       NULL,
@@ -324,7 +319,6 @@ final class StringTraitTest extends UnitTestCase {
       'test string',
       ['*test', 'string'],
       TRUE,
-    // Empty separator.
       ['+', '*', '-', '!', ''],
       ['Expected exact match for "%s" in haystack', 'Expected substring "%s" in haystack', 'Expected no exact match for "%s" in haystack', 'Expected substring "%s" not in haystack'],
       \RuntimeException::class,
@@ -335,7 +329,6 @@ final class StringTraitTest extends UnitTestCase {
       'test',
       ['+'],
       TRUE,
-    // Empty separator.
       ['+', '*', '-', '!', ''],
       ['Expected exact match for "%s" in haystack', 'Expected substring "%s" in haystack', 'Expected no exact match for "%s" in haystack', 'Expected substring "%s" not in haystack'],
       \RuntimeException::class,

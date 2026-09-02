@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace AlexSkrypnyk\PhpunitHelpers\Traits;
 
 /**
- * Trait EnvTrait.
- *
- * Trait for managing environment variables.
+ * Manages environment variables.
  *
  * @mixin \PHPUnit\Framework\TestCase
  */
