@@ -614,14 +614,14 @@ final class LoggerTraitTest extends UnitTestCase {
    *   Test cases: [input_seconds, expected_output]
    */
   public static function dataProviderFormatElapsedTime(): \Iterator {
-    yield 'short duration' => [5.3, '5s'];
-    yield 'thirty seconds' => [30.2, '30s'];
-    yield 'almost minute' => [59.4, '59s'];
-    yield 'exact minute' => [60.0, '1m'];
-    yield 'two minutes' => [120.0, '2m'];
-    yield 'minute with seconds' => [65.3, '1m 5s'];
-    yield 'longer duration' => [150.2, '2m 30s'];
-    yield 'complex duration' => [345.4, '5m 45s'];
+    yield 'short_duration' => [5.3, '5s'];
+    yield 'thirty_seconds' => [30.2, '30s'];
+    yield 'almost_minute' => [59.4, '59s'];
+    yield 'exact_minute' => [60.0, '1m'];
+    yield 'two_minutes' => [120.0, '2m'];
+    yield 'minute_with_seconds' => [65.3, '1m 5s'];
+    yield 'longer_duration' => [150.2, '2m 30s'];
+    yield 'complex_duration' => [345.4, '5m 45s'];
   }
 
   /**
@@ -892,16 +892,16 @@ final class LoggerTraitTest extends UnitTestCase {
    *   Test cases: [verbose_mode, test_description, test_method]
    */
   public static function dataProviderLoggerMethodsVerboseMode(): \Iterator {
-    yield 'log verbose' => [TRUE, 'log method', fn($self) => $self::log('Test message')];
-    yield 'log silent' => [FALSE, 'log method', fn($self) => $self::log('Test message')];
-    yield 'logSubstep verbose' => [TRUE, 'logSubstep method', fn($self) => $self::logSubstep('Test substep')];
-    yield 'logSubstep silent' => [FALSE, 'logSubstep method', fn($self) => $self::logSubstep('Test substep')];
-    yield 'logNote verbose' => [TRUE, 'logNote method', fn($self) => $self::logNote('Test note')];
-    yield 'logNote silent' => [FALSE, 'logNote method', fn($self) => $self::logNote('Test note')];
-    yield 'logStepStart verbose' => [TRUE, 'logStepStart method', fn($self) => $self::logStepStart('Test step')];
-    yield 'logStepStart silent' => [FALSE, 'logStepStart method', fn($self) => $self::logStepStart('Test step')];
-    yield 'logStepFinish verbose' => [TRUE, 'logStepFinish method', fn($self) => $self::logStepFinish('Test step')];
-    yield 'logStepFinish silent' => [FALSE, 'logStepFinish method', fn($self) => $self::logStepFinish('Test step')];
+    yield 'log_verbose' => [TRUE, 'log method', fn($self) => $self::log('Test message')];
+    yield 'log_silent' => [FALSE, 'log method', fn($self) => $self::log('Test message')];
+    yield 'log_substep_verbose' => [TRUE, 'logSubstep method', fn($self) => $self::logSubstep('Test substep')];
+    yield 'log_substep_silent' => [FALSE, 'logSubstep method', fn($self) => $self::logSubstep('Test substep')];
+    yield 'log_note_verbose' => [TRUE, 'logNote method', fn($self) => $self::logNote('Test note')];
+    yield 'log_note_silent' => [FALSE, 'logNote method', fn($self) => $self::logNote('Test note')];
+    yield 'log_step_start_verbose' => [TRUE, 'logStepStart method', fn($self) => $self::logStepStart('Test step')];
+    yield 'log_step_start_silent' => [FALSE, 'logStepStart method', fn($self) => $self::logStepStart('Test step')];
+    yield 'log_step_finish_verbose' => [TRUE, 'logStepFinish method', fn($self) => $self::logStepFinish('Test step')];
+    yield 'log_step_finish_silent' => [FALSE, 'logStepFinish method', fn($self) => $self::logStepFinish('Test step')];
   }
 
   /**
@@ -937,10 +937,10 @@ final class LoggerTraitTest extends UnitTestCase {
    *   Test cases: [step_name, message, expected_output_contains]
    */
   public static function dataProviderStepMethods(): \Iterator {
-    yield 'basic step start' => ['testStep', 'Starting process', ['STEP START | testStepMethods', 'Starting process']];
-    yield 'step finish with message' => ['testStep', 'Process completed', ['STEP DONE | testStepMethods', 'Process completed', '0s']];
-    yield 'step start no message' => ['testStep', NULL, ['STEP START | testStepMethods']];
-    yield 'step finish no message' => ['testStep', NULL, ['STEP DONE | testStepMethods', '0s']];
+    yield 'basic_step_start' => ['testStep', 'Starting process', ['STEP START | testStepMethods', 'Starting process']];
+    yield 'step_finish_with_message' => ['testStep', 'Process completed', ['STEP DONE | testStepMethods', 'Process completed', '0s']];
+    yield 'step_start_no_message' => ['testStep', NULL, ['STEP START | testStepMethods']];
+    yield 'step_finish_no_message' => ['testStep', NULL, ['STEP DONE | testStepMethods', '0s']];
   }
 
   /**
@@ -975,10 +975,10 @@ final class LoggerTraitTest extends UnitTestCase {
    *   Test cases: [title, message, double_border, min_width, expected_strings]
    */
   public static function dataProviderSectionFormatting(): \Iterator {
-    yield 'basic title only' => ['BASIC TITLE', NULL, FALSE, 60, ['BASIC TITLE', '---']];
-    yield 'title with message' => ['TITLE', 'Message content', FALSE, 60, ['TITLE', 'Message content', '---']];
-    yield 'double border' => ['DOUBLE', 'Double message', TRUE, 60, ['DOUBLE', 'Double message', '===']];
-    yield 'wide section' => ['WIDE', NULL, FALSE, 100, ['WIDE', '---']];
+    yield 'basic_title_only' => ['BASIC TITLE', NULL, FALSE, 60, ['BASIC TITLE', '---']];
+    yield 'title_with_message' => ['TITLE', 'Message content', FALSE, 60, ['TITLE', 'Message content', '---']];
+    yield 'double_border' => ['DOUBLE', 'Double message', TRUE, 60, ['DOUBLE', 'Double message', '===']];
+    yield 'wide_section' => ['WIDE', NULL, FALSE, 100, ['WIDE', '---']];
   }
 
   /**
