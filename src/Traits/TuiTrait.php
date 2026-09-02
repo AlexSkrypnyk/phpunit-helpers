@@ -49,7 +49,7 @@ trait TuiTrait {
    *
    * @var array
    */
-  public const KEYS = [
+  const KEYS = [
     'UP' => "\e[A",
     'SHIFT_UP' => "\e[1;2A",
     'DOWN' => "\e[B",
@@ -191,7 +191,7 @@ trait TuiTrait {
       // If an entry has a special key - we consider that any additional
       // functionality like clearing the existing entry or appending an accept
       // key is handled by the consumer.
-      $skip_additional_processing = static::tuiHasKey($entry, [self::KEYS['SPACE']]);
+      $skip_additional_processing = static::tuiHasKey($entry, [static::KEYS['SPACE']]);
 
       // Clear the existing TUI value, if any, one character at a time.
       if (!$skip_additional_processing && $clear_size > 0) {

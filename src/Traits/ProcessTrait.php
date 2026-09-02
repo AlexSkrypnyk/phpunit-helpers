@@ -145,7 +145,7 @@ trait ProcessTrait {
 
     foreach ($all_arguments as &$arg) {
       if (!is_scalar($arg)) {
-        throw new \InvalidArgumentException("All arguments must be scalar values.");
+        throw new \InvalidArgumentException('All arguments must be scalar values.');
       }
       $arg = (string) $arg;
     }
@@ -155,7 +155,7 @@ trait ProcessTrait {
     // prevented by setting to FALSE the env vars that need to be removed.
     foreach ($env as &$env_value) {
       if (!is_scalar($env_value)) {
-        throw new \InvalidArgumentException("All environment variables must be scalar values.");
+        throw new \InvalidArgumentException('All environment variables must be scalar values.');
       }
     }
 
@@ -306,7 +306,7 @@ trait ProcessTrait {
    *   The output processing callback.
    */
   protected function processStreamingOutputCallback(): callable {
-    return function ($type, $buffer): void {
+    return function (string $type, string $buffer): void {
       $prefix = $type === Process::ERR ? static::$processStreamingErrorOutputChars : static::$processStreamingStandardOutputChars;
 
       $parts = preg_split('/(\r\n|\n|\r)/', $buffer, -1, PREG_SPLIT_DELIM_CAPTURE);

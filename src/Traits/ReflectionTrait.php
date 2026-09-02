@@ -52,7 +52,7 @@ trait ReflectionTrait {
 
     // Ensure we have an object for non-static methods.
     if (!$method->isStatic() && $invoke_object === NULL) {
-      throw new \InvalidArgumentException("An object instance is required for non-static methods");
+      throw new \InvalidArgumentException('An object instance is required for non-static methods');
     }
 
     return $method->invokeArgs($invoke_object, $args);
@@ -68,7 +68,7 @@ trait ReflectionTrait {
    * @param mixed $value
    *   Value to set to the property.
    */
-  public static function setProtectedValue($object, $property, mixed $value): void {
+  public static function setProtectedValue(object $object, string $property, mixed $value): void {
     $class = new \ReflectionClass($object::class);
     $property = $class->getProperty($property);
 
@@ -86,7 +86,7 @@ trait ReflectionTrait {
    * @return mixed
    *   Protected property value.
    */
-  public static function getProtectedValue($object, $property): mixed {
+  public static function getProtectedValue(object $object, string $property): mixed {
     $class = new \ReflectionClass($object::class);
     $property = $class->getProperty($property);
 
