@@ -513,9 +513,9 @@ final class ProcessTraitTest extends UnitTestCase {
       $prefix = $type === Process::ERR ? self::$processStreamingErrorOutputChars : self::$processStreamingStandardOutputChars;
 
       $parts = preg_split('/(\r\n|\n|\r)/', $buffer, -1, PREG_SPLIT_DELIM_CAPTURE);
-      $counter = is_array($parts) ? count($parts) : 0;
+      $count = is_array($parts) ? count($parts) : 0;
 
-      for ($i = 0; $i < $counter; $i += 2) {
+      for ($i = 0; $i < $count; $i += 2) {
         $line = $parts[$i] ?? '';
         $eol = $parts[$i + 1] ?? '';
 
@@ -694,9 +694,9 @@ EOL;
       $prefix = $type === Process::ERR ? self::$processStreamingErrorOutputChars : self::$processStreamingStandardOutputChars;
 
       $parts = preg_split('/(\r\n|\n|\r)/', $buffer, -1, PREG_SPLIT_DELIM_CAPTURE);
-      $counter = is_array($parts) ? count($parts) : 0;
+      $count = is_array($parts) ? count($parts) : 0;
 
-      for ($i = 0; $i < $counter; $i += 2) {
+      for ($i = 0; $i < $count; $i += 2) {
         $line = $parts[$i] ?? '';
         $eol = $parts[$i + 1] ?? '';
 
@@ -723,9 +723,9 @@ EOL;
       $prefix = $type === Process::ERR ? self::$processStreamingErrorOutputChars : self::$processStreamingStandardOutputChars;
 
       $parts = preg_split('/(\r\n|\n|\r)/', $buffer, -1, PREG_SPLIT_DELIM_CAPTURE);
-      $counter = is_array($parts) ? count($parts) : 0;
+      $count = is_array($parts) ? count($parts) : 0;
 
-      for ($i = 0; $i < $counter; $i += 2) {
+      for ($i = 0; $i < $count; $i += 2) {
         $line = $parts[$i] ?? '';
         $eol = $parts[$i + 1] ?? '';
 
@@ -767,9 +767,9 @@ EOL;
       $prefix = $type === Process::ERR ? self::$processStreamingErrorOutputChars : self::$processStreamingStandardOutputChars;
 
       $parts = preg_split('/(\r\n|\n|\r)/', $buffer, -1, PREG_SPLIT_DELIM_CAPTURE);
-      $counter = is_array($parts) ? count($parts) : 0;
+      $count = is_array($parts) ? count($parts) : 0;
 
-      for ($i = 0; $i < $counter; $i += 2) {
+      for ($i = 0; $i < $count; $i += 2) {
         $line = $parts[$i] ?? '';
         $eol = $parts[$i + 1] ?? '';
 
