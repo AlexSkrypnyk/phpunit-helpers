@@ -96,15 +96,9 @@ final class TuiTraitTest extends TestCase {
   }
 
   #[DataProvider('dataProviderTuiKeystrokes')]
-  public function testTuiKeystrokes(
-    array $entries,
-    int $clear_size,
-    ?string $accept_key,
-    ?string $clear_key,
-    array $expected,
-  ): void {
+  public function testTuiKeystrokes(array $entries, int $clear_size, ?string $accept_key, ?string $clear_key, array $expected): void {
     $keystrokes = self::tuiKeystrokes($entries, $clear_size, $accept_key, $clear_key);
-    $this->assertEquals($expected, $keystrokes);
+    $this->assertSame($expected, $keystrokes);
   }
 
   public static function dataProviderTuiKeystrokes(): \Iterator {
@@ -206,7 +200,7 @@ final class TuiTraitTest extends TestCase {
         'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd', self::KEYS['ENTER'],
       ],
     ];
-    yield 'string_with_spaces_an_key' => [
+    yield 'string_with_spaces_as_key' => [
       [
         'answer1' => 'hello world',
       ],

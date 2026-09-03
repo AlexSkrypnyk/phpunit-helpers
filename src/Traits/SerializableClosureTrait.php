@@ -7,10 +7,7 @@ namespace AlexSkrypnyk\PhpunitHelpers\Traits;
 use Laravel\SerializableClosure\SerializableClosure;
 
 /**
- * Trait SerializableClosureTrait.
- *
- * Provides a wrapper for closures that allows to use them as arguments in data
- * providers.
+ * Provides a wrapper to pass closures as arguments in data providers.
  *
  * The methods are deliberately named as short as possible to avoid long lines
  * in data providers:

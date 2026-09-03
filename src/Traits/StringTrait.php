@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace AlexSkrypnyk\PhpunitHelpers\Traits;
 
 /**
- * Trait StringTrait.
- *
  * Provides string assertion utilities with prefix support.
  *
  * @mixin \PHPUnit\Framework\TestCase
@@ -24,7 +22,7 @@ trait StringTrait {
    *
    * @param string $haystack
    *   The string to search in.
-   * @param string|array $expected
+   * @param array|string $expected
    *   String or array of strings to check with optional prefixes.
    * @param string $message_present_exact
    *   Message template for failed exact match present assertions.
@@ -54,7 +52,7 @@ trait StringTrait {
    */
   protected function assertStringContainsOrNot(
     string $haystack,
-    string|array $expected,
+    array|string $expected,
     string $message_present_exact = 'Expected exact match for "%s" in haystack',
     string $message_present_contains = 'Expected substring "%s" in haystack',
     string $message_absent_exact = 'Expected no exact match for "%s" in haystack',
@@ -89,20 +87,17 @@ trait StringTrait {
       return;
     }
 
-    // Determine mode by checking for any prefixes.
     $has_prefix_count = 0;
     foreach ($expected as $value) {
       foreach ($prefixes as $prefix) {
         $prefix_with_separator = $prefix . $prefix_separator;
         if ($prefix_separator === '') {
-          // When separator is empty, check only prefix.
           if (str_starts_with($value, $prefix)) {
             $has_prefix_count++;
             break;
           }
         }
         elseif (str_starts_with($value, $prefix_with_separator)) {
-          // When separator exists, check prefix + separator.
           $has_prefix_count++;
           break;
         }
@@ -111,7 +106,6 @@ trait StringTrait {
 
     $mixed_mode = $has_prefix_count > 0;
 
-    // In mixed mode, all values must have valid prefixes.
     if ($mixed_mode && $has_prefix_count !== count($expected)) {
       $first_invalid = NULL;
       foreach ($expected as $value) {
@@ -119,14 +113,12 @@ trait StringTrait {
         foreach ($prefixes as $prefix) {
           $prefix_with_separator = $prefix . $prefix_separator;
           if ($prefix_separator === '') {
-            // When separator is empty, check only prefix.
             if (str_starts_with($value, $prefix)) {
               $has_valid_prefix = TRUE;
               break;
             }
           }
           elseif (str_starts_with($value, $prefix_with_separator)) {
-            // When separator exists, check prefix + separator.
             $has_valid_prefix = TRUE;
             break;
           }
@@ -139,16 +131,13 @@ trait StringTrait {
       throw new \RuntimeException(sprintf('All strings must have valid prefixes in mixed mode. First invalid: "%s"', $first_invalid));
     }
 
-    // Process each expected value.
     foreach ($expected as $expected_value) {
       if ($mixed_mode) {
-        // Find which prefix matches this value.
         $prefix = NULL;
         $value = NULL;
         foreach ($prefixes as $test_prefix) {
           $prefix_with_separator = $test_prefix . $prefix_separator;
           if ($prefix_separator === '') {
-            // When separator is empty, check only prefix.
             if (str_starts_with($expected_value, $test_prefix)) {
               $prefix = $test_prefix;
               $value = substr($expected_value, strlen($test_prefix));
@@ -156,14 +145,12 @@ trait StringTrait {
             }
           }
           elseif (str_starts_with($expected_value, $prefix_with_separator)) {
-            // When separator exists, check prefix + separator.
             $prefix = $test_prefix;
             $value = substr($expected_value, strlen($prefix_with_separator));
             break;
           }
         }
 
-        // Validate value is not empty after stripping prefix.
         if ($value === '') {
           throw new \RuntimeException(sprintf('Value cannot be empty after stripping prefix: "%s"', $expected_value));
         }
@@ -174,7 +161,6 @@ trait StringTrait {
         $value = $expected_value;
       }
 
-      // Perform the appropriate assertion based on prefix type.
       if ($prefix === $prefix_present_exact) {
         $message = sprintf($message_present_exact, $value);
         if ($case_insensitive) {

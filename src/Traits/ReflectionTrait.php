@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace AlexSkrypnyk\PhpunitHelpers\Traits;
 
 /**
- * Trait ReflectionTrait.
- *
  * Provides methods to work with class reflection.
+ *
+ * @mixin \PHPUnit\Framework\TestCase
  */
 trait ReflectionTrait {
 
@@ -24,6 +24,10 @@ trait ReflectionTrait {
    *
    * @return mixed
    *   Method result.
+   *
+   * @throws \InvalidArgumentException
+   *   When the class or method does not exist or no object instance is
+   *   provided for a non-static method.
    */
   public static function callProtectedMethod(object|string $object, string $name, array $args = []): mixed {
     $object_or_class = is_object($object) ? $object::class : $object;
@@ -40,13 +44,10 @@ trait ReflectionTrait {
 
     $method = $class->getMethod($name);
 
-    // If the method is static, we won't pass an object instance to invokeArgs()
-    // Otherwise, we ensure to pass the object instance.
     $invoke_object = $method->isStatic() ? NULL : (is_object($object) ? $object : NULL);
 
-    // Ensure we have an object for non-static methods.
     if (!$method->isStatic() && $invoke_object === NULL) {
-      throw new \InvalidArgumentException("An object instance is required for non-static methods");
+      throw new \InvalidArgumentException('An object instance is required for non-static methods');
     }
 
     return $method->invokeArgs($invoke_object, $args);
@@ -58,11 +59,11 @@ trait ReflectionTrait {
    * @param object $object
    *   Object to set the value on.
    * @param string $property
-   *   Property name to set the value. Property should exists in the object.
+   *   Property name to set the value. Property should exist in the object.
    * @param mixed $value
    *   Value to set to the property.
    */
-  public static function setProtectedValue($object, $property, mixed $value): void {
+  public static function setProtectedValue(object $object, string $property, mixed $value): void {
     $class = new \ReflectionClass($object::class);
     $property = $class->getProperty($property);
 
@@ -75,12 +76,12 @@ trait ReflectionTrait {
    * @param object $object
    *   Object to set the value on.
    * @param string $property
-   *   Property name to get the value. Property should exists in the object.
+   *   Property name to get the value. Property should exist in the object.
    *
    * @return mixed
    *   Protected property value.
    */
-  public static function getProtectedValue($object, $property): mixed {
+  public static function getProtectedValue(object $object, string $property): mixed {
     $class = new \ReflectionClass($object::class);
     $property = $class->getProperty($property);
 

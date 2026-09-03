@@ -49,9 +49,12 @@ trait ApplicationTrait {
    *
    * @return \Symfony\Component\Console\Application
    *   The application instance.
+   *
+   * @throws \RuntimeException
+   *   If the application is not initialized.
    */
   public function applicationGet(): Application {
-    if ($this->application === NULL) {
+    if (!$this->application instanceof Application) {
       throw new \RuntimeException('Application is not initialized. Call applicationInit* first.');
     }
     return $this->application;
@@ -67,7 +70,7 @@ trait ApplicationTrait {
    *   If the application tester is not initialized.
    */
   public function applicationGetTester(): ApplicationTester {
-    if ($this->applicationTester === NULL) {
+    if (!$this->applicationTester instanceof ApplicationTester) {
       throw new \RuntimeException('Application tester is not initialized. Call applicationInit* first.');
     }
     return $this->applicationTester;
@@ -91,27 +94,32 @@ trait ApplicationTrait {
    *
    * @return \Symfony\Component\Console\Tester\ApplicationTester
    *   The initialized application tester.
+   *
+   * @throws \InvalidArgumentException
+   *   When the loader file is missing or does not return an application.
    */
   public function applicationInitFromLoader(string $loader_path): ApplicationTester {
     if (!file_exists($loader_path)) {
       throw new \InvalidArgumentException(sprintf('Loader file not found: %s', $loader_path));
     }
 
-    $this->application = require $loader_path;
+    // Validate before assigning: the property is typed, so assigning a wrong
+    // type raises a TypeError before this guard can run.
+    $application = require $loader_path;
 
-    if (!$this->application instanceof Application) {
+    if (!$application instanceof Application) {
       throw new \InvalidArgumentException('Loader must return an instance of Application');
     }
+
+    $this->application = $application;
 
     $this->application->setAutoExit(FALSE);
     $this->application->setCatchExceptions(TRUE);
 
-    // Change the working directory if specified.
     if ($this->applicationCwd !== NULL) {
       $original_cwd = getcwd();
       if ($original_cwd !== FALSE) {
         chdir($this->applicationCwd);
-        // Register shutdown function to restore original working directory.
         // @codeCoverageIgnoreStart
         register_shutdown_function(function () use ($original_cwd): void {
           chdir($original_cwd);
@@ -134,8 +142,11 @@ trait ApplicationTrait {
    *
    * @return \Symfony\Component\Console\Tester\ApplicationTester
    *   The initialized application tester.
+   *
+   * @throws \InvalidArgumentException
+   *   When the provided object or class is not a command.
    */
-  public function applicationInitFromCommand(string | object $object_or_class, bool $is_single_command = TRUE): ApplicationTester {
+  public function applicationInitFromCommand(string|object $object_or_class, bool $is_single_command = TRUE): ApplicationTester {
     $this->application = new Application();
 
     $instance = is_object($object_or_class) ? $object_or_class : new $object_or_class();
@@ -156,12 +167,10 @@ trait ApplicationTrait {
     $this->application->setAutoExit(FALSE);
     $this->application->setCatchExceptions(TRUE);
 
-    // Change the working directory if specified.
     if ($this->applicationCwd !== NULL) {
       $original_cwd = getcwd();
       if ($original_cwd !== FALSE) {
         chdir($this->applicationCwd);
-        // Register shutdown function to restore original working directory.
         // @codeCoverageIgnoreStart
         register_shutdown_function(function () use ($original_cwd): void {
           chdir($original_cwd);
@@ -186,9 +195,14 @@ trait ApplicationTrait {
    *
    * @return string
    *   Application output.
+   *
+   * @throws \RuntimeException
+   *   When the application is not initialized.
+   * @throws \PHPUnit\Framework\AssertionFailedError
+   *   When the application outcome does not match the expectation.
    */
   public function applicationRun(array $input = [], array $options = [], bool $expect_fail = FALSE): string {
-    if ($this->applicationTester === NULL) {
+    if (!$this->applicationTester instanceof ApplicationTester) {
       throw new \RuntimeException('Application is not initialized. Call applicationInit* first.');
     }
 
@@ -210,7 +224,7 @@ trait ApplicationTrait {
         throw new \Exception(sprintf("Application exited with non-zero code.\nThe output was:\n%s\nThe error output was:\n%s", $this->applicationTester->getDisplay(), $this->applicationTester->getErrorOutput()));
       }
 
-      // Expected to fail, but succeeded (was called with expect_fail = TRUE).
+      // Expected to fail, but succeeded.
       if ($expect_fail) {
         throw new AssertionFailedError(sprintf("Application exited successfully but should not.\nThe output was:\n%s\nThe error output was:\n%s", $this->applicationTester->getDisplay(), $this->applicationTester->getErrorOutput()));
       }
@@ -224,16 +238,15 @@ trait ApplicationTrait {
       $output = $exception->getMessage();
     }
     catch (\Exception $exception) {
-      // Caught exception, check if we expected failure.
       if (!$expect_fail) {
-        // Expecting success (was called with expect_fail = FALSE).
+        // Expected to succeed, but failed.
         throw new AssertionFailedError('Application exited with an error:' . PHP_EOL . $exception->getMessage(), $exception->getCode(), $exception);
       }
       // Expected to fail, so capture the output.
       $output = $exception->getMessage();
     }
 
-    // Append error output. Internally, error output is captured separately.
+    // Error output is captured separately, so append it to the output.
     $output .= $this->applicationTester->getErrorOutput();
 
     return $output;
@@ -281,7 +294,7 @@ trait ApplicationTrait {
    * @param ?string $message
    *   Optional failure message.
    */
-  public function assertApplicationOutputContains(array | string $expected, ?string $message = NULL): void {
+  public function assertApplicationOutputContains(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
     $output = $this->applicationTester->getDisplay();
 
@@ -308,7 +321,7 @@ trait ApplicationTrait {
    * @param ?string $message
    *   Optional failure message.
    */
-  public function assertApplicationOutputNotContains(array | string $expected, ?string $message = NULL): void {
+  public function assertApplicationOutputNotContains(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
     $output = $this->applicationTester->getDisplay();
 
@@ -335,7 +348,7 @@ trait ApplicationTrait {
    * @param ?string $message
    *   Optional failure message.
    */
-  public function assertApplicationErrorOutputContains(array | string $expected, ?string $message = NULL): void {
+  public function assertApplicationErrorOutputContains(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
     $output = $this->applicationTester->getErrorOutput();
 
@@ -362,7 +375,7 @@ trait ApplicationTrait {
    * @param ?string $message
    *   Optional failure message.
    */
-  public function assertApplicationErrorOutputNotContains(array | string $expected, ?string $message = NULL): void {
+  public function assertApplicationErrorOutputNotContains(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
     $output = $this->applicationTester->getErrorOutput();
 
@@ -394,7 +407,7 @@ trait ApplicationTrait {
    * - Shortcut mode: No prefixes, all strings treated as substring present
    * - Mixed mode: If any string has a prefix, ALL strings must have prefixes
    *
-   * @param string|array $expected
+   * @param array|string $expected
    *   String or array of strings to check in the application output.
    *   Use '+ ' prefix for exact match present,
    *   '* ' prefix for substring present,
@@ -407,7 +420,7 @@ trait ApplicationTrait {
    * @throws \RuntimeException
    *   When prefix usage is inconsistent (some have prefixes, others don't).
    */
-  public function assertApplicationOutputContainsOrNot(string|array $expected, ?string $message = NULL): void {
+  public function assertApplicationOutputContainsOrNot(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
 
     $output = $this->applicationTester->getDisplay();
@@ -437,7 +450,7 @@ trait ApplicationTrait {
    * - Shortcut mode: No prefixes, all strings treated as substring present
    * - Mixed mode: If any string has a prefix, ALL strings must have prefixes
    *
-   * @param string|array $expected
+   * @param array|string $expected
    *   String or array of strings to check in the application error output.
    *   Use '+ ' prefix for exact match present,
    *   '* ' prefix for substring present,
@@ -450,7 +463,7 @@ trait ApplicationTrait {
    * @throws \RuntimeException
    *   When prefix usage is inconsistent (some have prefixes, others don't).
    */
-  public function assertApplicationErrorOutputContainsOrNot(string|array $expected, ?string $message = NULL): void {
+  public function assertApplicationErrorOutputContainsOrNot(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
 
     $output = $this->applicationTester->getErrorOutput();
@@ -481,7 +494,7 @@ trait ApplicationTrait {
    * - Shortcut mode: No prefixes, all strings treated as substring present
    * - Mixed mode: If any string has a prefix, ALL strings must have prefixes
    *
-   * @param string|array $expected
+   * @param array|string $expected
    *   String or array of strings to check in combined process output.
    *   Use '+ ' prefix for exact match present,
    *   '* ' prefix for substring present,
@@ -494,7 +507,7 @@ trait ApplicationTrait {
    * @throws \RuntimeException
    *   When prefix usage is inconsistent (some have prefixes, others don't).
    */
-  public function assertApplicationAnyOutputContainsOrNot(string|array $expected, ?string $message = NULL): void {
+  public function assertApplicationAnyOutputContainsOrNot(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
 
     $output = $this->applicationTester->getDisplay();
@@ -519,9 +532,10 @@ trait ApplicationTrait {
    *   The application info.
    */
   public function applicationInfo(): string {
-    if ($this->applicationTester === NULL) {
+    if (!$this->applicationTester instanceof ApplicationTester) {
       return 'APPLICATION: Not initialized' . PHP_EOL;
     }
+    $lines = [];
     $lines[] = 'APPLICATION';
     $lines[] = 'Output:';
     $output = $this->applicationTester->getDisplay();

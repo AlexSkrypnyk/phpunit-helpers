@@ -22,6 +22,8 @@ class LocationsTraitTest extends TestCase {
   protected string $testFixtures;
 
   protected function setUp(): void {
+    parent::setUp();
+
     $this->testTmp = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('locations_trait_test_tmp_', TRUE);
     mkdir($this->testTmp, 0777, TRUE);
 
@@ -42,6 +44,8 @@ class LocationsTraitTest extends TestCase {
     if (is_dir($this->testFixtures)) {
       rmdir($this->testFixtures);
     }
+
+    parent::tearDown();
   }
 
   public function testLocationsInit(): void {
@@ -103,7 +107,6 @@ class LocationsTraitTest extends TestCase {
       $this->assertDirectoryExists(self::$tmp);
     }
     finally {
-      // Restore original working directory.
       chdir($original_cwd);
     }
   }
@@ -122,7 +125,6 @@ class LocationsTraitTest extends TestCase {
     self::$fixtures = NULL;
 
     try {
-      // Change to the test directory.
       chdir($test_cwd_no_fixtures);
 
       $mock = $this->createPartialMock(self::class, ['locationsFixturesDir']);
@@ -136,7 +138,6 @@ class LocationsTraitTest extends TestCase {
       $this->assertNull(self::$fixtures, 'Fixtures property should be null when directory does not exist.');
     }
     finally {
-      // Restore original state.
       self::$fixtures = $original_fixtures;
       chdir($original_cwd);
 
@@ -206,7 +207,6 @@ class LocationsTraitTest extends TestCase {
     file_put_contents($file1, 'Test file 1');
     file_put_contents($file2, 'Test file 2');
 
-    // Test with default parameters.
     $files = [$file1, $file2];
     $copied_files = self::locationsCopyFilesToSut($files);
 
@@ -228,7 +228,6 @@ class LocationsTraitTest extends TestCase {
   }
 
   public function testLocationsTearDown(): void {
-    // Create a workspace directory with some content to test removal.
     self::$workspace = $this->testTmp . DIRECTORY_SEPARATOR . 'test_workspace_' . uniqid();
     mkdir(self::$workspace, 0777, TRUE);
     touch(self::$workspace . DIRECTORY_SEPARATOR . 'test_file.txt');
@@ -237,38 +236,24 @@ class LocationsTraitTest extends TestCase {
   }
 
   public function testLocationsTearDownWithRestrictedPermissions(): void {
-    // Create a workspace directory with restricted permissions to test chmod
-    // handling.
     self::$workspace = $this->testTmp . DIRECTORY_SEPARATOR . 'test_workspace_restricted_' . uniqid();
     mkdir(self::$workspace, 0777, TRUE);
 
-    // Create a subdirectory structure with files.
     $subdir = self::$workspace . DIRECTORY_SEPARATOR . 'subdir';
     mkdir($subdir, 0777, TRUE);
     touch($subdir . DIRECTORY_SEPARATOR . 'test_file.txt');
 
-    // Make the subdirectory read-only to simulate permission issues.
     chmod($subdir, 0555);
 
-    // Verify the directory is read-only.
     $this->assertIsNotWritable($subdir, 'Subdirectory should be read-only.');
 
-    // locationsTearDown should handle the chmod and remove the directory
-    // successfully.
     $this->locationsTearDown();
 
-    // Verify the workspace was completely removed.
     $this->assertDirectoryDoesNotExist(self::$workspace, 'Workspace with restricted permissions should be removed.');
   }
 
   #[DataProvider('dataProviderLocationsCopy')]
-  public function testLocationsCopy(
-    array $source_files,
-    array $include_files,
-    array $exclude_dirs,
-    bool $use_before_callback,
-    int $expected_count,
-  ): void {
+  public function testLocationsCopy(array $source_files, array $include_files, array $exclude_dirs, bool $use_before_callback, int $expected_count): void {
     $this->locationsInit($this->testCwd);
 
     $source_dir = $this->testTmp . DIRECTORY_SEPARATOR . 'copy_source_' . uniqid();
@@ -431,10 +416,9 @@ class LocationsTraitTest extends TestCase {
     ];
   }
 
-  public function testLocationGetters(): void {
+  public function testLocationsGetters(): void {
     $this->locationsInit($this->testCwd);
 
-    // Test all getter methods return the same values as direct property access.
     $this->assertSame(self::$root, self::locationsRoot());
     $this->assertSame(self::$fixtures, self::locationsFixtures());
     $this->assertSame(self::$workspace, self::locationsWorkspace());
@@ -442,39 +426,29 @@ class LocationsTraitTest extends TestCase {
     $this->assertSame(self::$sut, self::locationsSut());
     $this->assertSame(self::$tmp, self::locationsTmp());
 
-    // Test that getters return expected directory types.
     $this->assertDirectoryExists(self::locationsRoot());
     $this->assertDirectoryExists(self::locationsWorkspace());
     $this->assertDirectoryExists(self::locationsRepo());
     $this->assertDirectoryExists(self::locationsSut());
     $this->assertDirectoryExists(self::locationsTmp());
 
-    // Test fixtures getter specifically (can be null)
     if (self::locationsFixtures() !== NULL) {
       $this->assertDirectoryExists(self::locationsFixtures());
     }
   }
 
   public function testLocationsTearDownWithChmodException(): void {
-    // Create a workspace directory with restricted permissions to simulate
-    // chmod issues.
     self::$workspace = $this->testTmp . DIRECTORY_SEPARATOR . 'test_workspace_chmod_fail_' . uniqid();
     mkdir(self::$workspace, 0777, TRUE);
 
-    // Create a subdirectory and file structure that might cause chmod issues.
     $subdir = self::$workspace . DIRECTORY_SEPARATOR . 'readonly_subdir';
     mkdir($subdir, 0777, TRUE);
     touch($subdir . DIRECTORY_SEPARATOR . 'test_file.txt');
 
-    // Make the subdirectory read-only to potentially trigger chmod issues
-    // when locationsTearDown tries to modify permissions.
     chmod($subdir, 0444);
 
-    // Test that locationsTearDown completes successfully even if chmod fails.
-    // This tests the exception handling path in the actual implementation.
     $this->locationsTearDown();
 
-    // Verify the workspace was removed despite potential chmod exceptions.
     $this->assertDirectoryDoesNotExist(self::$workspace, 'Workspace should be removed even with chmod exception.');
   }
 
@@ -490,8 +464,7 @@ class LocationsTraitTest extends TestCase {
     $this->assertDirectoryDoesNotExist(self::$workspace);
   }
 
-  public function testLocationsFixtureDirThrowsExceptionWhenFixturesDirectoryMissing(): void {
-    // Create a temporary directory without fixtures subdirectory.
+  public function testLocationsFixtureDirThrowsExceptionWhenFixturesDirMissing(): void {
     $test_cwd_no_fixtures = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('locations_trait_test_no_fixtures_dir_', TRUE);
     mkdir($test_cwd_no_fixtures, 0777, TRUE);
 
@@ -516,7 +489,6 @@ class LocationsTraitTest extends TestCase {
     /** @var non-empty-string $expected_suffix */
     $this->locationsInit($this->testCwd);
 
-    // Create dataset directory structure for each test case.
     $dataset_dir = $this->testFixtures . DIRECTORY_SEPARATOR . 'locations_fixture_dir_with_baseline_dataset' . DIRECTORY_SEPARATOR . $expected_suffix;
     mkdir($dataset_dir, 0777, TRUE);
     touch($dataset_dir . DIRECTORY_SEPARATOR . 'test_file.txt');
@@ -543,16 +515,13 @@ class LocationsTraitTest extends TestCase {
     $dest_dir = $this->testTmp . DIRECTORY_SEPARATOR . 'copy_dest_nonexistent_' . uniqid();
     mkdir($dest_dir, 0777, TRUE);
 
-    // Create one existing file.
     $existing_file = $source_dir . DIRECTORY_SEPARATOR . 'existing.txt';
     file_put_contents($existing_file, 'content');
 
-    // Try to include a non-existent file along with the existing one.
     $include_files = [$existing_file, $source_dir . DIRECTORY_SEPARATOR . 'nonexistent.txt'];
 
     $result = self::locationsCopy($source_dir, $dest_dir, $include_files);
 
-    // Should only copy the existing file.
     $this->assertCount(1, $result);
     $this->assertFileExists($result[0]);
 

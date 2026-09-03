@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace AlexSkrypnyk\PhpunitHelpers\Traits;
 
 /**
- * Trait AssertTrait.
- *
  * Provides custom assertions.
  *
  * @mixin \PHPUnit\Framework\TestCase
@@ -80,15 +78,12 @@ trait AssertArrayTrait {
       if (is_array($value)) {
         $found = FALSE;
 
-        // Check if value exists as a direct value in array.
         if (in_array($value, $array, TRUE)) {
           $found = TRUE;
         }
         else {
-          // Check each element in array recursively.
           foreach ($array as $item) {
             if (is_array($item)) {
-              // Recursively search within this item.
               try {
                 $this->assertArrayContainsArray($item, [$value], $message);
                 $found = TRUE;
@@ -123,8 +118,8 @@ trait AssertArrayTrait {
    *   If any element from the sub-array is found in the main array.
    */
   public function assertArrayNotContainsArray(array $array, array $sub_array, ?string $message = NULL): void {
-    // Empty subArray against empty array should pass (both are empty)
-    // Empty subArray against non-empty array should fail (empty set is subset)
+    // An empty $sub_array passes against an empty $array (both are empty)
+    // and fails against a non-empty one (the empty set is a subset).
     if (empty($sub_array)) {
       if (!empty($array)) {
         $this->fail($message ?: 'Empty sub-array is a subset of any non-empty array.');
@@ -132,18 +127,14 @@ trait AssertArrayTrait {
       return;
     }
 
-    // Check that NONE of the elements in subArray are found in array.
     foreach ($sub_array as $value) {
       if (is_array($value)) {
-        // Check if value exists as a direct value in array.
         if (in_array($value, $array, TRUE)) {
           $this->fail($message ?: 'Unexpected sub-array found.');
         }
 
-        // Check each element in array recursively.
         foreach ($array as $item) {
           if (is_array($item)) {
-            // Recursively search within this item.
             try {
               $this->assertArrayNotContainsArray($item, [$value], $message);
             }

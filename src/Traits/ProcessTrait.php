@@ -67,8 +67,6 @@ trait ProcessTrait {
 
   /**
    * Dim the streaming output.
-   *
-   * This makes the streaming output less prominent in the console.
    */
   protected static bool $processStreamingOutputShouldDim = TRUE;
 
@@ -77,6 +75,9 @@ trait ProcessTrait {
    *
    * @return \Symfony\Component\Process\Process
    *   The currently running process.
+   *
+   * @throws \RuntimeException
+   *   When the process is not initialized.
    */
   public function processGet(): Process {
     if (!$this->process instanceof Process) {
@@ -116,6 +117,9 @@ trait ProcessTrait {
    *
    * @return \Symfony\Component\Process\Process
    *   The completed process.
+   *
+   * @throws \InvalidArgumentException
+   *   When the command, arguments or environment variables are invalid.
    */
   public function processRun(
     string $command,
@@ -125,12 +129,10 @@ trait ProcessTrait {
     int $timeout = 60,
     int $idle_timeout = 30,
   ): Process {
-    // Parse command string to extract command and arguments as a shortcut.
     $parsed_command = $this->processParseCommand($command);
     $base_command = array_shift($parsed_command);
     $parsed_arguments = $parsed_command;
 
-    // Validate the base command contains only allowed characters.
     if (preg_match('/[^a-zA-Z0-9_\-.\/]/', $base_command)) {
       throw new \InvalidArgumentException(sprintf('Invalid command: %s. Only alphanumeric characters, dots, dashes, underscores and slashes are allowed.', $base_command));
     }
@@ -139,21 +141,21 @@ trait ProcessTrait {
 
     foreach ($all_arguments as &$arg) {
       if (!is_scalar($arg)) {
-        throw new \InvalidArgumentException("All arguments must be scalar values.");
+        throw new \InvalidArgumentException('All arguments must be scalar values.');
       }
       $arg = (string) $arg;
     }
     unset($arg);
 
-    // Processes inherit all the env vars defined in the system. This can be
-    // prevented by setting to FALSE the env vars that need to be removed.
+    // The process inherits all system env vars. Setting a var to FALSE
+    // removes it from the inherited environment.
     foreach ($env as &$env_value) {
       if (!is_scalar($env_value)) {
-        throw new \InvalidArgumentException("All environment variables must be scalar values.");
+        throw new \InvalidArgumentException('All environment variables must be scalar values.');
       }
     }
 
-    $cmd = array_merge([$base_command], $all_arguments);
+    $full_command = array_merge([$base_command], $all_arguments);
 
     $inputs = empty($inputs) ? NULL : implode(PHP_EOL, $inputs) . PHP_EOL;
 
@@ -163,7 +165,7 @@ trait ProcessTrait {
     }
 
     $this->process = new Process(
-      $cmd,
+      $full_command,
       $this->processCwd,
       $env,
       $inputs,
@@ -194,16 +196,19 @@ trait ProcessTrait {
    * stops option parsing and treats all subsequent tokens as positional
    * arguments.
    *
-   * Note: This parser intentionally allows backslash escaping inside single
-   * quotes (e.g., 'It\'s working'), which deviates from POSIX shell behavior
-   * where backslashes are literal inside single quotes. This provides more
-   * intuitive escaping for users.
+   * The parser deliberately allows backslash escaping inside single quotes
+   * (e.g., 'It\'s working'). POSIX shells treat backslashes inside single
+   * quotes as literal; the deviation makes escaping more intuitive for
+   * users.
    *
    * @param string $command
    *   The command string to parse.
    *
    * @return array
    *   Array with command as first element and arguments as subsequent elements.
+   *
+   * @throws \InvalidArgumentException
+   *   When the command string is empty or malformed.
    */
   protected function processParseCommand(string $command): array {
     $command = trim($command);
@@ -250,11 +255,9 @@ trait ProcessTrait {
 
       if (!$in_quotes && ($char === ' ' || $char === "\t")) {
         if ($current !== '' || $has_content) {
-          // Check for end-of-options marker (--) only if not already found
-          // and not inside quotes.
           if (!$end_of_options_found && $current === '--') {
             $end_of_options_found = TRUE;
-            // Add the -- marker to the parts array so it reaches the command.
+            // Keep the -- marker so the command receives it.
             $parts[] = $current;
             $current = '';
             $has_content = FALSE;
@@ -297,13 +300,13 @@ trait ProcessTrait {
    *   The output processing callback.
    */
   protected function processStreamingOutputCallback(): callable {
-    return function ($type, $buffer): void {
+    return function (string $type, string $buffer): void {
       $prefix = $type === Process::ERR ? static::$processStreamingErrorOutputChars : static::$processStreamingStandardOutputChars;
 
       $parts = preg_split('/(\r\n|\n|\r)/', $buffer, -1, PREG_SPLIT_DELIM_CAPTURE);
-      $counter = is_array($parts) ? count($parts) : 0;
+      $count = is_array($parts) ? count($parts) : 0;
 
-      for ($i = 0; $i < $counter; $i += 2) {
+      for ($i = 0; $i < $count; $i += 2) {
         $line = $parts[$i] ?? '';
         $eol = $parts[$i + 1] ?? '';
 
@@ -352,11 +355,11 @@ trait ProcessTrait {
    * Checks if the process completed with a successful exit code and provides
    * detailed error output if it failed.
    *
-   * @param string|null $message
+   * @param ?string $message
    *   Optional message to include in the failure output if the process failed.
    */
   public function assertProcessSuccessful(?string $message = NULL): void {
-    $this->assertNotNull($this->process, 'Process should be initialized');
+    $this->assertNotNull($this->process, 'Process is not initialized');
 
     if (!$this->process->isSuccessful()) {
       $this->fail('PROCESS FAILED' . PHP_EOL . ($message ? 'Message: ' . $message . PHP_EOL : '') . $this->processFormatOutput() . $this->assertionSuffix());
@@ -369,7 +372,7 @@ trait ProcessTrait {
    * Checks if the process failed and provides detailed output if it
    * unexpectedly succeeded.
    *
-   * @param string|null $message
+   * @param ?string $message
    *   Optional message to include in the failure output if the process
    *   succeeded.
    */
@@ -470,7 +473,7 @@ trait ProcessTrait {
   /**
    * Asserts that the process error output contains an expected string.
    *
-   * @param string $expected
+   * @param array|string $expected
    *   Expected string to check for in the process error output.
    * @param ?string $message
    *   Optional failure message.
@@ -497,7 +500,7 @@ trait ProcessTrait {
   /**
    * Asserts that the process error output does not contain an expected string.
    *
-   * @param string $expected
+   * @param array|string $expected
    *   String that should not be in the process error output.
    * @param ?string $message
    *   Optional failure message.
@@ -534,7 +537,7 @@ trait ProcessTrait {
    * - Shortcut mode: No prefixes, all strings treated as substring present
    * - Mixed mode: If any string has a prefix, ALL strings must have prefixes
    *
-   * @param string|array $expected
+   * @param array|string $expected
    *   String or array of strings to check in the process output.
    *   Use '+ ' prefix for exact match present,
    *   '* ' prefix for substring present,
@@ -547,7 +550,7 @@ trait ProcessTrait {
    * @throws \RuntimeException
    *   When prefix usage is inconsistent (some have prefixes, others don't).
    */
-  public function assertProcessOutputContainsOrNot(string|array $expected, ?string $message = NULL): void {
+  public function assertProcessOutputContainsOrNot(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
 
     $output = $this->process->getOutput();
@@ -577,7 +580,7 @@ trait ProcessTrait {
    * - Shortcut mode: No prefixes, all strings treated as substring present
    * - Mixed mode: If any string has a prefix, ALL strings must have prefixes
    *
-   * @param string|array $expected
+   * @param array|string $expected
    *   String or array of strings to check in the process error output.
    *   Use '+ ' prefix for exact match present,
    *   '* ' prefix for substring present,
@@ -590,7 +593,7 @@ trait ProcessTrait {
    * @throws \RuntimeException
    *   When prefix usage is inconsistent (some have prefixes, others don't).
    */
-  public function assertProcessErrorOutputContainsOrNot(string|array $expected, ?string $message = NULL): void {
+  public function assertProcessErrorOutputContainsOrNot(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
 
     $output = $this->process->getErrorOutput();
@@ -683,7 +686,7 @@ trait ProcessTrait {
    * - Shortcut mode: No prefixes, all strings treated as substring present
    * - Mixed mode: If any string has a prefix, ALL strings must have prefixes
    *
-   * @param string|array $expected
+   * @param array|string $expected
    *   String or array of strings to check in combined process output.
    *   Use '+ ' prefix for exact match present,
    *   '* ' prefix for substring present,
@@ -696,7 +699,7 @@ trait ProcessTrait {
    * @throws \RuntimeException
    *   When prefix usage is inconsistent (some have prefixes, others don't).
    */
-  public function assertProcessAnyOutputContainsOrNot(string|array $expected, ?string $message = NULL): void {
+  public function assertProcessAnyOutputContainsOrNot(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->process, 'Process is not initialized');
 
     $output = $this->process->getOutput();

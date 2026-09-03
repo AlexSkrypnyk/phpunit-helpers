@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace AlexSkrypnyk\PhpunitHelpers\Tests\Unit;
 
-use PHPUnit\Framework\AssertionFailedError;
-use Symfony\Component\Process\Process;
 use AlexSkrypnyk\PhpunitHelpers\Traits\ProcessTrait;
 use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
+use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\Attributes\CoversTrait;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\ExpectationFailedException;
+use Symfony\Component\Process\Process;
 
 #[CoversTrait(ProcessTrait::class)]
 final class ProcessTraitTest extends UnitTestCase {
@@ -194,17 +194,14 @@ final class ProcessTraitTest extends UnitTestCase {
 
     $this->assertProcessSuccessful();
 
-    // Test assertProcessAnyOutputContains.
     $this->assertProcessAnyOutputContains('Standard Output');
     $this->assertProcessAnyOutputContains('Error Output');
     $this->assertProcessAnyOutputContains(['Standard', 'Error']);
     $this->assertProcessAnyOutputContains(['Standard Output', 'Error Output']);
 
-    // Test assertProcessAnyOutputNotContains.
     $this->assertProcessAnyOutputNotContains('Nonexistent String');
     $this->assertProcessAnyOutputNotContains(['NotFound1', 'NotFound2']);
 
-    // Test assertProcessAnyOutputContainsOrNot.
     $this->assertProcessAnyOutputContainsOrNot([
       '* Standard Output',
       '* Error Output',
@@ -234,7 +231,7 @@ final class ProcessTraitTest extends UnitTestCase {
 
     $this->assertProcessSuccessful();
 
-    // Test shortcut mode - no prefixes, all should be present.
+    // Without prefixes, every string must be present.
     $this->assertProcessAnyOutputContainsOrNot([
       'Test Output',
       'Test',
@@ -248,7 +245,6 @@ final class ProcessTraitTest extends UnitTestCase {
     $this->expectException(\RuntimeException::class);
     $this->expectExceptionMessage('All strings must have valid prefixes in mixed mode');
 
-    // This should fail - mixed usage (some with prefix, some without)
     $this->assertProcessAnyOutputContainsOrNot([
       '* Test Output',
       'Missing prefix',
@@ -284,12 +280,10 @@ final class ProcessTraitTest extends UnitTestCase {
 
     $this->assertProcessSuccessful();
 
-    // Test exact match present.
     $this->assertProcessOutputContainsOrNot([
       '+ Hello World',
     ]);
 
-    // Test exact match absent.
     $this->assertProcessOutputContainsOrNot([
       '- Not exact match',
     ]);
@@ -300,12 +294,10 @@ final class ProcessTraitTest extends UnitTestCase {
 
     $this->assertProcessSuccessful();
 
-    // Test exact match present for error output.
     $this->assertProcessErrorOutputContainsOrNot([
       '+ Error Message',
     ]);
 
-    // Test exact match absent.
     $this->assertProcessErrorOutputContainsOrNot([
       '- Not this error',
     ]);
@@ -316,12 +308,10 @@ final class ProcessTraitTest extends UnitTestCase {
 
     $this->assertProcessSuccessful();
 
-    // Test exact match present for combined output.
     $this->assertProcessAnyOutputContainsOrNot([
       '+ Standard' . "\n" . 'Error',
     ]);
 
-    // Test exact match absent.
     $this->assertProcessAnyOutputContainsOrNot([
       '- Not the output',
     ]);
@@ -332,17 +322,15 @@ final class ProcessTraitTest extends UnitTestCase {
 
     $this->assertProcessSuccessful();
 
-    // Test exact match with multi-line output.
     $this->assertProcessOutputContainsOrNot([
       '+ Line 1' . "\n" . 'Line 2' . "\n" . 'Line 3',
     ]);
 
-    // Test substring match for individual line.
     $this->assertProcessOutputContainsOrNot([
       '* Line 2',
     ]);
 
-    // Exact match should fail for single line when output has multiple.
+    // Exact match of a single line fails when the output has multiple lines.
     $this->assertProcessOutputContainsOrNot([
       '- Line 1',
     ]);
@@ -381,7 +369,7 @@ final class ProcessTraitTest extends UnitTestCase {
     $this->process = NULL;
 
     $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Process should be initialized');
+    $this->expectExceptionMessage('Process is not initialized');
 
     $this->assertProcessSuccessful();
   }
@@ -477,19 +465,11 @@ final class ProcessTraitTest extends UnitTestCase {
   }
 
   /**
-   * Test process streaming output callback functionality.
+   * Tests streaming output callback prefixing and line-ending handling.
    *
-   * This test verifies that the processStreamingOutputCallback() correctly:
-   * - Prefixes standard output with '>>'
-   * - Prefixes error output with 'XX'
-   * - Handles line endings properly.
-   *
-   * Important note about output order:
-   * The expected output order may not match the exact script execution order
-   * due to stdio buffering behavior when processes output to pipes:
-   * - stdout becomes block-buffered when piped (waits for buffer to fill)
-   * - stderr is typically unbuffered (flushes immediately)
-   * This is standard Unix/Linux behavior and affects how Symfony Process
+   * The expected output order can differ from the script execution order:
+   * piped stdout is block-buffered while stderr is typically unbuffered.
+   * This is standard Unix/Linux behavior that affects how Symfony Process
    * receives the output through pipes, not a bug in the streaming callback.
    */
   public function testProcessStreamingOutput(): void {
@@ -498,9 +478,6 @@ final class ProcessTraitTest extends UnitTestCase {
     }
 
     $command = self::$fixtures . '/shell-command-failing.sh';
-
-    // Create a temporary file to capture the streaming output.
-    tempnam(sys_get_temp_dir(), 'test_stream_output');
 
     // Override processStreamingOutputCallback method temporarily.
     $reflection = new \ReflectionClass($this);
@@ -513,9 +490,9 @@ final class ProcessTraitTest extends UnitTestCase {
       $prefix = $type === Process::ERR ? self::$processStreamingErrorOutputChars : self::$processStreamingStandardOutputChars;
 
       $parts = preg_split('/(\r\n|\n|\r)/', $buffer, -1, PREG_SPLIT_DELIM_CAPTURE);
-      $counter = is_array($parts) ? count($parts) : 0;
+      $count = is_array($parts) ? count($parts) : 0;
 
-      for ($i = 0; $i < $counter; $i += 2) {
+      for ($i = 0; $i < $count; $i += 2) {
         $line = $parts[$i] ?? '';
         $eol = $parts[$i + 1] ?? '';
 
@@ -539,7 +516,6 @@ final class ProcessTraitTest extends UnitTestCase {
     $this->process->setIdleTimeout(30);
     $this->process->run($capture_callback);
 
-    // Verify the process failed as expected.
     $this->assertProcessFailed();
 
     $expected_lines = <<<EOL
@@ -566,7 +542,6 @@ XX ERROR: Operation aborted
 XX === Complex Operation Failed ===
 EOL;
 
-    // Split expected output into lines and assert each line is present.
     $expected_lines_array = explode(PHP_EOL, $expected_lines);
     foreach ($expected_lines_array as $expected_line) {
       $this->assertStringContainsString($expected_line, $captured_output, sprintf("Missing expected line: '%s'", $expected_line));
@@ -647,7 +622,7 @@ EOL;
   public function testProcessTearDownWhenNotInitialized(): void {
     $this->assertNull($this->process);
 
-    // Should not throw any exception.
+    // The processTearDown() call must not throw.
     $this->processTearDown();
 
     $this->assertNull($this->process);
@@ -688,15 +663,15 @@ EOL;
   }
 
   public function testProcessStreamingCallbackWithEmptyBuffer(): void {
-    // Create a test callback that captures output instead of writing to STDOUT.
+    // The callback captures output instead of writing to STDOUT.
     $captured_output = '';
     $test_callback = function ($type, $buffer) use (&$captured_output): void {
       $prefix = $type === Process::ERR ? self::$processStreamingErrorOutputChars : self::$processStreamingStandardOutputChars;
 
       $parts = preg_split('/(\r\n|\n|\r)/', $buffer, -1, PREG_SPLIT_DELIM_CAPTURE);
-      $counter = is_array($parts) ? count($parts) : 0;
+      $count = is_array($parts) ? count($parts) : 0;
 
-      for ($i = 0; $i < $counter; $i += 2) {
+      for ($i = 0; $i < $count; $i += 2) {
         $line = $parts[$i] ?? '';
         $eol = $parts[$i + 1] ?? '';
 
@@ -708,24 +683,22 @@ EOL;
       }
     };
 
-    // Test with empty buffer - should not cause issues or exceptions.
     $test_callback(Process::OUT, '');
     $test_callback(Process::ERR, '');
 
-    // If we get here without exceptions, empty buffers are handled correctly.
     $this->assertSame('', $captured_output);
   }
 
   public function testProcessStreamingCallbackWithDifferentLineEndings(): void {
-    // Create a test callback that captures output instead of writing to STDOUT.
+    // The callback captures output instead of writing to STDOUT.
     $captured_output = '';
     $test_callback = function ($type, $buffer) use (&$captured_output): void {
       $prefix = $type === Process::ERR ? self::$processStreamingErrorOutputChars : self::$processStreamingStandardOutputChars;
 
       $parts = preg_split('/(\r\n|\n|\r)/', $buffer, -1, PREG_SPLIT_DELIM_CAPTURE);
-      $counter = is_array($parts) ? count($parts) : 0;
+      $count = is_array($parts) ? count($parts) : 0;
 
-      for ($i = 0; $i < $counter; $i += 2) {
+      for ($i = 0; $i < $count; $i += 2) {
         $line = $parts[$i] ?? '';
         $eol = $parts[$i + 1] ?? '';
 
@@ -737,7 +710,6 @@ EOL;
       }
     };
 
-    // Test different input patterns.
     $test_inputs = [
       "line1\nline2\n",
       "line1\r\nline2\r\n",
@@ -747,29 +719,24 @@ EOL;
     ];
 
     foreach ($test_inputs as $input) {
-      // Call the callback - it should not throw any exceptions.
       $test_callback(Process::OUT, $input);
       $test_callback(Process::ERR, $input);
     }
 
-    // If we get here without exceptions, the callback handled input correctly.
-    $this->addToAssertionCount(count($test_inputs) * 2);
-
-    // Verify some expected output was captured.
     $this->assertStringContainsString(self::$processStreamingStandardOutputChars, $captured_output);
     $this->assertStringContainsString(self::$processStreamingErrorOutputChars, $captured_output);
   }
 
   public function testProcessStreamingCallbackWithErrorOutput(): void {
-    // Create a test callback that captures output instead of writing to STDOUT.
+    // The callback captures output instead of writing to STDOUT.
     $captured_output = '';
     $test_callback = function ($type, $buffer) use (&$captured_output): void {
       $prefix = $type === Process::ERR ? self::$processStreamingErrorOutputChars : self::$processStreamingStandardOutputChars;
 
       $parts = preg_split('/(\r\n|\n|\r)/', $buffer, -1, PREG_SPLIT_DELIM_CAPTURE);
-      $counter = is_array($parts) ? count($parts) : 0;
+      $count = is_array($parts) ? count($parts) : 0;
 
-      for ($i = 0; $i < $counter; $i += 2) {
+      for ($i = 0; $i < $count; $i += 2) {
         $line = $parts[$i] ?? '';
         $eol = $parts[$i + 1] ?? '';
 
@@ -781,24 +748,17 @@ EOL;
       }
     };
 
-    // Call with error type - should not throw exceptions.
     $test_callback(Process::ERR, "error message\n");
     $test_callback(Process::OUT, "standard message\n");
 
-    // If we get here without exceptions, the callback is working.
-    $this->addToAssertionCount(1);
-
-    // Verify expected output was captured with correct prefixes.
     $this->assertStringContainsString(self::$processStreamingErrorOutputChars . 'error message', $captured_output);
     $this->assertStringContainsString(self::$processStreamingStandardOutputChars . 'standard message', $captured_output);
   }
 
   public function testProcessRunStopsExistingProcess(): void {
-    // Start first process.
     $this->processRun('echo', ['first process']);
     $first_process = $this->process;
 
-    // Start second process - should stop the first one.
     $this->processRun('echo', ['second process']);
     $second_process = $this->process;
 
@@ -808,7 +768,7 @@ EOL;
   }
 
   public function testProcessRunWithNullInputs(): void {
-    // Test the empty inputs check that converts empty array to NULL.
+    // An empty inputs array is converted to NULL.
     $this->processRun('echo', ['test'], []);
 
     $this->assertProcessSuccessful();
@@ -820,7 +780,7 @@ EOL;
       $this->markTestSkipped('Requires POSIX utilities');
     }
 
-    // Test with actual inputs - this should trigger the implode path.
+    // Non-empty inputs trigger the implode path.
     $this->processRun('cat', [], ['line1', 'line2', 'line3']);
 
     $this->assertProcessSuccessful();
@@ -831,7 +791,6 @@ EOL;
 
   #[DataProvider('dataProviderProcessRunWithCommandString')]
   public function testProcessRunWithCommandString(string $command_string, array $additional_args, array $expected_output): void {
-    // Skip POSIX-specific commands on Windows.
     if (DIRECTORY_SEPARATOR === '\\' && str_starts_with($command_string, 'printf')) {
       $this->markTestSkipped('Requires POSIX utilities');
     }
@@ -911,7 +870,6 @@ EOL;
   }
 
   public function testProcessRunPreservesBackwardCompatibility(): void {
-    // Test that the old array-based approach still works exactly as before.
     $this->processRun('echo', ['hello', 'world']);
 
     $this->assertProcessSuccessful();
@@ -919,7 +877,6 @@ EOL;
   }
 
   public function testProcessRunCommandStringParsing(): void {
-    // Test that command string parsing works correctly.
     $this->processRun('echo test1 test2');
 
     $this->assertProcessSuccessful();
@@ -927,7 +884,6 @@ EOL;
   }
 
   public function testProcessRunCommandStringWithSpecialCharacters(): void {
-    // Test command string with special characters in quotes.
     $this->processRun('echo "Hello! @#$%^&*()"');
 
     $this->assertProcessSuccessful();
@@ -935,7 +891,6 @@ EOL;
   }
 
   public function testProcessRunCommandStringWithFileFlags(): void {
-    // Test realistic file command with flags.
     $this->processRun('echo -e "line1\\nline2"');
 
     $this->assertProcessSuccessful();
@@ -943,8 +898,6 @@ EOL;
   }
 
   public function testProcessRunArgumentOverrideBehavior(): void {
-    // Test how parsed arguments and explicit arguments interact
-    // Parsed arguments come first, explicit arguments are appended.
     $this->processRun('echo parsed1 parsed2', ['explicit1', 'explicit2']);
 
     $this->assertProcessSuccessful();
@@ -952,7 +905,6 @@ EOL;
   }
 
   public function testProcessRunArgumentOrderWithFlags(): void {
-    // Test order with flag-like arguments - parsed flags come first.
     $this->processRun('echo --parsed-flag', ['--explicit-flag']);
 
     $this->assertProcessSuccessful();
@@ -960,26 +912,22 @@ EOL;
   }
 
   public function testProcessRunExplicitArgumentsPrecedence(): void {
-    // Test that parsed arguments come first, explicit arguments are appended
-    // This preserves command structure, especially for -- markers.
+    // Explicit arguments are appended after parsed ones to preserve command
+    // structure, especially -- markers.
     $this->processRun('echo default-arg1 default-arg2', ['override-arg1', 'override-arg2']);
 
     $this->assertProcessSuccessful();
-    // Parsed arguments come first, then explicit arguments.
     $this->assertProcessOutputContains('default-arg1 default-arg2 override-arg1 override-arg2');
   }
 
   public function testProcessRunWithEndOfOptionsAndExplicitArgs(): void {
-    // Test that commands with -- preserve structure with explicit args.
     $this->processRun('echo command -- after-marker', ['explicit']);
 
     $this->assertProcessSuccessful();
-    // Command structure preserved, explicit args appended at end.
     $this->assertProcessOutputContains('command -- after-marker explicit');
   }
 
   public function testProcessRunWithIdleTimeout(): void {
-    // Test the setIdleTimeout path.
     $this->processRun('echo', ['test'], [], [], 10, 5);
 
     $this->assertProcessSuccessful();
@@ -987,7 +935,6 @@ EOL;
   }
 
   public function testProcessFormatOutputWithoutProcessInstance(): void {
-    // Test the case where processFormatOutput is called with no process.
     $this->process = NULL;
 
     $reflection = new \ReflectionClass($this);
@@ -999,8 +946,6 @@ EOL;
   }
 
   public function testStaticVariableAccess(): void {
-    // Test that our static variables have expected values.
-    // Test that they have expected values.
     $this->assertSame('>> ', self::$processStreamingStandardOutputChars);
     $this->assertSame('XX ', self::$processStreamingErrorOutputChars);
     $this->assertStringContainsString('STANDARD OUTPUT', self::$processStandardOutputHeader);
@@ -1022,7 +967,7 @@ EOL;
     $result = $method->invoke($this, $command);
 
     if ($exception_message === NULL) {
-      $this->assertEquals($expected, $result);
+      $this->assertSame($expected, $result);
     }
   }
 
@@ -1279,38 +1224,30 @@ EOL;
   }
 
   public function testProcessStreamingCallbackReturnsCallable(): void {
-    // Test that processStreamingOutputCallback returns a callable.
     $reflection = new \ReflectionClass($this);
     $method = $reflection->getMethod('processStreamingOutputCallback');
     $callback = $method->invoke($this);
 
     $this->assertIsCallable($callback);
 
-    // Test that calling the callback doesn't throw exceptions
-    // Test with empty strings to avoid visible output.
+    // Empty strings avoid visible output.
     $callback(Process::OUT, "");
     $callback(Process::ERR, "");
-
-    // If we reach here, the callback executed without errors.
-    $this->addToAssertionCount(1);
   }
 
   public function testProcessRunWithZeroArguments(): void {
-    // Test edge case with exactly zero arguments.
     $this->processRun('echo', []);
 
     $this->assertProcessSuccessful();
   }
 
   public function testProcessRunWithEmptyStringArgument(): void {
-    // Test edge case with empty string argument.
     $this->processRun('echo', ['']);
 
     $this->assertProcessSuccessful();
   }
 
   public function testProcessRunWithMixedScalarArguments(): void {
-    // Test with various scalar types to ensure the scalar validation works.
     $this->processRun('echo', ['string', 123, TRUE, 45.67]);
 
     $this->assertProcessSuccessful();
@@ -1321,7 +1258,6 @@ EOL;
       $this->markTestSkipped('Requires POSIX utilities');
     }
 
-    // Test with various scalar types for environment variables.
     $this->processRun('printenv', [], [], [
       'TEST_STRING' => 'value',
       'TEST_INT' => 123,
@@ -1337,11 +1273,10 @@ EOL;
       $this->markTestSkipped('Requires POSIX utilities');
     }
 
-    // First, set an environment variable.
     putenv('TEST_UNSET_VAR=initial_value');
     $this->assertNotFalse(getenv('TEST_UNSET_VAR'));
 
-    // Run a process that unsets the environment variable by passing FALSE.
+    // A FALSE value unsets the variable.
     $this->processRun('printenv', [], [], [
       'TEST_UNSET_VAR' => FALSE,
       'TEST_KEEP_VAR' => 'keep_this',
@@ -1349,13 +1284,10 @@ EOL;
 
     $this->assertProcessSuccessful();
 
-    // The process should not show TEST_UNSET_VAR in its environment.
     $this->assertProcessOutputNotContains('TEST_UNSET_VAR=initial_value');
 
-    // But it should show TEST_KEEP_VAR.
     $this->assertProcessOutputContains('TEST_KEEP_VAR=keep_this');
 
-    // Clean up.
     putenv('TEST_UNSET_VAR');
   }
 
@@ -1364,7 +1296,6 @@ EOL;
       $this->markTestSkipped('Requires POSIX utilities');
     }
 
-    // Test that exit code is properly displayed in formatted output.
     $this->processRun('sh', ['-c', 'exit 42']);
 
     $reflection = new \ReflectionClass($this);
@@ -1376,7 +1307,6 @@ EOL;
   }
 
   public function testAssertProcessSuccessfulWithFailedProcess(): void {
-    // Test the fail() path in assertProcessSuccessful when process failed.
     $this->processRun('sh', ['-c', 'exit 1']);
 
     $this->expectException(AssertionFailedError::class);
@@ -1386,7 +1316,6 @@ EOL;
   }
 
   public function testAssertProcessSuccessfulWithFailedProcessAndMessage(): void {
-    // Test the fail() path in assertProcessSuccessful with custom message.
     $this->processRun('sh', ['-c', 'exit 1']);
 
     $this->expectException(AssertionFailedError::class);
@@ -1397,7 +1326,6 @@ EOL;
   }
 
   public function testAssertProcessFailedWithSuccessfulProcess(): void {
-    // Test the fail() path in assertProcessFailed when process succeeded.
     $this->processRun('echo', ['success']);
 
     $this->expectException(AssertionFailedError::class);
@@ -1407,7 +1335,6 @@ EOL;
   }
 
   public function testAssertProcessFailedWithSuccessfulProcessAndMessage(): void {
-    // Test the fail() path in assertProcessFailed with custom message.
     $this->processRun('echo', ['success']);
 
     $this->expectException(AssertionFailedError::class);
@@ -1496,9 +1423,6 @@ $test->processRun("echo", ["test output"]);
     self::$processStreamingOutputShouldDim = TRUE;
   }
 
-  /**
-   * Test custom failure messages work correctly.
-   */
   public function testCustomFailureMessages(): void {
     $this->processRun('echo', ['test output']);
 

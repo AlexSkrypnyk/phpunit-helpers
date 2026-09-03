@@ -39,6 +39,8 @@ namespace AlexSkrypnyk\PhpunitHelpers\Traits;
  * // Convert entries to keystrokes if needed.
  * my_tui_run_keystrokes(static::tuiKeystrokes($entries_set1));
  * @endcode
+ *
+ * @mixin \PHPUnit\Framework\TestCase
  */
 trait TuiTrait {
 
@@ -47,7 +49,7 @@ trait TuiTrait {
    *
    * @var array
    */
-  public const KEYS = [
+  const KEYS = [
     'UP' => "\e[A",
     'SHIFT_UP' => "\e[1;2A",
     'DOWN' => "\e[B",
@@ -93,7 +95,7 @@ trait TuiTrait {
    * An entry will not be included in the resulting array of entries if it has
    * this value.
    *
-   * @var null|string
+   * @var string
    */
   const TUI_SKIP = '__SKIP__';
 
@@ -126,6 +128,9 @@ trait TuiTrait {
    *
    * @return array
    *   The processed TUI entries.
+   *
+   * @throws \InvalidArgumentException
+   *   When an entry value is not scalar.
    */
   public static function tuiEntries(array $entries, string $default = ''): array {
     foreach ($entries as $key => $value) {
@@ -158,6 +163,9 @@ trait TuiTrait {
    *
    * @return array
    *   The processed TUI entries as keystrokes.
+   *
+   * @throws \RuntimeException
+   *   When a TUI_SKIP entry was not filtered out.
    */
   public static function tuiKeystrokes(array $entries, int $clear_size = 0, ?string $accept_key = NULL, ?string $clear_key = NULL): array {
     $accept_key ??= static::KEYS['ENTER'];
@@ -180,12 +188,10 @@ trait TuiTrait {
 
       $entry_keystrokes = [];
 
-      // If an entry has a special key - we consider that any additional
-      // functionality like clearing the existing entry or appending an accept
-      // key is handled by the consumer.
-      $skip_additional_processing = static::tuiHasKey($entry, [self::KEYS['SPACE']]);
+      // For an entry containing a special key, clearing the existing entry
+      // and appending an accept key are handled by the consumer.
+      $skip_additional_processing = static::tuiHasKey($entry, [static::KEYS['SPACE']]);
 
-      // Clear the existing TUI value, if any, one character at a time.
       if (!$skip_additional_processing && $clear_size > 0) {
         $entry_keystrokes = array_fill(0, $clear_size, $clear_key);
       }
@@ -193,7 +199,6 @@ trait TuiTrait {
       $split_entry = static::tuiEntryToKeystroke($entry);
       $entry_keystrokes = array_merge($entry_keystrokes, $split_entry);
 
-      // Add the accept key at the end of the entry if it is not already there.
       if (!$skip_additional_processing && end($entry_keystrokes) !== $accept_key) {
         $entry_keystrokes[] = $accept_key;
       }
@@ -260,7 +265,6 @@ trait TuiTrait {
   public static function tuiHasKey(string $value, array $exclude = []): bool {
     $flattened_keys = static::tuiKeysFlattened();
 
-    // Exclude specified keys from the check.
     if (!empty($exclude)) {
       $flattened_keys = array_diff($flattened_keys, $exclude);
     }

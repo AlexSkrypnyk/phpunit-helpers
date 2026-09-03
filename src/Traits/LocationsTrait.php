@@ -44,7 +44,7 @@ trait LocationsTrait {
   protected static ?string $fixtures = NULL;
 
   /**
-   * Main workspace directory where the rest of the directories located.
+   * Main workspace directory where the rest of the directories are located.
    *
    * The "workspace" in this context is a place to store assets produced by a
    * single test run.
@@ -139,6 +139,9 @@ trait LocationsTrait {
    *
    * @return string
    *   The fixtures directory path.
+   *
+   * @throws \RuntimeException
+   *   When the fixtures directory does not exist.
    */
   public function locationsFixtureDir(?string $name = NULL): string {
     $fixtures_dir = static::$root . DIRECTORY_SEPARATOR . static::locationsFixturesDir();
@@ -148,12 +151,10 @@ trait LocationsTrait {
 
     $path = static::locationsRealpath($fixtures_dir);
 
-    // Set the fixtures directory based on the passed name.
     if ($name) {
       $path .= DIRECTORY_SEPARATOR . $name;
     }
     else {
-      // Set the fixtures directory based on the test name.
       $fixture_dir = $this->name();
       $fixture_dir = str_contains($fixture_dir, '::') ? explode('::', $fixture_dir)[1] : $fixture_dir;
       $fixture_dir = strtolower((string) preg_replace('/(?<!^)[A-Z]/', '_$0', $fixture_dir));
@@ -161,15 +162,12 @@ trait LocationsTrait {
       $path .= DIRECTORY_SEPARATOR . $fixture_dir;
     }
 
-    // Further adjust the fixtures directory name if the test uses a
-    // data provider with named data sets.
     $data_name = $this->dataName();
     if (!empty($data_name) && !is_numeric($data_name)) {
       if ($data_name === static::BASELINE_DATASET) {
         $path_suffix = static::BASELINE_DIR;
       }
       else {
-        // Convert the data name to a snake case string.
         $path_suffix = strtolower(str_replace(['-', ' '], '_', (string) preg_replace('/[^a-zA-Z0-9_\- ]/', '', $data_name)));
       }
       $path .= DIRECTORY_SEPARATOR . $path_suffix;
@@ -185,6 +183,7 @@ trait LocationsTrait {
    *   The locations' info.
    */
   public static function locationsInfo(): string {
+    $lines = [];
     $lines[] = 'LOCATIONS';
     $lines[] = '---------';
     $lines[] = 'Root       : ' . static::$root;
@@ -254,6 +253,8 @@ trait LocationsTrait {
       })
       ->exclude($exclusions);
 
+    $fs = new Filesystem();
+
     foreach ($finder as $file) {
       $src_path = $file->getRealPath();
       $dst_path = $dst . DIRECTORY_SEPARATOR . $file->getRelativePathname();
@@ -262,7 +263,7 @@ trait LocationsTrait {
         $before($src_path, $dst_path);
       }
 
-      (new Filesystem())->copy($src_path, $dst_path);
+      $fs->copy($src_path, $dst_path);
       $created[] = static::locationsRealpath($dst_path);
     }
 
@@ -282,6 +283,9 @@ trait LocationsTrait {
    *
    * @return array<int, string>
    *   The list of created file paths.
+   *
+   * @throws \RuntimeException
+   *   When the base directory does not exist.
    */
   public static function locationsCopyFilesToSut(array $files, ?string $basedir = NULL, bool $append_rand = TRUE): array {
     $basedir = $basedir ?: getcwd();

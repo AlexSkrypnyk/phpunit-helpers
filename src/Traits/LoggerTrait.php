@@ -6,6 +6,8 @@ namespace AlexSkrypnyk\PhpunitHelpers\Traits;
 
 /**
  * Provides logging functionality.
+ *
+ * @mixin \PHPUnit\Framework\TestCase
  */
 trait LoggerTrait {
 
@@ -106,6 +108,9 @@ trait LoggerTrait {
    *   Whether to use double border characters (=) instead of single (-).
    * @param int $min_width
    *   Minimum width of the section.
+   *
+   * @throws \InvalidArgumentException
+   *   When the minimum width is not a positive integer.
    */
   public static function logSection(string $title, ?string $message = NULL, bool $double_border = FALSE, int $min_width = 60): void {
     if ($min_width <= 0) {
@@ -114,31 +119,21 @@ trait LoggerTrait {
     if (!static::$loggerIsVerbose) {
       return;
     }
-    if ($double_border) {
-      $delimiter_char = '=';
-      $header_format = '[ %s ]';
-    }
-    else {
-      $delimiter_char = '-';
-      $header_format = '[ %s ]';
-    }
+    $delimiter_char = $double_border ? '=' : '-';
+    $header_format = '[ %s ]';
 
     $header = sprintf($header_format, $title);
     $header_length = strlen($header);
 
-    // Ensure minimum 3 characters on each side of the header.
     $min_padding = 3;
     $total_length = max($min_width, $header_length + (2 * $min_padding));
 
-    // Calculate padding for centering.
     $padding_length = ($total_length - $header_length) / 2;
     $left_padding = max($min_padding, (int) ceil($padding_length));
     $right_padding = max($min_padding, (int) floor($padding_length));
 
-    // Create the top delimiter line.
     $top_line = str_repeat($delimiter_char, $left_padding) . $header . str_repeat($delimiter_char, $right_padding);
 
-    // Create the bottom delimiter line.
     $bottom_line = str_repeat($delimiter_char, strlen($top_line));
 
     fwrite(static::getOutputStream(), PHP_EOL . $top_line . PHP_EOL);
@@ -147,7 +142,6 @@ trait LoggerTrait {
       $message = trim($message);
       $header_width = strlen($top_line);
 
-      // Word wrap the message to match the header width.
       $wrapped_lines = [];
       $lines = explode(PHP_EOL, $message);
 
@@ -156,13 +150,11 @@ trait LoggerTrait {
           $wrapped_lines[] = $line;
         }
         else {
-          // Use wordwrap to split long lines.
           $wrapped = wordwrap($line, $header_width, "\n", FALSE);
           $wrapped_lines = array_merge($wrapped_lines, explode("\n", $wrapped));
         }
       }
 
-      // Output the wrapped message lines.
       foreach ($wrapped_lines as $line) {
         fwrite(static::getOutputStream(), $line . PHP_EOL);
       }
@@ -214,10 +206,8 @@ trait LoggerTrait {
     $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
     $step = $trace[1]['function'] ?? 'unknown';
 
-    // Capture current parent stack for hierarchy.
     $parent_stack = static::$loggerStepStack;
 
-    // Add step to tracking array with hierarchy information.
     static::$loggerSteps[] = [
       'name' => $step,
       'start_time' => microtime(TRUE),
@@ -226,7 +216,6 @@ trait LoggerTrait {
       'parent_stack' => $parent_stack,
     ];
 
-    // Push current step onto the stack for nested steps.
     static::$loggerStepStack[] = $step;
 
     $prefix = str_starts_with($step, static::$loggerStepMethodPrefix) ? sprintf('%s START', strtoupper(static::$loggerStepMethodPrefix)) : 'STEP START';
@@ -247,12 +236,10 @@ trait LoggerTrait {
     $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
     $step = $trace[1]['function'] ?? 'unknown';
 
-    // Find the most recent unfinished step with matching name.
     $prefix = str_starts_with($step, static::$loggerStepMethodPrefix) ? sprintf('%s DONE', strtoupper(static::$loggerStepMethodPrefix)) : 'STEP DONE';
     $section_title = $prefix . ' | ' . $step;
     $step_index = NULL;
 
-    // Search backwards for the most recent matching step.
     for ($i = count(static::$loggerSteps) - 1; $i >= 0; $i--) {
       if (static::$loggerSteps[$i]['name'] === $step && static::$loggerSteps[$i]['end_time'] === NULL) {
         $step_index = $i;
@@ -265,14 +252,11 @@ trait LoggerTrait {
       $elapsed_time = $end_time - static::$loggerSteps[$step_index]['start_time'];
       $formatted_time = static::formatElapsedTime($elapsed_time);
 
-      // Update the step entry with completion info.
       static::$loggerSteps[$step_index]['end_time'] = $end_time;
       static::$loggerSteps[$step_index]['elapsed'] = $elapsed_time;
 
       $section_title .= ' | ' . $formatted_time;
 
-      // Pop the step from the stack when it finishes.
-      // Find and remove the step from the stack.
       $stack_key = array_search($step, static::$loggerStepStack, TRUE);
       if ($stack_key !== FALSE) {
         array_splice(static::$loggerStepStack, (int) $stack_key, 1);
@@ -316,6 +300,9 @@ trait LoggerTrait {
    *
    * @param string $indent
    *   Indentation string for hierarchical display (e.g., '  ', '    ', '\t').
+   *
+   * @return string
+   *   The formatted summary table.
    */
   public static function logStepSummary(string $indent = '  '): string {
     if (empty(static::$loggerSteps)) {
@@ -324,7 +311,6 @@ trait LoggerTrait {
 
     $lines = [];
 
-    // Calculate column widths including indentation.
     $name_lengths = array_map(function (array $step) use ($indent): int {
       $depth = count($step['parent_stack']);
       $indentation = str_repeat($indent, $depth);
@@ -339,7 +325,6 @@ trait LoggerTrait {
     // "Elapsed" header length
     $max_elapsed_length = 7;
 
-    // Create table header.
     $header = sprintf(
       '| %-' . $max_name_length . 's | %-' . $max_status_length . 's | %-' . $max_elapsed_length . 's |',
       'Step',
@@ -351,17 +336,14 @@ trait LoggerTrait {
       str_repeat('-', $max_status_length + 2) . '+' .
       str_repeat('-', $max_elapsed_length + 2) . '+';
 
-    // Build table output.
     $lines[] = $separator;
     $lines[] = $header;
     $lines[] = $separator;
 
-    // Create table rows with hierarchical indentation.
     foreach (static::$loggerSteps as $step) {
       $status = $step['end_time'] === NULL ? 'Running' : 'Complete';
       $elapsed = $step['elapsed'] === NULL ? '-' : static::formatElapsedTime($step['elapsed']);
 
-      // Calculate depth and add indentation.
       $depth = count($step['parent_stack']);
       $indentation = str_repeat($indent, $depth);
       $indented_name = $indentation . $step['name'];

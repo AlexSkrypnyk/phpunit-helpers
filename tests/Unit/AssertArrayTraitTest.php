@@ -15,15 +15,12 @@ final class AssertArrayTraitTest extends TestCase {
 
   use AssertArrayTrait;
 
-  /**
-   * Test assertArrayContainsString method.
-   */
   #[DataProvider('dataProviderAssertArrayContainsString')]
-  public function testAssertArrayContainsString(string $needle, array $haystack, bool $should_pass, ?string $expected_exception = NULL): void {
+  public function testAssertArrayContainsString(string $needle, array $haystack, bool $should_pass, ?string $expected_exception_message = NULL): void {
     if (!$should_pass) {
       $this->expectException(AssertionFailedError::class);
-      if ($expected_exception) {
-        $this->expectExceptionMessage($expected_exception);
+      if ($expected_exception_message) {
+        $this->expectExceptionMessage($expected_exception_message);
       }
     }
 
@@ -34,11 +31,7 @@ final class AssertArrayTraitTest extends TestCase {
     }
   }
 
-  /**
-   * Data provider for assertArrayContainsString tests.
-   */
   public static function dataProviderAssertArrayContainsString(): \Iterator {
-    // Success cases.
     yield 'basic_string_match' => [
       'needle' => 'bar',
       'haystack' => ['foo', 'bar', 'baz'],
@@ -79,18 +72,17 @@ final class AssertArrayTraitTest extends TestCase {
       'haystack' => [0, new \stdClass(), 'test'],
       'should_pass' => TRUE,
     ];
-    // Failure cases.
     yield 'string_not_found' => [
       'needle' => 'xyz',
       'haystack' => ['foo', 'bar', 'baz'],
       'should_pass' => FALSE,
-      'expected_exception' => 'Failed asserting that string "xyz" is present in array',
+      'expected_exception_message' => 'Failed asserting that string "xyz" is present in array',
     ];
     yield 'empty_array' => [
       'needle' => 'foo',
       'haystack' => [],
       'should_pass' => FALSE,
-      'expected_exception' => 'Failed asserting that string "foo" is present in array',
+      'expected_exception_message' => 'Failed asserting that string "foo" is present in array',
     ];
     yield 'no_partial_match' => [
       'needle' => 'xyz',
@@ -99,15 +91,12 @@ final class AssertArrayTraitTest extends TestCase {
     ];
   }
 
-  /**
-   * Test assertArrayNotContainsString method.
-   */
   #[DataProvider('dataProviderAssertArrayNotContainsString')]
-  public function testAssertArrayNotContainsString(string $needle, array $haystack, bool $should_pass, ?string $expected_exception = NULL): void {
+  public function testAssertArrayNotContainsString(string $needle, array $haystack, bool $should_pass, ?string $expected_exception_message = NULL): void {
     if (!$should_pass) {
       $this->expectException(AssertionFailedError::class);
-      if ($expected_exception) {
-        $this->expectExceptionMessage($expected_exception);
+      if ($expected_exception_message) {
+        $this->expectExceptionMessage($expected_exception_message);
       }
     }
 
@@ -118,11 +107,7 @@ final class AssertArrayTraitTest extends TestCase {
     }
   }
 
-  /**
-   * Data provider for assertArrayNotContainsString tests.
-   */
   public static function dataProviderAssertArrayNotContainsString(): \Iterator {
-    // Success cases.
     yield 'string_not_found' => [
       'needle' => 'xyz',
       'haystack' => ['foo', 'bar', 'baz'],
@@ -143,12 +128,11 @@ final class AssertArrayTraitTest extends TestCase {
       'haystack' => ['string', new \stdClass(), 123],
       'should_pass' => TRUE,
     ];
-    // Failure cases.
     yield 'string_found' => [
       'needle' => 'ba',
       'haystack' => ['foo', 'bar', 'baz'],
       'should_pass' => FALSE,
-      'expected_exception' => 'Failed asserting that string "ba" is not present in array',
+      'expected_exception_message' => 'Failed asserting that string "ba" is not present in array',
     ];
     yield 'partial_match_found' => [
       'needle' => 'oo',
@@ -157,15 +141,12 @@ final class AssertArrayTraitTest extends TestCase {
     ];
   }
 
-  /**
-   * Test assertArrayContainsArray method.
-   */
   #[DataProvider('dataProviderAssertArrayContainsArray')]
-  public function testAssertArrayContainsArray(array $array, array $sub_array, bool $should_pass, ?string $expected_exception = NULL): void {
+  public function testAssertArrayContainsArray(array $array, array $sub_array, bool $should_pass, ?string $expected_exception_message = NULL): void {
     if (!$should_pass) {
       $this->expectException(AssertionFailedError::class);
-      if ($expected_exception) {
-        $this->expectExceptionMessage($expected_exception);
+      if ($expected_exception_message) {
+        $this->expectExceptionMessage($expected_exception_message);
       }
     }
 
@@ -176,11 +157,7 @@ final class AssertArrayTraitTest extends TestCase {
     }
   }
 
-  /**
-   * Data provider for assertArrayContainsArray tests.
-   */
   public static function dataProviderAssertArrayContainsArray(): \Iterator {
-    // Success cases.
     yield 'simple_contains_success' => [
       'array' => ['a', 'b', 'c'],
       'sub_array' => ['a', 'b'],
@@ -253,12 +230,11 @@ final class AssertArrayTraitTest extends TestCase {
       'sub_array' => [['nested', 'target']],
       'should_pass' => TRUE,
     ];
-    // Failure cases.
     yield 'element_not_found_failure' => [
       'array' => ['a', 'b', 'c'],
       'sub_array' => ['d'],
       'should_pass' => FALSE,
-      'expected_exception' => "Value 'd' not found in array",
+      'expected_exception_message' => "Value 'd' not found in array",
     ];
     yield 'partial_match_failure' => [
       'array' => ['a', 'b', 'c'],
@@ -272,7 +248,7 @@ final class AssertArrayTraitTest extends TestCase {
       ],
       'sub_array' => [['a', 'b']],
       'should_pass' => FALSE,
-      'expected_exception' => 'Expected sub-array not found',
+      'expected_exception_message' => 'Expected sub-array not found',
     ];
     yield 'different_order_failure' => [
       'array' => [
@@ -283,15 +259,12 @@ final class AssertArrayTraitTest extends TestCase {
     ];
   }
 
-  /**
-   * Test assertArrayNotContainsArray method.
-   */
   #[DataProvider('dataProviderAssertArrayNotContainsArray')]
-  public function testAssertArrayNotContainsArray(array $array, array $sub_array, bool $should_pass, ?string $expected_exception = NULL): void {
+  public function testAssertArrayNotContainsArray(array $array, array $sub_array, bool $should_pass, ?string $expected_exception_message = NULL): void {
     if (!$should_pass) {
       $this->expectException(AssertionFailedError::class);
-      if ($expected_exception) {
-        $this->expectExceptionMessage($expected_exception);
+      if ($expected_exception_message) {
+        $this->expectExceptionMessage($expected_exception_message);
       }
     }
 
@@ -302,11 +275,7 @@ final class AssertArrayTraitTest extends TestCase {
     }
   }
 
-  /**
-   * Data provider for assertArrayNotContainsArray tests.
-   */
   public static function dataProviderAssertArrayNotContainsArray(): \Iterator {
-    // Success cases.
     yield 'element_not_found_success' => [
       'array' => ['a', 'b', 'c'],
       'sub_array' => ['d'],
@@ -345,12 +314,11 @@ final class AssertArrayTraitTest extends TestCase {
       'sub_array' => [['a', 'b', 'c']],
       'should_pass' => TRUE,
     ];
-    // Failure cases.
     yield 'partial_with_missing_failure' => [
       'array' => ['a', 'b'],
       'sub_array' => ['a', 'c'],
       'should_pass' => FALSE,
-      'expected_exception' => "Unexpected value 'a' found in array",
+      'expected_exception_message' => "Unexpected value 'a' found in array",
     ];
     yield 'simple_contains_failure' => [
       'array' => ['a', 'b', 'c'],
@@ -369,13 +337,13 @@ final class AssertArrayTraitTest extends TestCase {
       ],
       'sub_array' => [['name' => 'John', 'age' => 30]],
       'should_pass' => FALSE,
-      'expected_exception' => 'Unexpected sub-array found',
+      'expected_exception_message' => 'Unexpected sub-array found',
     ];
     yield 'empty_subarray_failure' => [
       'array' => ['a', 'b', 'c'],
       'sub_array' => [],
       'should_pass' => FALSE,
-      'expected_exception' => 'Empty sub-array is a subset of any non-empty array',
+      'expected_exception_message' => 'Empty sub-array is a subset of any non-empty array',
     ];
     yield 'recursive_match_failure' => [
       'array' => [
@@ -387,19 +355,16 @@ final class AssertArrayTraitTest extends TestCase {
       ],
       'sub_array' => [['target', 'found']],
       'should_pass' => FALSE,
-      'expected_exception' => 'Unexpected sub-array found',
+      'expected_exception_message' => 'Unexpected sub-array found',
     ];
   }
 
-  /**
-   * Test edge cases and special scenarios.
-   */
   #[DataProvider('dataProviderEdgeCases')]
-  public function testEdgeCases(string $method, array $args, bool $should_pass, ?string $expected_exception = NULL): void {
+  public function testEdgeCases(string $method, array $args, bool $should_pass, ?string $expected_exception_message = NULL): void {
     if (!$should_pass) {
       $this->expectException(AssertionFailedError::class);
-      if ($expected_exception) {
-        $this->expectExceptionMessage($expected_exception);
+      if ($expected_exception_message) {
+        $this->expectExceptionMessage($expected_exception_message);
       }
     }
 
@@ -415,13 +380,9 @@ final class AssertArrayTraitTest extends TestCase {
     }
   }
 
-  /**
-   * Data provider for edge cases.
-   */
   public static function dataProviderEdgeCases(): \Iterator {
     $object = new \stdClass();
     $object->property = 'test';
-    // assertArrayContainsArray edge cases.
     yield 'null_values_in_contains' => [
       'method' => 'assertArrayContainsArray',
       'args' => [[NULL, 'a', 'b'], [NULL]],
@@ -455,7 +416,6 @@ final class AssertArrayTraitTest extends TestCase {
       ],
       'should_pass' => TRUE,
     ];
-    // assertArrayNotContainsString with objects.
     yield 'objects_ignored_in_not_contains_string' => [
       'method' => 'assertArrayNotContainsString',
       'args' => ['property', ['string', $object, 123]],
@@ -463,9 +423,6 @@ final class AssertArrayTraitTest extends TestCase {
     ];
   }
 
-  /**
-   * Test custom failure messages work correctly.
-   */
   public function testCustomFailureMessages(): void {
     $custom_message = 'This is a custom failure message';
 

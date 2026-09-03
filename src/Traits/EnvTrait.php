@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace AlexSkrypnyk\PhpunitHelpers\Traits;
 
 /**
- * Trait EnvTrait.
- *
- * Trait for managing environment variables.
+ * Manages environment variables.
  *
  * @mixin \PHPUnit\Framework\TestCase
  */
@@ -93,6 +91,9 @@ trait EnvTrait {
    *
    * @param string $name
    *   The name of the environment variable.
+   *
+   * @return mixed
+   *   The value of the environment variable, or FALSE if it is not set.
    */
   public static function envGet(string $name): mixed {
     return getenv($name);
@@ -103,6 +104,9 @@ trait EnvTrait {
    *
    * @param string $name
    *   The name of the environment variable.
+   *
+   * @return bool
+   *   TRUE if the environment variable is set, FALSE otherwise.
    */
   public static function envIsSet(string $name): bool {
     return getenv($name) !== FALSE;
@@ -110,6 +114,12 @@ trait EnvTrait {
 
   /**
    * Check if an environment variable is not set.
+   *
+   * @param string $name
+   *   The name of the environment variable.
+   *
+   * @return bool
+   *   TRUE if the environment variable is not set, FALSE otherwise.
    */
   public static function envIsUnset(string $name): bool {
     return getenv($name) === FALSE;
