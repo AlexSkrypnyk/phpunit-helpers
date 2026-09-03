@@ -675,6 +675,44 @@ final class ApplicationTraitTest extends UnitTestCase {
     ]);
   }
 
+  public function testApplicationAnyOutputContains(): void {
+    $this->applicationInitFromCommand(ErrorOutputCommand::class);
+    $this->applicationRun([]);
+
+    $this->assertApplicationSuccessful();
+
+    $this->assertApplicationAnyOutputContains('Test Error');
+    $this->assertApplicationAnyOutputContains(['Test Error', 'Output message']);
+  }
+
+  public function testApplicationAnyOutputContainsFailure(): void {
+    $this->applicationInitFromCommand(ErrorOutputCommand::class);
+    $this->applicationRun([]);
+
+    $this->expectException(ExpectationFailedException::class);
+
+    $this->assertApplicationAnyOutputContains('Nonexistent string');
+  }
+
+  public function testApplicationAnyOutputNotContains(): void {
+    $this->applicationInitFromCommand(ErrorOutputCommand::class);
+    $this->applicationRun([]);
+
+    $this->assertApplicationSuccessful();
+
+    $this->assertApplicationAnyOutputNotContains('Nonexistent string');
+    $this->assertApplicationAnyOutputNotContains(['NotFound1', 'NotFound2']);
+  }
+
+  public function testApplicationAnyOutputNotContainsFailure(): void {
+    $this->applicationInitFromCommand(ErrorOutputCommand::class);
+    $this->applicationRun([]);
+
+    $this->expectException(ExpectationFailedException::class);
+
+    $this->assertApplicationAnyOutputNotContains('Test Error');
+  }
+
   public function testApplicationAnyOutputContainsOrNotShortcutMode(): void {
     $this->applicationInitFromCommand(ErrorOutputCommand::class);
     $this->applicationRun([]);

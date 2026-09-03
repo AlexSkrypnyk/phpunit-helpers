@@ -19,7 +19,6 @@ use Symfony\Component\Console\Tester\ApplicationTester;
  */
 trait ApplicationTrait {
 
-  use ReflectionTrait;
   use StringTrait;
 
   /**
@@ -276,7 +275,7 @@ trait ApplicationTrait {
       PHP_EOL,
       PHP_EOL,
       $this->applicationTester->getDisplay()
-    ));
+    ) . $this->assertionSuffix());
   }
 
   /**
@@ -292,7 +291,7 @@ trait ApplicationTrait {
       PHP_EOL,
       PHP_EOL,
       $this->applicationTester->getDisplay()
-    ));
+    ) . $this->assertionSuffix());
   }
 
   /**
@@ -317,7 +316,7 @@ trait ApplicationTrait {
           PHP_EOL,
           PHP_EOL,
           $output
-        ));
+        ) . $this->assertionSuffix());
       }
     }
   }
@@ -344,7 +343,7 @@ trait ApplicationTrait {
           PHP_EOL,
           PHP_EOL,
           $output
-        ));
+        ) . $this->assertionSuffix());
       }
     }
   }
@@ -371,7 +370,7 @@ trait ApplicationTrait {
           PHP_EOL,
           PHP_EOL,
           $output
-        ));
+        ) . $this->assertionSuffix());
       }
     }
   }
@@ -398,7 +397,7 @@ trait ApplicationTrait {
           PHP_EOL,
           PHP_EOL,
           $output
-        ));
+        ) . $this->assertionSuffix());
       }
     }
   }
@@ -439,10 +438,10 @@ trait ApplicationTrait {
     $this->assertStringContainsOrNot(
       $output,
       $expected,
-      $message ?: "Application output exact match failed for '%s'",
-      $message ?: "Application output does not contain '%s'",
-      $message ?: "Application output should not exactly match '%s'",
-      $message ?: "Application output contains '%s' but should not"
+      $message ?: "Application output exact match failed for '%s'" . $this->assertionSuffix(),
+      $message ?: "Application output does not contain '%s'" . $this->assertionSuffix(),
+      $message ?: "Application output should not exactly match '%s'" . $this->assertionSuffix(),
+      $message ?: "Application output contains '%s' but should not" . $this->assertionSuffix()
     );
   }
 
@@ -482,11 +481,67 @@ trait ApplicationTrait {
     $this->assertStringContainsOrNot(
       $output,
       $expected,
-      $message ?: "Application error output exact match failed for '%s'",
-      $message ?: "Application error output does not contain '%s'",
-      $message ?: "Application error output should not exactly match '%s'",
-      $message ?: "Application error output contains '%s' but should not"
+      $message ?: "Application error output exact match failed for '%s'" . $this->assertionSuffix(),
+      $message ?: "Application error output does not contain '%s'" . $this->assertionSuffix(),
+      $message ?: "Application error output should not exactly match '%s'" . $this->assertionSuffix(),
+      $message ?: "Application error output contains '%s' but should not" . $this->assertionSuffix()
     );
+  }
+
+  /**
+   * Asserts that either application output contains expected string(s).
+   *
+   * Checks the standard output and error output combined into a single string.
+   *
+   * @param array|string $expected
+   *   Expected string or strings to check for in either output.
+   * @param ?string $message
+   *   Optional failure message.
+   */
+  public function assertApplicationAnyOutputContains(array|string $expected, ?string $message = NULL): void {
+    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
+    $output = $this->applicationTester->getDisplay() . $this->applicationTester->getErrorOutput();
+
+    $expected = is_array($expected) ? $expected : [$expected];
+
+    foreach ($expected as $value) {
+      if (is_string($value)) {
+        $this->assertStringContainsString($value, $output, $message ?: sprintf(
+          "Application standard or error output does not contain '%s'.%sOutput:%s%s",
+          $value,
+          PHP_EOL,
+          PHP_EOL,
+          $output
+        ) . $this->assertionSuffix());
+      }
+    }
+  }
+
+  /**
+   * Asserts that neither application output contains expected string(s).
+   *
+   * @param array|string $expected
+   *   String or strings that should not be in either output.
+   * @param ?string $message
+   *   Optional failure message.
+   */
+  public function assertApplicationAnyOutputNotContains(array|string $expected, ?string $message = NULL): void {
+    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
+    $output = $this->applicationTester->getDisplay() . $this->applicationTester->getErrorOutput();
+
+    $expected = is_array($expected) ? $expected : [$expected];
+
+    foreach ($expected as $value) {
+      if (is_string($value)) {
+        $this->assertStringNotContainsString($value, $output, $message ?: sprintf(
+          "Application standard or error output contains '%s' but should not.%sOutput:%s%s",
+          $value,
+          PHP_EOL,
+          PHP_EOL,
+          $output
+        ) . $this->assertionSuffix());
+      }
+    }
   }
 
   /**
@@ -527,10 +582,10 @@ trait ApplicationTrait {
     $this->assertStringContainsOrNot(
       $output,
       $expected,
-      $message ?: "Application output exact match failed for '%s'",
-      $message ?: "Application output does not contain '%s'",
-      $message ?: "Application output should not exactly match '%s'",
-      $message ?: "Application output contains '%s' but should not"
+      $message ?: "Application output exact match failed for '%s'" . $this->assertionSuffix(),
+      $message ?: "Application output does not contain '%s'" . $this->assertionSuffix(),
+      $message ?: "Application output should not exactly match '%s'" . $this->assertionSuffix(),
+      $message ?: "Application output contains '%s' but should not" . $this->assertionSuffix()
     );
   }
 
