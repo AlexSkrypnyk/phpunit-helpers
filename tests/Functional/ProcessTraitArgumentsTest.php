@@ -19,7 +19,7 @@ final class ProcessTraitArgumentsTest extends UnitTestCase {
 
   protected function setUp(): void {
     parent::setUp();
-    $this->processStreamOutput = FALSE;
+    $this->processStreamingOutput = FALSE;
   }
 
   protected function tearDown(): void {

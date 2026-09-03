@@ -19,7 +19,7 @@ final class ProcessTraitTest extends UnitTestCase {
 
   protected function setUp(): void {
     parent::setUp();
-    $this->processStreamOutput = FALSE;
+    $this->processStreamingOutput = FALSE;
   }
 
   protected function tearDown(): void {
@@ -481,7 +481,7 @@ final class ProcessTraitTest extends UnitTestCase {
 
     // Override processStreamingOutputCallback method temporarily.
     $reflection = new \ReflectionClass($this);
-    $property = $reflection->getProperty('processStreamOutput');
+    $property = $reflection->getProperty('processStreamingOutput');
     $property->setValue($this, TRUE);
 
     // Capture streaming output by overriding the actual method.
@@ -1344,7 +1344,7 @@ EOL;
   }
 
   public function testStreamingOutputWithDimmingEnabled(): void {
-    $this->processStreamOutput = TRUE;
+    $this->processStreamingOutput = TRUE;
     self::$processStreamingOutputShouldDim = TRUE;
 
     $temp_file = tempnam(sys_get_temp_dir(), 'phpunit_stdout_test');
@@ -1358,7 +1358,7 @@ class TestClass {
   use ProcessTrait;
   
   public function enableStreamingWithDimming() {
-    $this->processStreamOutput = true;
+    $this->processStreamingOutput = true;
     static::$processStreamingOutputShouldDim = true;
   }
 }
@@ -1379,11 +1379,11 @@ $test->processRun("echo", ["test output"]);
     $this->assertStringContainsString("\033[22m", $output, 'Should contain ANSI dim end code');
     $this->assertStringContainsString('test output', $output, 'Should contain actual text');
 
-    $this->processStreamOutput = FALSE;
+    $this->processStreamingOutput = FALSE;
   }
 
   public function testStreamingOutputWithDimmingDisabled(): void {
-    $this->processStreamOutput = TRUE;
+    $this->processStreamingOutput = TRUE;
     self::$processStreamingOutputShouldDim = FALSE;
 
     $temp_file = tempnam(sys_get_temp_dir(), 'phpunit_stdout_test');
@@ -1397,7 +1397,7 @@ class TestClass {
   use ProcessTrait;
   
   public function enableStreamingWithoutDimming() {
-    $this->processStreamOutput = true;
+    $this->processStreamingOutput = true;
     static::$processStreamingOutputShouldDim = false;
   }
 }
@@ -1418,7 +1418,7 @@ $test->processRun("echo", ["test output"]);
     $this->assertStringNotContainsString("\033[22m", $output, 'Should not contain ANSI dim end code');
     $this->assertStringContainsString('test output', $output, 'Should contain actual text');
 
-    $this->processStreamOutput = FALSE;
+    $this->processStreamingOutput = FALSE;
     self::$processStreamingOutputShouldDim = TRUE;
   }
 
@@ -1435,7 +1435,7 @@ $test->processRun("echo", ["test output"]);
 
   #[DataProvider('dataProviderDim')]
   public function testDim(string $text, string $eol, string $expected): void {
-    $this->assertSame($expected, self::dim($text, $eol));
+    $this->assertSame($expected, self::processColorDim($text, $eol));
   }
 
   public static function dataProviderDim(): \Iterator {
