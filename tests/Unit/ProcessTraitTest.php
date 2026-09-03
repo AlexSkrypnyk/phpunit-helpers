@@ -912,8 +912,7 @@ EOL;
   }
 
   public function testProcessRunExplicitArgumentsPrecedence(): void {
-    // Explicit arguments are appended after parsed ones to preserve command
-    // structure, especially -- markers.
+    // Without an end-of-options marker, explicit arguments are appended.
     $this->processRun('echo default-arg1 default-arg2', ['override-arg1', 'override-arg2']);
 
     $this->assertProcessSuccessful();
@@ -924,7 +923,7 @@ EOL;
     $this->processRun('echo command -- after-marker', ['explicit']);
 
     $this->assertProcessSuccessful();
-    $this->assertProcessOutputContains('command -- after-marker explicit');
+    $this->assertProcessOutputContains('command explicit -- after-marker');
   }
 
   public function testProcessRunWithIdleTimeout(): void {
