@@ -8,8 +8,6 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 
 /**
- * Trait Locations.
- *
  * Helpers to work with Locations during tests.
  *
  * Paths are static to allow for easy access from static methods such as
@@ -112,7 +110,7 @@ trait LocationsTrait {
   /**
    * Tear down the locations.
    *
-   * Will be skipped if the DEBUG environment variable is set.
+   * Removes the workspace directory and everything below it.
    */
   public function locationsTearDown(): void {
     $fs = new Filesystem();
@@ -177,7 +175,7 @@ trait LocationsTrait {
   }
 
   /**
-   * Print the locations' info.
+   * Build the locations' info.
    *
    * @return string
    *   The locations' info.
@@ -203,8 +201,9 @@ trait LocationsTrait {
    * @param string $dst
    *   The destination directory.
    * @param array<int, string> $include
-   *   An array of files to include in the copy. If empty, no files will be
-   *   copied.
+   *   An array of files to include in the copy. If empty, every file under the
+   *   source directory is copied except the default exclusions ('.git',
+   *   'node_modules', 'vendor') and anything listed in $exclude.
    * @param array<int, string> $exclude
    *   An array of excluded directories or files.
    * @param callable|null $before
@@ -276,8 +275,8 @@ trait LocationsTrait {
    * @param array<int, string> $files
    *   The files to copy.
    * @param string|null $basedir
-   *   The base directory to use for the files. If NULL, the base directory
-   *   of the first file will be used.
+   *   The base directory to use for the files. If NULL, the current working
+   *   directory is used.
    * @param bool $append_rand
    *   Whether to append a random numeric suffix to the file names.
    *
@@ -315,7 +314,7 @@ trait LocationsTrait {
   }
 
   /**
-   * Get the real path of a directory.
+   * Get the real path of a file or directory.
    *
    * @param string $path
    *   The path to check.

@@ -67,10 +67,10 @@ trait EnvTrait {
   }
 
   /**
-   * Unset an environment variable by prefix.
+   * Unset every environment variable whose name starts with a prefix.
    *
    * @param string $prefix
-   *   The prefix of the environment variable.
+   *   The prefix to match environment variable names against.
    */
   public static function envUnsetPrefix(string $prefix): void {
     foreach (array_keys(static::$env) as $name) {
