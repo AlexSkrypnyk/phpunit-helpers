@@ -104,7 +104,9 @@ trait ProcessTrait {
    *   The command to run. Can be a single command or command with arguments
    *   separated by spaces (e.g., "git status" or "ls -la").
    * @param array $arguments
-   *   Additional command arguments.
+   *   Additional command arguments. When the command string contains an
+   *   end-of-options marker (--), these are inserted before it so they keep
+   *   their option meaning.
    *   Note: All scalar arguments are converted to strings (TRUE→"1", FALSE→"").
    * @param array $inputs
    *   Array of inputs for interactive processes.
@@ -133,11 +135,29 @@ trait ProcessTrait {
     $base_command = array_shift($parsed_command);
     $parsed_arguments = $parsed_command;
 
+    // @codeCoverageIgnoreStart
+    if ($base_command === NULL) {
+      throw new \InvalidArgumentException('Command cannot be empty.');
+    }
+    // @codeCoverageIgnoreEnd
     if (preg_match('/[^a-zA-Z0-9_\-.\/]/', $base_command)) {
       throw new \InvalidArgumentException(sprintf('Invalid command: %s. Only alphanumeric characters, dots, dashes, underscores and slashes are allowed.', $base_command));
     }
 
-    $all_arguments = array_values(array_merge($parsed_arguments, $arguments));
+    // Everything after the end-of-options marker is positional, so appending
+    // there would strip the option meaning from caller-supplied arguments.
+    $marker_position = array_search('--', $parsed_arguments, TRUE);
+    if ($marker_position === FALSE) {
+      $all_arguments = array_merge($parsed_arguments, $arguments);
+    }
+    else {
+      $all_arguments = array_merge(
+        array_slice($parsed_arguments, 0, $marker_position),
+        $arguments,
+        array_slice($parsed_arguments, $marker_position)
+      );
+    }
+    $all_arguments = array_values($all_arguments);
 
     foreach ($all_arguments as &$arg) {
       if (!is_scalar($arg)) {
@@ -192,9 +212,10 @@ trait ProcessTrait {
    * Parses a command string into command and arguments.
    *
    * Handles quoted arguments and escaping properly. Supports both single
-   * and double quotes. Also supports the end-of-options marker (--) which
-   * stops option parsing and treats all subsequent tokens as positional
-   * arguments.
+   * and double quotes. The end-of-options marker (--) is emitted as an
+   * ordinary token: the parser draws no option/positional distinction, and
+   * the target program interprets the marker. processRun() places
+   * caller-supplied arguments before it.
    *
    * The parser deliberately allows backslash escaping inside single quotes
    * (e.g., 'It\'s working'). POSIX shells treat backslashes inside single
@@ -204,7 +225,7 @@ trait ProcessTrait {
    * @param string $command
    *   The command string to parse.
    *
-   * @return array
+   * @return list<string>
    *   Array with command as first element and arguments as subsequent elements.
    *
    * @throws \InvalidArgumentException
@@ -223,7 +244,6 @@ trait ProcessTrait {
     $escaped = FALSE;
     $length = strlen($command);
     $has_content = FALSE;
-    $end_of_options_found = FALSE;
 
     for ($i = 0; $i < $length; $i++) {
       $char = $command[$i];
@@ -255,15 +275,6 @@ trait ProcessTrait {
 
       if (!$in_quotes && ($char === ' ' || $char === "\t")) {
         if ($current !== '' || $has_content) {
-          if (!$end_of_options_found && $current === '--') {
-            $end_of_options_found = TRUE;
-            // Keep the -- marker so the command receives it.
-            $parts[] = $current;
-            $current = '';
-            $has_content = FALSE;
-            continue;
-          }
-
           $parts[] = $current;
           $current = '';
           $has_content = FALSE;
