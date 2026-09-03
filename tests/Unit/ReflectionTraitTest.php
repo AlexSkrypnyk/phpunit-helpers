@@ -64,7 +64,7 @@ final class ReflectionTraitTest extends TestCase {
 
   public function testCallProtectedMethodWithInvalidObject(): void {
     $this->expectException(\InvalidArgumentException::class);
-    $this->expectExceptionMessage('An object instance is required for non-static methods');
+    $this->expectExceptionMessage('An object instance is required for non-static methods.');
 
     self::callProtectedMethod($this->testObject::class, 'protectedMethod', ['test']);
   }

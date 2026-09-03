@@ -369,7 +369,7 @@ final class ProcessTraitTest extends UnitTestCase {
     $this->process = NULL;
 
     $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Process is not initialized');
+    $this->expectExceptionMessage('Process is not initialized.');
 
     $this->assertProcessSuccessful();
   }
@@ -378,7 +378,7 @@ final class ProcessTraitTest extends UnitTestCase {
     $this->process = NULL;
 
     $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Process is not initialized');
+    $this->expectExceptionMessage('Process is not initialized.');
 
     $this->assertProcessFailed();
   }
@@ -387,7 +387,7 @@ final class ProcessTraitTest extends UnitTestCase {
     $this->process = NULL;
 
     $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Process is not initialized');
+    $this->expectExceptionMessage('Process is not initialized.');
 
     $this->assertProcessOutputContains('test');
   }
@@ -396,7 +396,7 @@ final class ProcessTraitTest extends UnitTestCase {
     $this->process = NULL;
 
     $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Process is not initialized');
+    $this->expectExceptionMessage('Process is not initialized.');
 
     $this->assertProcessOutputNotContains('test');
   }
@@ -405,7 +405,7 @@ final class ProcessTraitTest extends UnitTestCase {
     $this->process = NULL;
 
     $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Process is not initialized');
+    $this->expectExceptionMessage('Process is not initialized.');
 
     $this->assertProcessErrorOutputContains('test');
   }
@@ -414,7 +414,7 @@ final class ProcessTraitTest extends UnitTestCase {
     $this->process = NULL;
 
     $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Process is not initialized');
+    $this->expectExceptionMessage('Process is not initialized.');
 
     $this->assertProcessErrorOutputNotContains('test');
   }
@@ -423,7 +423,7 @@ final class ProcessTraitTest extends UnitTestCase {
     $this->process = NULL;
 
     $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Process is not initialized');
+    $this->expectExceptionMessage('Process is not initialized.');
 
     $this->assertProcessOutputContainsOrNot('test');
   }
@@ -432,7 +432,7 @@ final class ProcessTraitTest extends UnitTestCase {
     $this->process = NULL;
 
     $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Process is not initialized');
+    $this->expectExceptionMessage('Process is not initialized.');
 
     $this->assertProcessErrorOutputContainsOrNot('test');
   }
@@ -441,7 +441,7 @@ final class ProcessTraitTest extends UnitTestCase {
     $this->process = NULL;
 
     $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Process is not initialized');
+    $this->expectExceptionMessage('Process is not initialized.');
 
     $this->assertProcessAnyOutputContains('test');
   }
@@ -450,7 +450,7 @@ final class ProcessTraitTest extends UnitTestCase {
     $this->process = NULL;
 
     $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Process is not initialized');
+    $this->expectExceptionMessage('Process is not initialized.');
 
     $this->assertProcessAnyOutputNotContains('test');
   }
@@ -459,7 +459,7 @@ final class ProcessTraitTest extends UnitTestCase {
     $this->process = NULL;
 
     $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Process is not initialized');
+    $this->expectExceptionMessage('Process is not initialized.');
 
     $this->assertProcessAnyOutputContainsOrNot('test');
   }
@@ -603,7 +603,7 @@ EOL;
 
   public function testProcessGetWhenNotInitialized(): void {
     $this->expectException(\RuntimeException::class);
-    $this->expectExceptionMessage('Process is not initialized');
+    $this->expectExceptionMessage('Process is not initialized.');
 
     $this->processGet();
   }
@@ -659,7 +659,7 @@ EOL;
     $formatted_output = $method->invoke($this);
     $this->assertIsString($formatted_output);
 
-    $this->assertStringContainsString('Process is not initialized', $formatted_output);
+    $this->assertStringContainsString('Process is not initialized.', $formatted_output);
   }
 
   public function testProcessStreamingCallbackWithEmptyBuffer(): void {
@@ -941,7 +941,7 @@ EOL;
     $result = $method->invoke($this);
 
     $this->assertIsString($result);
-    $this->assertStringContainsString('Process is not initialized', $result);
+    $this->assertStringContainsString('Process is not initialized.', $result);
   }
 
   public function testStaticVariableAccess(): void {
