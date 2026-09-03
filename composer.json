@@ -29,7 +29,7 @@
         "drupal/coder": "^9.0.1",
         "ergebnis/composer-normalize": "^2.52.0",
         "laravel/serializable-closure": "^2.0.16",
-        "phpstan/phpstan": "^2.2.12",
+        "phpstan/phpstan": "^2.2.13",
         "rector/rector": "^2.6.6",
         "squizlabs/php_codesniffer": "^4.0.4",
         "symfony/console": "^6.4 || ^7.2"
