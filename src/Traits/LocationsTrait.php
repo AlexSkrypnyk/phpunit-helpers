@@ -284,13 +284,13 @@ trait LocationsTrait {
    * @return array<int, string>
    *   The list of created file paths.
    *
-   * @throws \RuntimeException
-   *   When the base directory does not exist.
+   * @throws \InvalidArgumentException
+   *   When the base path is not a directory.
    */
   public static function locationsCopyFilesToSut(array $files, ?string $basedir = NULL, bool $append_rand = TRUE): array {
     $basedir = $basedir ?: getcwd();
     if (!$basedir || !is_dir($basedir)) {
-      throw new \RuntimeException(sprintf('The base directory "%s" does not exist.', $basedir));
+      throw new \InvalidArgumentException(sprintf('The base path "%s" is not a directory.', $basedir));
     }
     return static::locationsCopy($basedir, static::$sut, $files, [], function (string &$src, string &$dst) use ($append_rand): void {
       $dst .= ($append_rand ? random_int(1000, 9999) : '');
@@ -323,18 +323,18 @@ trait LocationsTrait {
    * @return string
    *   The real path.
    *
-   * @throws \RuntimeException
+   * @throws \InvalidArgumentException
    *   If the path does not exist.
    */
   public static function locationsRealpath(string $path): string {
-    $path = realpath($path);
+    $resolved = realpath($path);
 
     // @codeCoverageIgnoreStart
-    if ($path === FALSE) {
-      throw new \RuntimeException(sprintf('Path "%s" does not exist.', $path));
+    if ($resolved === FALSE) {
+      throw new \InvalidArgumentException(sprintf('Path "%s" does not exist.', $path));
     }
     // @codeCoverageIgnoreEnd
-    return $path;
+    return $resolved;
   }
 
   /**
