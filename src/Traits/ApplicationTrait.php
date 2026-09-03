@@ -209,6 +209,7 @@ trait ApplicationTrait {
     $options += ['capture_stderr_separately' => TRUE];
 
     $output = '';
+    $succeeded_unexpectedly = FALSE;
     try {
       $this->applicationTester->run($input, $options);
       $output = $this->applicationTester->getDisplay();
@@ -219,14 +220,18 @@ trait ApplicationTrait {
         // @codeCoverageIgnoreEnd
       }
 
-      // Expected to succeed, but failed.
       if ($this->applicationTester->getStatusCode() !== 0) {
-        throw new \Exception(sprintf("Application exited with non-zero code.\nThe output was:\n%s\nThe error output was:\n%s", $this->applicationTester->getDisplay(), $this->applicationTester->getErrorOutput()));
+        // An expected failure keeps the application output; only an unexpected
+        // one is converted into a diagnostic by the catch blocks below.
+        if (!$expect_fail) {
+          throw new \Exception(sprintf("Application exited with non-zero code.\nThe output was:\n%s\nThe error output was:\n%s", $this->applicationTester->getDisplay(), $this->applicationTester->getErrorOutput()));
+        }
       }
-
-      // Expected to fail, but succeeded.
-      if ($expect_fail) {
-        throw new AssertionFailedError(sprintf("Application exited successfully but should not.\nThe output was:\n%s\nThe error output was:\n%s", $this->applicationTester->getDisplay(), $this->applicationTester->getErrorOutput()));
+      // AssertionFailedError descends from \RuntimeException, so throwing it
+      // here would be caught below. Record the outcome and throw after the
+      // catch blocks instead.
+      elseif ($expect_fail) {
+        $succeeded_unexpectedly = TRUE;
       }
     }
     catch (\RuntimeException $exception) {
@@ -244,6 +249,10 @@ trait ApplicationTrait {
       }
       // Expected to fail, so capture the output.
       $output = $exception->getMessage();
+    }
+
+    if ($succeeded_unexpectedly) {
+      throw new AssertionFailedError(sprintf("Application exited successfully but should not.\nThe output was:\n%s\nThe error output was:\n%s", $this->applicationTester->getDisplay(), $this->applicationTester->getErrorOutput()));
     }
 
     // Error output is captured separately, so append it to the output.

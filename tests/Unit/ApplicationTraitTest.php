@@ -181,6 +181,38 @@ final class ApplicationTraitTest extends UnitTestCase {
     $this->assertApplicationOutputContains('Hello, TestUser!');
   }
 
+  public function testApplicationRunExpectedFailureReturnsOutput(): void {
+    $command = new class() extends Command {
+
+      protected function configure(): void {
+        $this->setName('test:exit-code');
+      }
+
+      protected function execute(InputInterface $input, OutputInterface $output): int {
+        $output->writeln('Important output line');
+
+        return Command::FAILURE;
+      }
+
+    };
+
+    $this->applicationInitFromCommand($command);
+
+    $output = $this->applicationRun([], [], TRUE);
+
+    $this->assertStringContainsString('Important output line', $output);
+    $this->assertStringNotContainsString('Application exited with non-zero code', $output);
+  }
+
+  public function testApplicationRunExpectedFailureButSucceeded(): void {
+    $this->applicationInitFromCommand(GreetingCommand::class);
+
+    $this->expectException(AssertionFailedError::class);
+    $this->expectExceptionMessage('Application exited successfully but should not.');
+
+    $this->applicationRun([], [], TRUE);
+  }
+
   public function testApplicationRunExceptionHandling(): void {
     $this->application = new Application();
 
