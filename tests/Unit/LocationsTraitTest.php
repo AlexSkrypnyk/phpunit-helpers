@@ -227,6 +227,33 @@ class LocationsTraitTest extends TestCase {
     }
   }
 
+  #[DataProvider('dataProviderLocationsCopyFilesToSutInvalidBasedir')]
+  public function testLocationsCopyFilesToSutInvalidBasedir(string $type): void {
+    $this->locationsInit($this->testCwd);
+
+    $basedir = $this->testTmp . DIRECTORY_SEPARATOR . 'not_a_directory';
+    if ($type === 'file') {
+      file_put_contents($basedir, 'This is a file, not a directory.');
+    }
+
+    $this->expectException(\InvalidArgumentException::class);
+    $this->expectExceptionMessage('is not a directory.');
+
+    try {
+      self::locationsCopyFilesToSut([], $basedir);
+    }
+    finally {
+      if (is_file($basedir)) {
+        unlink($basedir);
+      }
+    }
+  }
+
+  public static function dataProviderLocationsCopyFilesToSutInvalidBasedir(): \Iterator {
+    yield 'missing_path' => ['missing'];
+    yield 'existing_file' => ['file'];
+  }
+
   public function testLocationsTearDown(): void {
     self::$workspace = $this->testTmp . DIRECTORY_SEPARATOR . 'test_workspace_' . uniqid();
     mkdir(self::$workspace, 0777, TRUE);
