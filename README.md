@@ -296,7 +296,7 @@ class MyProcessTest extends TestCase {
   protected function setUp(): void {
     // Configure process behavior.
     $this->processCwd = NULL; // Current working directory (NULL for current PHP process dir).
-    $this->processStreamOutput = FALSE; // Whether to stream an output during process execution.
+    $this->processStreamingOutput = FALSE; // Whether to stream an output during process execution.
   }
 
   protected function tearDown(): void {
@@ -591,7 +591,7 @@ class MyLoggerTest extends TestCase {
 
   protected function setUp(): void {
     // Enable verbose logging for debugging
-    static::loggerSetVerbose(TRUE);
+    static::logSetVerbose(TRUE);
   }
 
   public function testHierarchicalWorkflow() {
@@ -631,8 +631,8 @@ class MyLoggerTest extends TestCase {
 - `logSubstep(string)` - Indented substep messages
 - `logNote(string)` - Indented note messages
 - `logStepSummary(?string, string)` - Hierarchical step summary table with configurable indentation
-- `loggerSetVerbose(bool)` - Control verbose mode
-- `loggerSetOutputStream(resource|null)` - Set custom output stream (defaults to STDERR)
+- `logSetVerbose(bool)` - Control verbose mode
+- `logSetOutputStream(resource|null)` - Set custom output stream (defaults to STDERR)
 
 **Key features:**
 - Hierarchical step tracking with parent-child relationships

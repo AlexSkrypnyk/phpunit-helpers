@@ -14,14 +14,14 @@ trait LoggerTrait {
   /**
    * Controls whether logging output is enabled.
    */
-  protected static bool $loggerIsVerbose = FALSE;
+  protected static bool $logIsVerbose = FALSE;
 
   /**
    * The output stream for logging. Defaults to STDERR if not set.
    *
    * @var resource|null
    */
-  protected static $loggerOutputStream;
+  protected static $logOutputStream;
 
   /**
    * Stores all step tracking information.
@@ -33,19 +33,19 @@ trait LoggerTrait {
    * - 'elapsed': The elapsed time in seconds (null if not finished)
    * - 'parent_stack': Array of parent step names for hierarchy.
    */
-  protected static array $loggerSteps = [];
+  protected static array $logSteps = [];
 
   /**
    * Stack of currently running steps for hierarchy tracking.
    *
    * @var array<string>
    */
-  protected static array $loggerStepStack = [];
+  protected static array $logStepStack = [];
 
   /**
    * Prefix for identifying step methods.
    */
-  protected static string $loggerStepMethodPrefix = 'step';
+  protected static string $logStepMethodPrefix = 'step';
 
   /**
    * Sets the verbose mode for logging.
@@ -53,8 +53,8 @@ trait LoggerTrait {
    * @param bool $verbose
    *   TRUE to enable verbose logging, FALSE to disable.
    */
-  public static function loggerSetVerbose(bool $verbose): void {
-    static::$loggerIsVerbose = $verbose;
+  public static function logSetVerbose(bool $verbose): void {
+    static::$logIsVerbose = $verbose;
   }
 
   /**
@@ -66,12 +66,12 @@ trait LoggerTrait {
    * @throws \InvalidArgumentException
    *   When the provided stream is not a valid resource or NULL.
    */
-  public static function loggerSetOutputStream($stream): void {
+  public static function logSetOutputStream($stream): void {
     if (!is_resource($stream) && $stream !== NULL) {
       throw new \InvalidArgumentException('Stream must be a valid resource or NULL.');
     }
 
-    static::$loggerOutputStream = $stream;
+    static::$logOutputStream = $stream;
   }
 
   /**
@@ -80,8 +80,8 @@ trait LoggerTrait {
    * @return resource
    *   The output stream resource (STDERR if not set).
    */
-  protected static function getOutputStream() {
-    return static::$loggerOutputStream ?: STDERR;
+  protected static function logGetOutputStream() {
+    return static::$logOutputStream ?: STDERR;
   }
 
   /**
@@ -91,10 +91,10 @@ trait LoggerTrait {
    *   The message to log.
    */
   public static function log(string $message): void {
-    if (!static::$loggerIsVerbose) {
+    if (!static::$logIsVerbose) {
       return;
     }
-    fwrite(static::getOutputStream(), PHP_EOL . $message . PHP_EOL);
+    fwrite(static::logGetOutputStream(), PHP_EOL . $message . PHP_EOL);
   }
 
   /**
@@ -116,7 +116,7 @@ trait LoggerTrait {
     if ($min_width <= 0) {
       throw new \InvalidArgumentException('Minimum width must be a positive integer.');
     }
-    if (!static::$loggerIsVerbose) {
+    if (!static::$logIsVerbose) {
       return;
     }
     $delimiter_char = $double_border ? '=' : '-';
@@ -136,7 +136,7 @@ trait LoggerTrait {
 
     $bottom_line = str_repeat($delimiter_char, strlen($top_line));
 
-    fwrite(static::getOutputStream(), PHP_EOL . $top_line . PHP_EOL);
+    fwrite(static::logGetOutputStream(), PHP_EOL . $top_line . PHP_EOL);
 
     if (!empty($message)) {
       $message = trim($message);
@@ -156,10 +156,10 @@ trait LoggerTrait {
       }
 
       foreach ($wrapped_lines as $line) {
-        fwrite(static::getOutputStream(), $line . PHP_EOL);
+        fwrite(static::logGetOutputStream(), $line . PHP_EOL);
       }
 
-      fwrite(static::getOutputStream(), $bottom_line . PHP_EOL);
+      fwrite(static::logGetOutputStream(), $bottom_line . PHP_EOL);
     }
   }
 
@@ -177,7 +177,7 @@ trait LoggerTrait {
    *   When the file cannot be read.
    */
   public static function logFile(string $path, ?string $message = NULL): void {
-    if (!static::$loggerIsVerbose) {
+    if (!static::$logIsVerbose) {
       return;
     }
     if (!file_exists($path)) {
@@ -206,9 +206,9 @@ trait LoggerTrait {
     $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
     $step = $trace[1]['function'] ?? 'unknown';
 
-    $parent_stack = static::$loggerStepStack;
+    $parent_stack = static::$logStepStack;
 
-    static::$loggerSteps[] = [
+    static::$logSteps[] = [
       'name' => $step,
       'start_time' => microtime(TRUE),
       'end_time' => NULL,
@@ -216,13 +216,13 @@ trait LoggerTrait {
       'parent_stack' => $parent_stack,
     ];
 
-    static::$loggerStepStack[] = $step;
+    static::$logStepStack[] = $step;
 
-    $prefix = str_starts_with($step, static::$loggerStepMethodPrefix) ? sprintf('%s START', strtoupper(static::$loggerStepMethodPrefix)) : 'STEP START';
+    $prefix = str_starts_with($step, static::$logStepMethodPrefix) ? sprintf('%s START', strtoupper(static::$logStepMethodPrefix)) : 'STEP START';
     static::logSection($prefix . ' | ' . $step, $message, FALSE, 40);
 
-    if (static::$loggerIsVerbose) {
-      fwrite(static::getOutputStream(), PHP_EOL);
+    if (static::$logIsVerbose) {
+      fwrite(static::logGetOutputStream(), PHP_EOL);
     }
   }
 
@@ -236,12 +236,12 @@ trait LoggerTrait {
     $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
     $step = $trace[1]['function'] ?? 'unknown';
 
-    $prefix = str_starts_with($step, static::$loggerStepMethodPrefix) ? sprintf('%s DONE', strtoupper(static::$loggerStepMethodPrefix)) : 'STEP DONE';
+    $prefix = str_starts_with($step, static::$logStepMethodPrefix) ? sprintf('%s DONE', strtoupper(static::$logStepMethodPrefix)) : 'STEP DONE';
     $section_title = $prefix . ' | ' . $step;
     $step_index = NULL;
 
-    for ($i = count(static::$loggerSteps) - 1; $i >= 0; $i--) {
-      if (static::$loggerSteps[$i]['name'] === $step && static::$loggerSteps[$i]['end_time'] === NULL) {
+    for ($i = count(static::$logSteps) - 1; $i >= 0; $i--) {
+      if (static::$logSteps[$i]['name'] === $step && static::$logSteps[$i]['end_time'] === NULL) {
         $step_index = $i;
         break;
       }
@@ -249,23 +249,23 @@ trait LoggerTrait {
 
     if ($step_index !== NULL) {
       $end_time = microtime(TRUE);
-      $elapsed_time = $end_time - static::$loggerSteps[$step_index]['start_time'];
-      $formatted_time = static::formatElapsedTime($elapsed_time);
+      $elapsed_time = $end_time - static::$logSteps[$step_index]['start_time'];
+      $formatted_time = static::logFormatElapsedTime($elapsed_time);
 
-      static::$loggerSteps[$step_index]['end_time'] = $end_time;
-      static::$loggerSteps[$step_index]['elapsed'] = $elapsed_time;
+      static::$logSteps[$step_index]['end_time'] = $end_time;
+      static::$logSteps[$step_index]['elapsed'] = $elapsed_time;
 
       $section_title .= ' | ' . $formatted_time;
 
-      $stack_key = array_search($step, static::$loggerStepStack, TRUE);
+      $stack_key = array_search($step, static::$logStepStack, TRUE);
       if ($stack_key !== FALSE) {
-        array_splice(static::$loggerStepStack, (int) $stack_key, 1);
+        array_splice(static::$logStepStack, (int) $stack_key, 1);
       }
     }
 
     static::logSection($section_title, $message, FALSE, 40);
-    if (static::$loggerIsVerbose) {
-      fwrite(static::getOutputStream(), PHP_EOL);
+    if (static::$logIsVerbose) {
+      fwrite(static::logGetOutputStream(), PHP_EOL);
     }
   }
 
@@ -276,10 +276,10 @@ trait LoggerTrait {
    *   The substep message to log.
    */
   public static function logSubstep(string $message): void {
-    if (!static::$loggerIsVerbose) {
+    if (!static::$logIsVerbose) {
       return;
     }
-    fwrite(static::getOutputStream(), '  --> ' . $message . PHP_EOL);
+    fwrite(static::logGetOutputStream(), '  --> ' . $message . PHP_EOL);
   }
 
   /**
@@ -289,10 +289,10 @@ trait LoggerTrait {
    *   The note message to log.
    */
   public static function logNote(string $message): void {
-    if (!static::$loggerIsVerbose) {
+    if (!static::$logIsVerbose) {
       return;
     }
-    fwrite(static::getOutputStream(), '    > ' . $message . PHP_EOL);
+    fwrite(static::logGetOutputStream(), '    > ' . $message . PHP_EOL);
   }
 
   /**
@@ -305,7 +305,7 @@ trait LoggerTrait {
    *   The formatted summary table.
    */
   public static function logStepSummary(string $indent = '  '): string {
-    if (empty(static::$loggerSteps)) {
+    if (empty(static::$logSteps)) {
       return '';
     }
 
@@ -315,7 +315,7 @@ trait LoggerTrait {
       $depth = count($step['parent_stack']);
       $indentation = str_repeat($indent, $depth);
       return strlen($indentation . $step['name']);
-    }, static::$loggerSteps);
+    }, static::$logSteps);
     $max_name_length = max($name_lengths);
     // Minimum for "Step" header.
     $max_name_length = max($max_name_length, 4);
@@ -340,9 +340,9 @@ trait LoggerTrait {
     $lines[] = $header;
     $lines[] = $separator;
 
-    foreach (static::$loggerSteps as $step) {
+    foreach (static::$logSteps as $step) {
       $status = $step['end_time'] === NULL ? 'Running' : 'Complete';
-      $elapsed = $step['elapsed'] === NULL ? '-' : static::formatElapsedTime($step['elapsed']);
+      $elapsed = $step['elapsed'] === NULL ? '-' : static::logFormatElapsedTime($step['elapsed']);
 
       $depth = count($step['parent_stack']);
       $indentation = str_repeat($indent, $depth);
@@ -373,7 +373,7 @@ trait LoggerTrait {
    * @return string
    *   The formatted time string (e.g., "1m 23s" or "45s").
    */
-  protected static function formatElapsedTime(float $elapsed_seconds): string {
+  protected static function logFormatElapsedTime(float $elapsed_seconds): string {
     $total_seconds = (int) round($elapsed_seconds);
 
     if ($total_seconds < 60) {
@@ -396,7 +396,7 @@ trait LoggerTrait {
    * @return string
    *   The locations' info.
    */
-  public function loggerInfo(): string {
+  public function logInfo(): string {
     $lines = '';
     $lines .= 'STEP SUMMARY' . PHP_EOL;
     return $lines . static::logStepSummary();

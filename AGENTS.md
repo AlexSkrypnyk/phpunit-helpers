@@ -95,6 +95,21 @@ composer install
 - Local variables/method arguments: `snake_case`
 - Method names/class properties: `camelCase`
 
+### Trait Member Prefixes
+
+Every method and property declared in a trait under `src/Traits/` starts with that trait's prefix, so members remain traceable to their trait once composed into a consuming class.
+
+The prefix is the trait name minus the `Trait` suffix, lower-camel-cased: `ApplicationTrait` uses `application*`, `EnvTrait` uses `env*`, `TuiTrait` uses `tui*`, `LocationsTrait` uses `locations*`, `ProcessTrait` uses `process*`.
+
+Four deliberate exceptions, each of which stays as it is:
+
+- **Assertion methods keep the PHPUnit `assert` prefix first**, with the trait's subject immediately after: `assertProcessSuccessful()`, `assertApplicationOutputContains()`, `assertArrayContainsString()`, `assertStringContainsOrNot()`. This keeps them grouped with PHPUnit's own assertions in editor autocomplete.
+- **`LoggerTrait` uses `log` rather than `logger`**, applied consistently to every method and property: `logSetVerbose()`, `logStepStart()`, `logFormatElapsedTime()`, `$logSteps`, `$logIsVerbose`.
+- **`SerializableClosureTrait` keeps `cw()` and `cu()`.** The names are deliberately short because they appear inline in data providers, where longer names push lines past the limit. The trait docblock records this.
+- **`ReflectionTrait` keeps `callProtectedMethod()`, `setProtectedValue()` and `getProtectedValue()`.** The names read naturally at the call site and are in wide use.
+
+`LocationsTrait`'s `$root`, `$fixtures`, `$workspace`, `$repo`, `$sut` and `$tmp` properties are unprefixed. They are read directly as `self::$fixtures` and `self::$tmp` throughout consuming test suites, so they are left alone; the accessors `locationsRoot()`, `locationsFixtures()` and the rest already follow the rule.
+
 ## Testing Patterns
 
 ### PHPUnit Structure
