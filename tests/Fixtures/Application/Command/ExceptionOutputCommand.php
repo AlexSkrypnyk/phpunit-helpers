@@ -30,7 +30,7 @@ class ExceptionOutputCommand extends Command {
       $error_output->writeln('Error output before exception');
     }
     else {
-      fwrite(STDERR, "Error output before exception" . PHP_EOL);
+      fwrite(STDERR, 'Error output before exception' . PHP_EOL);
     }
 
     throw new \RuntimeException('Test exception message');

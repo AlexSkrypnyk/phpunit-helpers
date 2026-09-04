@@ -646,8 +646,8 @@ EOL;
       "line1\nline2\n",
       "line1\r\nline2\r\n",
       "line1\rline2\r",
-      "single line",
-      "",
+      'single line',
+      '',
     ];
 
     foreach ($test_inputs as $input) {
@@ -1151,8 +1151,8 @@ EOL;
     $this->assertIsCallable($callback);
 
     // Empty strings avoid visible output.
-    $callback(Process::OUT, "");
-    $callback(Process::ERR, "");
+    $callback(Process::OUT, '');
+    $callback(Process::ERR, '');
   }
 
   #[DataProvider('dataProviderProcessStreamingOutputCallbackDimming')]
