@@ -479,12 +479,12 @@ final class ProcessTraitTest extends UnitTestCase {
 
     $command = self::$fixtures . '/shell-command-failing.sh';
 
-    // Override processStreamingOutputCallback method temporarily.
     $reflection = new \ReflectionClass($this);
     $property = $reflection->getProperty('processStreamOutput');
     $property->setValue($this, TRUE);
 
-    // Capture streaming output by overriding the actual method.
+    // The callback logic is duplicated here rather than invoked, so the test
+    // can capture what would have been streamed.
     $captured_output = '';
     $capture_callback = function ($type, $buffer) use (&$captured_output): void {
       $prefix = $type === Process::ERR ? self::$processStreamingErrorOutputChars : self::$processStreamingStandardOutputChars;
@@ -504,7 +504,8 @@ final class ProcessTraitTest extends UnitTestCase {
       }
     };
 
-    // Use the actual processRun method but intercept the callback.
+    // Built directly rather than through processRun() so the capture callback
+    // can be passed to run().
     $this->process = new Process(
       [$command],
       $this->processCwd,

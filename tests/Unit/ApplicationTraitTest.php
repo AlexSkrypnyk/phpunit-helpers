@@ -81,8 +81,6 @@ final class ApplicationTraitTest extends UnitTestCase {
 
     $this->assertApplicationSuccessful();
 
-    // Verify custom working directory was used (we can't directly check the
-    // current directory because it's reset by the shutdown function)
     $this->assertInstanceOf(ApplicationTester::class, $this->applicationTester);
   }
 
@@ -712,7 +710,8 @@ final class ApplicationTraitTest extends UnitTestCase {
       '+ Hello, World!',
     ]);
 
-    // Should not match if there's content after the newline.
+    // Single-quoted, so this holds a literal backslash-n rather than a newline
+    // and therefore never equals the output.
     $this->assertApplicationOutputContainsOrNot([
       '- Hello, World!\nExtra',
     ]);

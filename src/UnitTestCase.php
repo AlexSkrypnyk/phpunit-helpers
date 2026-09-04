@@ -61,8 +61,8 @@ abstract class UnitTestCase extends TestCase {
   /**
    * Additional information about the test.
    *
-   * Collects and returns information from all methods in the class that end
-   * with 'Info'.
+   * Collects and returns information from methods in the class whose name ends
+   * with 'Info' and does not contain 'test'.
    *
    * @return string
    *   The additional information.

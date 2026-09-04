@@ -592,9 +592,6 @@ final class LoggerTraitTest extends UnitTestCase {
     self::logStepStart('Test step');
     self::logStepFinish('Test step');
 
-    // Clear output from any potential leakage.
-    $this->getCapturedOutput();
-
     $buffer = fopen('php://memory', 'r+');
     if ($buffer === FALSE) {
       throw new \RuntimeException('Failed to create memory buffer');

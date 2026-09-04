@@ -19,7 +19,7 @@ trait ProcessTrait {
   use StringTrait;
 
   /**
-   * The currently running process.
+   * The most recently run process.
    */
   protected ?Process $process = NULL;
 
@@ -71,10 +71,10 @@ trait ProcessTrait {
   protected static bool $processStreamingOutputShouldDim = TRUE;
 
   /**
-   * Gets the currently running process.
+   * Gets the most recently run process.
    *
    * @return \Symfony\Component\Process\Process
-   *   The currently running process.
+   *   The most recently run process.
    *
    * @throws \RuntimeException
    *   When the process is not initialized.
@@ -89,7 +89,7 @@ trait ProcessTrait {
   /**
    * Tears down the process.
    *
-   * Stops the currently running process.
+   * Stops the process if one is still running.
    */
   protected function processTearDown(): void {
     if ($this->process instanceof Process) {
