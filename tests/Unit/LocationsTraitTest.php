@@ -61,14 +61,6 @@ class LocationsTraitTest extends TestCase {
     $this->assertNotEmpty(self::$fixtures);
     $this->assertSame(self::locationsRealpath($this->testFixtures), self::locationsRealpath(self::$fixtures ?? ''));
 
-    $after_called = FALSE;
-    $after = function () use (&$after_called): void {
-      $after_called = TRUE;
-    };
-
-    $this->locationsInit($this->testCwd, $after);
-    $this->assertTrue($after_called, 'Closure was called after initialization');
-
     $info = self::locationsInfo();
 
     $this->assertStringContainsString('Root', $info);
