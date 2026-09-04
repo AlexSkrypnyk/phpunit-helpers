@@ -378,9 +378,7 @@ final class ApplicationTraitTest extends UnitTestCase {
   }
 
   public function testAssertApplicationFailedWithSuccessStatus(): void {
-    $command = new GreetingCommand();
-
-    $this->applicationInitFromCommand($command);
+    $this->applicationInitFromCommand(GreetingCommand::class);
 
     $this->applicationRun([]);
 
@@ -390,7 +388,7 @@ final class ApplicationTraitTest extends UnitTestCase {
     $this->assertApplicationFailed();
   }
 
-  public function testApplicationInitFromLoaderWithCwd(): void {
+  public function testApplicationInitFromLoaderWithCustomCwd(): void {
     $original_cwd = getcwd();
 
     if ($original_cwd === FALSE) {
