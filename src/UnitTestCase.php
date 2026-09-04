@@ -6,6 +6,7 @@ namespace AlexSkrypnyk\PhpunitHelpers;
 
 use AlexSkrypnyk\PhpunitHelpers\Traits\LocationsTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\ReflectionTrait;
+use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\TestStatus\Error;
 use PHPUnit\Framework\TestStatus\Failure;
@@ -97,16 +98,37 @@ abstract class UnitTestCase extends TestCase {
   }
 
   /**
-   * Suffix to be added to all assertion failure messages.
-   *
-   * Works around a PHPUnit limitation: onNotSuccessfulTest() cannot alter
-   * the message within the assertion Throwable.
+   * Suffix appended to every assertion failure message.
    *
    * @return string
    *   The assertion suffix.
    */
   protected function assertionSuffix(): string {
     return $this->info();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function invokeTestMethod(string $methodName, array $testArguments): mixed {
+    try {
+      return parent::invokeTestMethod($methodName, $testArguments);
+    }
+    catch (AssertionFailedError $exception) {
+      // runBare() is final and emits the failure event from its own catch
+      // block, so onNotSuccessfulTest() runs too late to change the reported
+      // message. This hook is called from inside that block.
+      $suffix = $this->assertionSuffix();
+
+      if ($suffix !== '') {
+        // Mutating the caught Throwable keeps its stack trace, so the failure
+        // still reports the assertion line rather than this method.
+        $property = new \ReflectionProperty(\Exception::class, 'message');
+        $property->setValue($exception, $exception->getMessage() . $suffix);
+      }
+
+      throw $exception;
+    }
   }
 
   /**

@@ -372,7 +372,7 @@ trait ProcessTrait {
     $this->assertNotNull($this->process, 'Process is not initialized.');
 
     if (!$this->process->isSuccessful()) {
-      $this->fail('PROCESS FAILED' . PHP_EOL . ($message ? 'Message: ' . $message . PHP_EOL : '') . $this->processFormatOutput() . $this->assertionSuffix());
+      $this->fail('PROCESS FAILED' . PHP_EOL . ($message ? 'Message: ' . $message . PHP_EOL : '') . $this->processFormatOutput());
     }
   }
 
@@ -390,7 +390,7 @@ trait ProcessTrait {
     $this->assertNotNull($this->process, 'Process is not initialized.');
 
     if ($this->process->isSuccessful()) {
-      $this->fail('PROCESS SUCCEEDED but failure was expected' . PHP_EOL . ($message ? 'Message: ' . $message . PHP_EOL : '') . $this->processFormatOutput() . $this->assertionSuffix());
+      $this->fail('PROCESS SUCCEEDED but failure was expected' . PHP_EOL . ($message ? 'Message: ' . $message . PHP_EOL : '') . $this->processFormatOutput());
     }
   }
 
@@ -448,7 +448,7 @@ trait ProcessTrait {
           PHP_EOL,
           PHP_EOL,
           $output
-        ) . $this->assertionSuffix());
+        ));
       }
     }
   }
@@ -475,7 +475,7 @@ trait ProcessTrait {
           PHP_EOL,
           PHP_EOL,
           $output
-        ) . $this->assertionSuffix());
+        ));
       }
     }
   }
@@ -502,7 +502,7 @@ trait ProcessTrait {
           PHP_EOL,
           PHP_EOL,
           $output
-        ) . $this->assertionSuffix());
+        ));
       }
     }
   }
@@ -529,7 +529,7 @@ trait ProcessTrait {
           PHP_EOL,
           PHP_EOL,
           $output
-        ) . $this->assertionSuffix());
+        ));
       }
     }
   }
@@ -570,10 +570,10 @@ trait ProcessTrait {
     $this->assertStringContainsOrNot(
       $output,
       $expected,
-      $message ?: "Process output exact match failed for '%s'" . $this->assertionSuffix(),
-      $message ?: "Process output does not contain '%s'" . $this->assertionSuffix(),
-      $message ?: "Process output should not exactly match '%s'" . $this->assertionSuffix(),
-      $message ?: "Process output contains '%s' but should not" . $this->assertionSuffix()
+      $message ?: "Process output exact match failed for '%s'",
+      $message ?: "Process output does not contain '%s'",
+      $message ?: "Process output should not exactly match '%s'",
+      $message ?: "Process output contains '%s' but should not"
     );
   }
 
@@ -613,10 +613,10 @@ trait ProcessTrait {
     $this->assertStringContainsOrNot(
       $output,
       $expected,
-      $message ?: "Process error output exact match failed for '%s'" . $this->assertionSuffix(),
-      $message ?: "Process error output does not contain '%s'" . $this->assertionSuffix(),
-      $message ?: "Process error output should not exactly match '%s'" . $this->assertionSuffix(),
-      $message ?: "Process error output contains '%s' but should not" . $this->assertionSuffix()
+      $message ?: "Process error output exact match failed for '%s'",
+      $message ?: "Process error output does not contain '%s'",
+      $message ?: "Process error output should not exactly match '%s'",
+      $message ?: "Process error output contains '%s' but should not"
     );
   }
 
@@ -646,7 +646,7 @@ trait ProcessTrait {
           PHP_EOL,
           PHP_EOL,
           $output
-        ) . $this->assertionSuffix());
+        ));
       }
     }
   }
@@ -677,7 +677,7 @@ trait ProcessTrait {
           PHP_EOL,
           PHP_EOL,
           $output
-        ) . $this->assertionSuffix());
+        ));
       }
     }
   }
@@ -720,10 +720,10 @@ trait ProcessTrait {
     $this->assertStringContainsOrNot(
       $output,
       $expected,
-      $message ?: "Process output exact match failed for '%s'" . $this->assertionSuffix(),
-      $message ?: "Process output does not contain '%s'" . $this->assertionSuffix(),
-      $message ?: "Process output should not exactly match '%s'" . $this->assertionSuffix(),
-      $message ?: "Process output contains '%s' but should not" . $this->assertionSuffix()
+      $message ?: "Process output exact match failed for '%s'",
+      $message ?: "Process output does not contain '%s'",
+      $message ?: "Process output should not exactly match '%s'",
+      $message ?: "Process output contains '%s' but should not"
     );
   }
 
