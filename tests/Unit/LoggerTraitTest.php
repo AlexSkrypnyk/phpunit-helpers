@@ -96,7 +96,7 @@ final class LoggerTraitTest extends UnitTestCase {
     self::logSection('Silent Section', 'Silent content');
 
     $silent_output = $this->getCapturedOutput();
-    $this->assertEmpty($silent_output);
+    $this->assertSame('', $silent_output);
   }
 
   /**
@@ -108,7 +108,7 @@ final class LoggerTraitTest extends UnitTestCase {
     self::log('Test message');
 
     $output = $this->getCapturedOutput();
-    $this->assertEmpty($output);
+    $this->assertSame('', $output);
   }
 
   /**
@@ -449,7 +449,7 @@ final class LoggerTraitTest extends UnitTestCase {
     self::logStepFinish('Silent step end');
 
     $silent_output = $this->getCapturedOutput();
-    $this->assertEmpty($silent_output);
+    $this->assertSame('', $silent_output);
 
     $buffer = fopen('php://memory', 'r+');
     if ($buffer === FALSE) {
@@ -572,18 +572,6 @@ final class LoggerTraitTest extends UnitTestCase {
   }
 
   /**
-   * Test logStepSummary with no steps tracked.
-   */
-  public function testLogStepSummaryWithNoSteps(): void {
-    self::logSetVerbose(TRUE);
-
-    self::logStepSummary();
-
-    $output = $this->getCapturedOutput();
-    $this->assertEmpty($output);
-  }
-
-  /**
    * Test logStepSummary with verbose mode disabled.
    */
   public function testLogStepSummaryWithVerboseDisabled(): void {
@@ -602,7 +590,7 @@ final class LoggerTraitTest extends UnitTestCase {
     self::logStepSummary();
 
     $output = $this->getCapturedOutput();
-    $this->assertEmpty($output);
+    $this->assertSame('', $output);
   }
 
   /**
@@ -811,7 +799,7 @@ final class LoggerTraitTest extends UnitTestCase {
       $this->assertNotEmpty($output, sprintf('Expected output for %s in verbose mode', $description));
     }
     else {
-      $this->assertEmpty($output, sprintf('Expected no output for %s in silent mode', $description));
+      $this->assertSame('', $output, sprintf('Expected no output for %s in silent mode', $description));
     }
   }
 

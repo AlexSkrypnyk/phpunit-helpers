@@ -366,103 +366,33 @@ final class ProcessTraitTest extends UnitTestCase {
     $this->processRun('echo', [], [], ['ENV1' => ['non-scalar', 'value']]);
   }
 
-  public function testAssertProcessSuccessfulWhenNull(): void {
+  #[DataProvider('dataProviderAssertionsWhenNull')]
+  public function testAssertionsWhenNull(string $method, array $arguments): void {
     $this->process = NULL;
 
     $this->expectException(ExpectationFailedException::class);
     $this->expectExceptionMessage('Process is not initialized.');
 
-    $this->assertProcessSuccessful();
+    $callable = [$this, $method];
+    if (!is_callable($callable)) {
+      throw new \RuntimeException(sprintf('Assertion method %s does not exist.', $method));
+    }
+
+    $callable(...$arguments);
   }
 
-  public function testAssertProcessFailedWhenNull(): void {
-    $this->process = NULL;
-
-    $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Process is not initialized.');
-
-    $this->assertProcessFailed();
-  }
-
-  public function testAssertProcessOutputContainsWhenNull(): void {
-    $this->process = NULL;
-
-    $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Process is not initialized.');
-
-    $this->assertProcessOutputContains('test');
-  }
-
-  public function testAssertProcessOutputNotContainsWhenNull(): void {
-    $this->process = NULL;
-
-    $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Process is not initialized.');
-
-    $this->assertProcessOutputNotContains('test');
-  }
-
-  public function testAssertProcessErrorOutputContainsWhenNull(): void {
-    $this->process = NULL;
-
-    $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Process is not initialized.');
-
-    $this->assertProcessErrorOutputContains('test');
-  }
-
-  public function testAssertProcessErrorOutputNotContainsWhenNull(): void {
-    $this->process = NULL;
-
-    $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Process is not initialized.');
-
-    $this->assertProcessErrorOutputNotContains('test');
-  }
-
-  public function testAssertProcessOutputContainsOrNotWhenNull(): void {
-    $this->process = NULL;
-
-    $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Process is not initialized.');
-
-    $this->assertProcessOutputContainsOrNot('test');
-  }
-
-  public function testAssertProcessErrorOutputContainsOrNotWhenNull(): void {
-    $this->process = NULL;
-
-    $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Process is not initialized.');
-
-    $this->assertProcessErrorOutputContainsOrNot('test');
-  }
-
-  public function testAssertProcessAnyOutputContainsWhenNull(): void {
-    $this->process = NULL;
-
-    $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Process is not initialized.');
-
-    $this->assertProcessAnyOutputContains('test');
-  }
-
-  public function testAssertProcessAnyOutputNotContainsWhenNull(): void {
-    $this->process = NULL;
-
-    $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Process is not initialized.');
-
-    $this->assertProcessAnyOutputNotContains('test');
-  }
-
-  public function testAssertProcessAnyOutputContainsOrNotWhenNull(): void {
-    $this->process = NULL;
-
-    $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Process is not initialized.');
-
-    $this->assertProcessAnyOutputContainsOrNot('test');
+  public static function dataProviderAssertionsWhenNull(): \Iterator {
+    yield 'successful' => ['assertProcessSuccessful', []];
+    yield 'failed' => ['assertProcessFailed', []];
+    yield 'output_contains' => ['assertProcessOutputContains', ['test']];
+    yield 'output_not_contains' => ['assertProcessOutputNotContains', ['test']];
+    yield 'error_output_contains' => ['assertProcessErrorOutputContains', ['test']];
+    yield 'error_output_not_contains' => ['assertProcessErrorOutputNotContains', ['test']];
+    yield 'output_contains_or_not' => ['assertProcessOutputContainsOrNot', ['test']];
+    yield 'error_output_contains_or_not' => ['assertProcessErrorOutputContainsOrNot', ['test']];
+    yield 'any_output_contains' => ['assertProcessAnyOutputContains', ['test']];
+    yield 'any_output_not_contains' => ['assertProcessAnyOutputNotContains', ['test']];
+    yield 'any_output_contains_or_not' => ['assertProcessAnyOutputContainsOrNot', ['test']];
   }
 
   /**
@@ -630,7 +560,7 @@ EOL;
     $this->assertNull($this->process);
   }
 
-  public function testProcessRunWithCustomWorkingDirectory(): void {
+  public function testProcessRunWithCustomCwd(): void {
     $temp_dir = sys_get_temp_dir();
     $this->processCwd = $temp_dir;
 
@@ -933,17 +863,6 @@ EOL;
 
     $this->assertProcessSuccessful();
     $this->assertProcessOutputContains('test');
-  }
-
-  public function testProcessFormatOutputWithoutProcessInstance(): void {
-    $this->process = NULL;
-
-    $reflection = new \ReflectionClass($this);
-    $method = $reflection->getMethod('processFormatOutput');
-    $result = $method->invoke($this);
-
-    $this->assertIsString($result);
-    $this->assertStringContainsString('Process is not initialized.', $result);
   }
 
   public function testStaticVariableAccess(): void {

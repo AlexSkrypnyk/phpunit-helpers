@@ -630,7 +630,8 @@ class MyLoggerTest extends TestCase {
 - `logStepFinish(?string)` - End step tracking with elapsed time calculation
 - `logSubstep(string)` - Indented substep messages
 - `logNote(string)` - Indented note messages
-- `logStepSummary(?string, string)` - Hierarchical step summary table with configurable indentation
+- `logStepSummary(string)` - Hierarchical step summary table with configurable indentation
+- `logInfo()` - Step summary with a heading, used by `UnitTestCase::info()`
 - `logSetVerbose(bool)` - Control verbose mode
 - `logSetOutputStream(resource|null)` - Set custom output stream (defaults to STDERR)
 

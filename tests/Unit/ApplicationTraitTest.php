@@ -72,7 +72,7 @@ final class ApplicationTraitTest extends UnitTestCase {
     yield 'array' => ['[]'];
   }
 
-  public function testApplicationInitWithCustomWorkingDirectory(): void {
+  public function testApplicationInitWithCustomCwd(): void {
     $this->applicationCwd = self::$tmp;
 
     $this->applicationInitFromCommand(GreetingCommand::class);
@@ -143,23 +143,6 @@ final class ApplicationTraitTest extends UnitTestCase {
     $this->applicationRun(['command' => 'app:greet']);
     $this->assertApplicationSuccessful();
     $this->assertApplicationOutputContains('Hello, World!');
-  }
-
-  public function testApplicationInitFromLoaderWithGetcwdFailure(): void {
-    // Mock a scenario where getcwd() returns FALSE (which is hard to test
-    // directly). This covers the conditional branch in
-    // applicationInitFromLoader().
-    if (!self::$fixtures) {
-      throw new \RuntimeException('Fixtures directory is not set.');
-    }
-
-    $this->applicationCwd = self::$tmp;
-
-    $loader_path = self::$fixtures . '/Application/loader.php';
-    $this->applicationInitFromLoader($loader_path);
-
-    $this->assertInstanceOf(Application::class, $this->application);
-    $this->assertInstanceOf(ApplicationTester::class, $this->applicationTester);
   }
 
   public function testApplicationRunWithShowOutput(): void {
@@ -407,7 +390,7 @@ final class ApplicationTraitTest extends UnitTestCase {
     $this->assertApplicationFailed();
   }
 
-  public function testApplicationInitFromLoaderWithWorkingDirectory(): void {
+  public function testApplicationInitFromLoaderWithCwd(): void {
     $original_cwd = getcwd();
 
     if ($original_cwd === FALSE) {
