@@ -49,6 +49,8 @@ trait StringTrait {
    *   When prefix arguments are invalid (not single characters or not unique).
    * @throws \RuntimeException
    *   When prefix usage is inconsistent or values are empty after stripping.
+   * @throws \PHPUnit\Framework\AssertionFailedError
+   *   When an assertion on the haystack fails.
    */
   protected function assertStringContainsOrNot(
     string $haystack,
