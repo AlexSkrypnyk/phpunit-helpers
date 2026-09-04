@@ -252,21 +252,21 @@ final class ApplicationTraitTest extends UnitTestCase {
     ];
   }
 
-  public function testApplicationRunWithoutInit(): void {
+  public function testApplicationRunWhenNotInitialized(): void {
     $this->expectException(\RuntimeException::class);
     $this->expectExceptionMessage('Application is not initialized.');
 
     $this->applicationRun([]);
   }
 
-  public function testApplicationGetNotInitialized(): void {
+  public function testApplicationGetWhenNotInitialized(): void {
     $this->expectException(\RuntimeException::class);
     $this->expectExceptionMessage('Application is not initialized. Call applicationInit* first.');
 
     $this->applicationGet();
   }
 
-  public function testApplicationGetTesterNotInitialized(): void {
+  public function testApplicationGetTesterWhenNotInitialized(): void {
     $this->expectException(\RuntimeException::class);
     $this->expectExceptionMessage('Application tester is not initialized. Call applicationInit* first.');
 
@@ -463,15 +463,15 @@ final class ApplicationTraitTest extends UnitTestCase {
     $this->assertStringContainsString('Error:', $info);
   }
 
-  public function testApplicationInfoUninitializedApplication(): void {
+  public function testApplicationInfoWhenNotInitialized(): void {
     $this->applicationTester = NULL;
     $info = $this->applicationInfo();
 
     $this->assertStringContainsString('APPLICATION: Not initialized', $info);
   }
 
-  #[DataProvider('dataProviderAssertionsWhenNull')]
-  public function testAssertionsWhenNull(string $method, array $arguments): void {
+  #[DataProvider('dataProviderApplicationAssertionsWhenNotInitialized')]
+  public function testApplicationAssertionsWhenNotInitialized(string $method, array $arguments): void {
     $this->applicationTester = NULL;
 
     $this->expectException(ExpectationFailedException::class);
@@ -485,7 +485,7 @@ final class ApplicationTraitTest extends UnitTestCase {
     $callable(...$arguments);
   }
 
-  public static function dataProviderAssertionsWhenNull(): \Iterator {
+  public static function dataProviderApplicationAssertionsWhenNotInitialized(): \Iterator {
     yield 'successful' => ['assertApplicationSuccessful', []];
     yield 'failed' => ['assertApplicationFailed', []];
     yield 'output_contains' => ['assertApplicationOutputContains', ['test']];
@@ -708,7 +708,7 @@ final class ApplicationTraitTest extends UnitTestCase {
     ]);
   }
 
-  public function testApplicationOutputExactMatchWithMultipleLines(): void {
+  public function testApplicationOutputContainsOrNotExactMatchMultiline(): void {
     $command = new class() extends Command {
 
       protected function configure(): void {
