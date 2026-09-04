@@ -38,10 +38,6 @@ final class SerializableClosureTraitTest extends TestCase {
     $this->assertSame('test', $actual());
   }
 
-  public function fixtureCallable(): string {
-    return 'test';
-  }
-
   public function testCwCallable(): void {
     $actual = self::cw($this->fixtureCallable(...));
 
@@ -60,6 +56,10 @@ final class SerializableClosureTraitTest extends TestCase {
 
     $this->assertInstanceOf(\Closure::class, $actual);
     $this->assertSame('test', $actual());
+  }
+
+  public function fixtureCallable(): string {
+    return 'test';
   }
 
 }
