@@ -30,7 +30,7 @@ final class ProcessTraitArgumentsTest extends UnitTestCase {
   #[DataProvider('dataProviderArgumentPlacement')]
   public function testArgumentPlacement(string $suffix, array $arguments, array $expected): void {
     if (DIRECTORY_SEPARATOR === '\\') {
-      $this->markTestSkipped('Requires POSIX utilities');
+      $this->markTestSkipped('Requires POSIX utilities.');
     }
 
     if (!self::$fixtures) {

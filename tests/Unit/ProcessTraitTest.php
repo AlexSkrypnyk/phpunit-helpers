@@ -227,7 +227,7 @@ final class ProcessTraitTest extends UnitTestCase {
     $this->assertProcessAnyOutputNotContains('Standard Content');
   }
 
-  public function testProcessAnyOutputAssertionsShortcutMode(): void {
+  public function testProcessAnyOutputContainsOrNotShortcutMode(): void {
     $this->processRun('echo', ['Test Output']);
 
     $this->assertProcessSuccessful();
@@ -240,7 +240,7 @@ final class ProcessTraitTest extends UnitTestCase {
     ]);
   }
 
-  public function testProcessAnyOutputAssertionsInconsistentPrefixUsage(): void {
+  public function testProcessAnyOutputContainsOrNotInconsistentPrefixUsage(): void {
     $this->processRun('echo', ['Test Output']);
 
     $this->expectException(\RuntimeException::class);
@@ -252,7 +252,7 @@ final class ProcessTraitTest extends UnitTestCase {
     ]);
   }
 
-  public function testProcessErrorOutputAssertionsInconsistentPrefixUsage(): void {
+  public function testProcessErrorOutputContainsOrNotInconsistentPrefixUsage(): void {
     $this->processRun('sh', ['-c', 'echo "Test Error" 1>&2']);
 
     $this->expectException(\RuntimeException::class);
@@ -264,7 +264,7 @@ final class ProcessTraitTest extends UnitTestCase {
     ]);
   }
 
-  public function testProcessOutputAssertionsInconsistentPrefixUsage(): void {
+  public function testProcessOutputContainsOrNotInconsistentPrefixUsage(): void {
     $this->processRun('echo', ['Test Output']);
 
     $this->expectException(\RuntimeException::class);
@@ -276,7 +276,7 @@ final class ProcessTraitTest extends UnitTestCase {
     ]);
   }
 
-  public function testProcessOutputExactMatch(): void {
+  public function testProcessOutputContainsOrNotExactMatch(): void {
     $this->processRun('echo', ['Hello World']);
 
     $this->assertProcessSuccessful();
@@ -290,7 +290,7 @@ final class ProcessTraitTest extends UnitTestCase {
     ]);
   }
 
-  public function testProcessErrorOutputExactMatch(): void {
+  public function testProcessErrorOutputContainsOrNotExactMatch(): void {
     $this->processRun('sh', ['-c', 'echo "Error Message" 1>&2']);
 
     $this->assertProcessSuccessful();
@@ -304,7 +304,7 @@ final class ProcessTraitTest extends UnitTestCase {
     ]);
   }
 
-  public function testProcessAnyOutputExactMatch(): void {
+  public function testProcessAnyOutputContainsOrNotExactMatch(): void {
     $this->processRun('sh', ['-c', 'echo "Standard"; echo "Error" 1>&2']);
 
     $this->assertProcessSuccessful();
@@ -318,7 +318,7 @@ final class ProcessTraitTest extends UnitTestCase {
     ]);
   }
 
-  public function testProcessOutputExactMatchMultiline(): void {
+  public function testProcessOutputContainsOrNotExactMatchMultiline(): void {
     $this->processRun('sh', ['-c', 'echo "Line 1"; echo "Line 2"; echo "Line 3"']);
 
     $this->assertProcessSuccessful();
@@ -366,8 +366,8 @@ final class ProcessTraitTest extends UnitTestCase {
     $this->processRun('echo', [], [], ['ENV1' => ['non-scalar', 'value']]);
   }
 
-  #[DataProvider('dataProviderAssertionsWhenNull')]
-  public function testAssertionsWhenNull(string $method, array $arguments): void {
+  #[DataProvider('dataProviderProcessAssertionsWhenNotInitialized')]
+  public function testProcessAssertionsWhenNotInitialized(string $method, array $arguments): void {
     $this->process = NULL;
 
     $this->expectException(ExpectationFailedException::class);
@@ -381,7 +381,7 @@ final class ProcessTraitTest extends UnitTestCase {
     $callable(...$arguments);
   }
 
-  public static function dataProviderAssertionsWhenNull(): \Iterator {
+  public static function dataProviderProcessAssertionsWhenNotInitialized(): \Iterator {
     yield 'successful' => ['assertProcessSuccessful', []];
     yield 'failed' => ['assertProcessFailed', []];
     yield 'output_contains' => ['assertProcessOutputContains', ['test']];
@@ -410,30 +410,10 @@ final class ProcessTraitTest extends UnitTestCase {
 
     $command = self::$fixtures . '/shell-command-failing.sh';
 
-    $reflection = new \ReflectionClass($this);
-    $property = $reflection->getProperty('processStreamingOutput');
-    $property->setValue($this, TRUE);
+    $this->processStreamingOutput = TRUE;
 
-    // The callback logic is duplicated here rather than invoked, so the test
-    // can capture what would have been streamed.
     $captured_output = '';
-    $capture_callback = function ($type, $buffer) use (&$captured_output): void {
-      $prefix = $type === Process::ERR ? self::$processStreamingErrorOutputChars : self::$processStreamingStandardOutputChars;
-
-      $parts = preg_split('/(\r\n|\n|\r)/', $buffer, -1, PREG_SPLIT_DELIM_CAPTURE);
-      $count = is_array($parts) ? count($parts) : 0;
-
-      for ($i = 0; $i < $count; $i += 2) {
-        $line = $parts[$i] ?? '';
-        $eol = $parts[$i + 1] ?? '';
-
-        if ($line === '' && $eol === '') {
-          continue;
-        }
-
-        $captured_output .= $prefix . $line . $eol;
-      }
-    };
+    $capture_callback = $this->makeStreamingCaptureCallback($captured_output);
 
     // Built directly rather than through processRun() so the capture callback
     // can be passed to run().
@@ -483,9 +463,7 @@ EOL;
   public function testProcessFormatOutput(): void {
     $this->processRun('echo', ['Standard output text']);
 
-    $reflection = new \ReflectionClass($this);
-    $method = $reflection->getMethod('processFormatOutput');
-    $formatted_output = $method->invoke($this);
+    $formatted_output = self::callProtectedMethod($this, 'processFormatOutput');
     $this->assertIsString($formatted_output);
 
     $this->assertStringContainsString('EXIT CODE: 0', $formatted_output);
@@ -497,9 +475,7 @@ EOL;
   public function testProcessFormatOutputWithError(): void {
     $this->processRun('sh', ['-c', 'echo "Process stdout message"; echo "Process stderr message" >&2; exit 1']);
 
-    $reflection = new \ReflectionClass($this);
-    $method = $reflection->getMethod('processFormatOutput');
-    $formatted_output = $method->invoke($this);
+    $formatted_output = self::callProtectedMethod($this, 'processFormatOutput');
     $this->assertIsString($formatted_output);
 
     $this->assertStringContainsString('EXIT CODE: 1', $formatted_output);
@@ -514,9 +490,7 @@ EOL;
   public function testProcessFormatOutputWithEmptyOutput(): void {
     $this->processRun('true');
 
-    $reflection = new \ReflectionClass($this);
-    $method = $reflection->getMethod('processFormatOutput');
-    $formatted_output = $method->invoke($this);
+    $formatted_output = self::callProtectedMethod($this, 'processFormatOutput');
     $this->assertIsString($formatted_output);
 
     $this->assertStringContainsString('EXIT CODE: 0', $formatted_output);
@@ -586,34 +560,15 @@ EOL;
   public function testProcessFormatOutputWhenNotInitialized(): void {
     $this->process = NULL;
 
-    $reflection = new \ReflectionClass($this);
-    $method = $reflection->getMethod('processFormatOutput');
-    $formatted_output = $method->invoke($this);
+    $formatted_output = self::callProtectedMethod($this, 'processFormatOutput');
     $this->assertIsString($formatted_output);
 
     $this->assertStringContainsString('Process is not initialized.', $formatted_output);
   }
 
   public function testProcessStreamingCallbackWithEmptyBuffer(): void {
-    // The callback captures output instead of writing to STDOUT.
     $captured_output = '';
-    $test_callback = function ($type, $buffer) use (&$captured_output): void {
-      $prefix = $type === Process::ERR ? self::$processStreamingErrorOutputChars : self::$processStreamingStandardOutputChars;
-
-      $parts = preg_split('/(\r\n|\n|\r)/', $buffer, -1, PREG_SPLIT_DELIM_CAPTURE);
-      $count = is_array($parts) ? count($parts) : 0;
-
-      for ($i = 0; $i < $count; $i += 2) {
-        $line = $parts[$i] ?? '';
-        $eol = $parts[$i + 1] ?? '';
-
-        if ($line === '' && $eol === '') {
-          continue;
-        }
-
-        $captured_output .= $prefix . $line . $eol;
-      }
-    };
+    $test_callback = $this->makeStreamingCaptureCallback($captured_output);
 
     $test_callback(Process::OUT, '');
     $test_callback(Process::ERR, '');
@@ -622,32 +577,15 @@ EOL;
   }
 
   public function testProcessStreamingCallbackWithDifferentLineEndings(): void {
-    // The callback captures output instead of writing to STDOUT.
     $captured_output = '';
-    $test_callback = function ($type, $buffer) use (&$captured_output): void {
-      $prefix = $type === Process::ERR ? self::$processStreamingErrorOutputChars : self::$processStreamingStandardOutputChars;
-
-      $parts = preg_split('/(\r\n|\n|\r)/', $buffer, -1, PREG_SPLIT_DELIM_CAPTURE);
-      $count = is_array($parts) ? count($parts) : 0;
-
-      for ($i = 0; $i < $count; $i += 2) {
-        $line = $parts[$i] ?? '';
-        $eol = $parts[$i + 1] ?? '';
-
-        if ($line === '' && $eol === '') {
-          continue;
-        }
-
-        $captured_output .= $prefix . $line . $eol;
-      }
-    };
+    $test_callback = $this->makeStreamingCaptureCallback($captured_output);
 
     $test_inputs = [
       "line1\nline2\n",
       "line1\r\nline2\r\n",
       "line1\rline2\r",
-      "single line",
-      "",
+      'single line',
+      '',
     ];
 
     foreach ($test_inputs as $input) {
@@ -660,25 +598,8 @@ EOL;
   }
 
   public function testProcessStreamingCallbackWithErrorOutput(): void {
-    // The callback captures output instead of writing to STDOUT.
     $captured_output = '';
-    $test_callback = function ($type, $buffer) use (&$captured_output): void {
-      $prefix = $type === Process::ERR ? self::$processStreamingErrorOutputChars : self::$processStreamingStandardOutputChars;
-
-      $parts = preg_split('/(\r\n|\n|\r)/', $buffer, -1, PREG_SPLIT_DELIM_CAPTURE);
-      $count = is_array($parts) ? count($parts) : 0;
-
-      for ($i = 0; $i < $count; $i += 2) {
-        $line = $parts[$i] ?? '';
-        $eol = $parts[$i + 1] ?? '';
-
-        if ($line === '' && $eol === '') {
-          continue;
-        }
-
-        $captured_output .= $prefix . $line . $eol;
-      }
-    };
+    $test_callback = $this->makeStreamingCaptureCallback($captured_output);
 
     $test_callback(Process::ERR, "error message\n");
     $test_callback(Process::OUT, "standard message\n");
@@ -709,7 +630,7 @@ EOL;
 
   public function testProcessRunWithNonEmptyInputs(): void {
     if (DIRECTORY_SEPARATOR === '\\') {
-      $this->markTestSkipped('Requires POSIX utilities');
+      $this->markTestSkipped('Requires POSIX utilities.');
     }
 
     // Non-empty inputs trigger the implode path.
@@ -724,7 +645,7 @@ EOL;
   #[DataProvider('dataProviderProcessRunWithCommandString')]
   public function testProcessRunWithCommandString(string $command_string, array $additional_args, array $expected_output): void {
     if (DIRECTORY_SEPARATOR === '\\' && str_starts_with($command_string, 'printf')) {
-      $this->markTestSkipped('Requires POSIX utilities');
+      $this->markTestSkipped('Requires POSIX utilities.');
     }
 
     $this->processRun($command_string, $additional_args);
@@ -771,6 +692,46 @@ EOL;
       ['--author=John'],
       ['--author=John', '--message=Initial commit'],
     ];
+    yield 'array_arguments_form' => [
+      'echo',
+      ['hello', 'world'],
+      ['hello world'],
+    ];
+    yield 'multiword_command_string' => [
+      'echo test1 test2',
+      [],
+      ['test1 test2'],
+    ];
+    yield 'special_characters' => [
+      'echo "Hello! @#$%^&*()"',
+      [],
+      ['Hello! @#$%^&*()'],
+    ];
+    yield 'file_flags' => [
+      'echo -e "line1\\nline2"',
+      [],
+      ['line1'],
+    ];
+    yield 'parsed_then_explicit_arguments' => [
+      'echo parsed1 parsed2',
+      ['explicit1', 'explicit2'],
+      ['parsed1 parsed2 explicit1 explicit2'],
+    ];
+    yield 'flag_argument_order' => [
+      'echo --parsed-flag',
+      ['--explicit-flag'],
+      ['--parsed-flag --explicit-flag'],
+    ];
+    yield 'explicit_arguments_appended' => [
+      'echo default-arg1 default-arg2',
+      ['override-arg1', 'override-arg2'],
+      ['default-arg1 default-arg2 override-arg1 override-arg2'],
+    ];
+    yield 'end_of_options_with_explicit_args' => [
+      'echo command -- after-marker',
+      ['explicit'],
+      ['command explicit -- after-marker'],
+    ];
   }
 
   public function testProcessRunWithInvalidCommandString(): void {
@@ -801,63 +762,6 @@ EOL;
     $this->processRun('echo "unclosed quote');
   }
 
-  public function testProcessRunPreservesBackwardCompatibility(): void {
-    $this->processRun('echo', ['hello', 'world']);
-
-    $this->assertProcessSuccessful();
-    $this->assertProcessOutputContains('hello world');
-  }
-
-  public function testProcessRunCommandStringParsing(): void {
-    $this->processRun('echo test1 test2');
-
-    $this->assertProcessSuccessful();
-    $this->assertProcessOutputContains('test1 test2');
-  }
-
-  public function testProcessRunCommandStringWithSpecialCharacters(): void {
-    $this->processRun('echo "Hello! @#$%^&*()"');
-
-    $this->assertProcessSuccessful();
-    $this->assertProcessOutputContains('Hello! @#$%^&*()');
-  }
-
-  public function testProcessRunCommandStringWithFileFlags(): void {
-    $this->processRun('echo -e "line1\\nline2"');
-
-    $this->assertProcessSuccessful();
-    $this->assertProcessOutputContains('line1');
-  }
-
-  public function testProcessRunArgumentOverrideBehavior(): void {
-    $this->processRun('echo parsed1 parsed2', ['explicit1', 'explicit2']);
-
-    $this->assertProcessSuccessful();
-    $this->assertProcessOutputContains('parsed1 parsed2 explicit1 explicit2');
-  }
-
-  public function testProcessRunArgumentOrderWithFlags(): void {
-    $this->processRun('echo --parsed-flag', ['--explicit-flag']);
-
-    $this->assertProcessSuccessful();
-    $this->assertProcessOutputContains('--parsed-flag --explicit-flag');
-  }
-
-  public function testProcessRunExplicitArgumentsPrecedence(): void {
-    // Without an end-of-options marker, explicit arguments are appended.
-    $this->processRun('echo default-arg1 default-arg2', ['override-arg1', 'override-arg2']);
-
-    $this->assertProcessSuccessful();
-    $this->assertProcessOutputContains('default-arg1 default-arg2 override-arg1 override-arg2');
-  }
-
-  public function testProcessRunWithEndOfOptionsAndExplicitArgs(): void {
-    $this->processRun('echo command -- after-marker', ['explicit']);
-
-    $this->assertProcessSuccessful();
-    $this->assertProcessOutputContains('command explicit -- after-marker');
-  }
-
   public function testProcessRunWithIdleTimeout(): void {
     $this->processRun('echo', ['test'], [], [], 10, 5);
 
@@ -865,7 +769,7 @@ EOL;
     $this->assertProcessOutputContains('test');
   }
 
-  public function testStaticVariableAccess(): void {
+  public function testProcessStaticPropertyDefaults(): void {
     $this->assertSame('>> ', self::$processStreamingStandardOutputChars);
     $this->assertSame('XX ', self::$processStreamingErrorOutputChars);
     $this->assertStringContainsString('STANDARD OUTPUT', self::$processStandardOutputHeader);
@@ -876,15 +780,12 @@ EOL;
 
   #[DataProvider('dataProviderProcessParseCommand')]
   public function testProcessParseCommand(string $command, array $expected, ?string $exception_message = NULL): void {
-    $reflection = new \ReflectionClass($this);
-    $method = $reflection->getMethod('processParseCommand');
-
     if ($exception_message !== NULL) {
       $this->expectException(\InvalidArgumentException::class);
       $this->expectExceptionMessage($exception_message);
     }
 
-    $result = $method->invoke($this, $command);
+    $result = self::callProtectedMethod($this, 'processParseCommand', [$command]);
 
     if ($exception_message === NULL) {
       $this->assertSame($expected, $result);
@@ -1144,15 +1045,13 @@ EOL;
   }
 
   public function testProcessStreamingCallbackReturnsCallable(): void {
-    $reflection = new \ReflectionClass($this);
-    $method = $reflection->getMethod('processStreamingOutputCallback');
-    $callback = $method->invoke($this);
+    $callback = self::callProtectedMethod($this, 'processStreamingOutputCallback');
 
     $this->assertIsCallable($callback);
 
     // Empty strings avoid visible output.
-    $callback(Process::OUT, "");
-    $callback(Process::ERR, "");
+    $callback(Process::OUT, '');
+    $callback(Process::ERR, '');
   }
 
   #[DataProvider('dataProviderProcessStreamingOutputCallbackDimming')]
@@ -1197,39 +1096,6 @@ EOL;
     ];
   }
 
-  /**
-   * Runs a callback and returns what it wrote to STDOUT.
-   *
-   * @param callable $callback
-   *   The callback to run.
-   *
-   * @return string
-   *   Everything the callback wrote to STDOUT.
-   */
-  protected function captureStdout(callable $callback): string {
-    $name = 'phpunit_helpers_stream_capture';
-
-    if (!in_array($name, stream_get_filters(), TRUE)) {
-      stream_filter_register($name, StreamCaptureFilter::class);
-    }
-
-    StreamCaptureFilter::$captured = '';
-
-    $filter = stream_filter_append(STDOUT, $name, STREAM_FILTER_WRITE);
-    if ($filter === FALSE) {
-      throw new \RuntimeException('Unable to attach the capture filter to STDOUT.');
-    }
-
-    try {
-      $callback();
-    }
-    finally {
-      stream_filter_remove($filter);
-    }
-
-    return StreamCaptureFilter::$captured;
-  }
-
   public function testProcessRunWithZeroArguments(): void {
     $this->processRun('echo', []);
 
@@ -1250,7 +1116,7 @@ EOL;
 
   public function testProcessRunWithMixedScalarEnvironmentVariables(): void {
     if (DIRECTORY_SEPARATOR === '\\') {
-      $this->markTestSkipped('Requires POSIX utilities');
+      $this->markTestSkipped('Requires POSIX utilities.');
     }
 
     $this->processRun('printenv', [], [], [
@@ -1265,37 +1131,39 @@ EOL;
 
   public function testProcessRunWithEnvironmentVariableUnsetting(): void {
     if (DIRECTORY_SEPARATOR === '\\') {
-      $this->markTestSkipped('Requires POSIX utilities');
+      $this->markTestSkipped('Requires POSIX utilities.');
     }
 
     putenv('TEST_UNSET_VAR=initial_value');
-    $this->assertNotFalse(getenv('TEST_UNSET_VAR'));
 
-    // A FALSE value unsets the variable.
-    $this->processRun('printenv', [], [], [
-      'TEST_UNSET_VAR' => FALSE,
-      'TEST_KEEP_VAR' => 'keep_this',
-    ]);
+    try {
+      $this->assertNotFalse(getenv('TEST_UNSET_VAR'));
 
-    $this->assertProcessSuccessful();
+      // A FALSE value unsets the variable.
+      $this->processRun('printenv', [], [], [
+        'TEST_UNSET_VAR' => FALSE,
+        'TEST_KEEP_VAR' => 'keep_this',
+      ]);
 
-    $this->assertProcessOutputNotContains('TEST_UNSET_VAR=initial_value');
+      $this->assertProcessSuccessful();
 
-    $this->assertProcessOutputContains('TEST_KEEP_VAR=keep_this');
+      $this->assertProcessOutputNotContains('TEST_UNSET_VAR=initial_value');
 
-    putenv('TEST_UNSET_VAR');
+      $this->assertProcessOutputContains('TEST_KEEP_VAR=keep_this');
+    }
+    finally {
+      putenv('TEST_UNSET_VAR');
+    }
   }
 
   public function testProcessFormatOutputExitCodeDisplay(): void {
     if (DIRECTORY_SEPARATOR === '\\') {
-      $this->markTestSkipped('Requires POSIX utilities');
+      $this->markTestSkipped('Requires POSIX utilities.');
     }
 
     $this->processRun('sh', ['-c', 'exit 42']);
 
-    $reflection = new \ReflectionClass($this);
-    $method = $reflection->getMethod('processFormatOutput');
-    $formatted_output = $method->invoke($this);
+    $formatted_output = self::callProtectedMethod($this, 'processFormatOutput');
 
     $this->assertIsString($formatted_output);
     $this->assertStringContainsString('EXIT CODE: 42', $formatted_output);
@@ -1339,13 +1207,14 @@ EOL;
     $this->assertProcessFailed('Expected process to fail');
   }
 
-  public function testStreamingOutputWithDimmingEnabled(): void {
+  public function testProcessStreamingOutputWithDimmingEnabled(): void {
     $this->processStreamingOutput = TRUE;
     self::$processStreamingOutputShouldDim = TRUE;
 
-    $temp_file = tempnam(sys_get_temp_dir(), 'phpunit_stdout_test');
+    try {
+      $temp_file = tempnam(sys_get_temp_dir(), 'phpunit_stdout_test');
 
-    $test_script = sprintf('
+      $test_script = sprintf('
 <?php
 require_once "%s/vendor/autoload.php";
 use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\StreamCaptureFilter;
@@ -1365,27 +1234,30 @@ $test->enableStreamingWithDimming();
 $test->processRun("echo", ["test output"]);
 ', getcwd());
 
-    file_put_contents($temp_file . '.php', $test_script);
-    $output = shell_exec('php ' . escapeshellarg($temp_file . '.php'));
-    unlink($temp_file . '.php');
-    unlink($temp_file);
+      file_put_contents($temp_file . '.php', $test_script);
+      $output = shell_exec('php ' . escapeshellarg($temp_file . '.php'));
+      unlink($temp_file . '.php');
+      unlink($temp_file);
 
-    $this->assertNotNull($output);
-    $output = (string) $output;
-    $this->assertStringContainsString("\033[2m", $output, 'Should contain ANSI dim start code');
-    $this->assertStringContainsString("\033[22m", $output, 'Should contain ANSI dim end code');
-    $this->assertStringContainsString('test output', $output, 'Should contain actual text');
-
-    $this->processStreamingOutput = FALSE;
+      $this->assertNotNull($output);
+      $output = (string) $output;
+      $this->assertStringContainsString("\033[2m", $output, 'Should contain ANSI dim start code');
+      $this->assertStringContainsString("\033[22m", $output, 'Should contain ANSI dim end code');
+      $this->assertStringContainsString('test output', $output, 'Should contain actual text');
+    }
+    finally {
+      $this->processStreamingOutput = FALSE;
+    }
   }
 
-  public function testStreamingOutputWithDimmingDisabled(): void {
+  public function testProcessStreamingOutputWithDimmingDisabled(): void {
     $this->processStreamingOutput = TRUE;
     self::$processStreamingOutputShouldDim = FALSE;
 
-    $temp_file = tempnam(sys_get_temp_dir(), 'phpunit_stdout_test');
+    try {
+      $temp_file = tempnam(sys_get_temp_dir(), 'phpunit_stdout_test');
 
-    $test_script = sprintf('
+      $test_script = sprintf('
 <?php
 require_once "%s/vendor/autoload.php";
 use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\StreamCaptureFilter;
@@ -1405,67 +1277,118 @@ $test->enableStreamingWithoutDimming();
 $test->processRun("echo", ["test output"]);
 ', getcwd());
 
-    file_put_contents($temp_file . '.php', $test_script);
-    $output = shell_exec('php ' . escapeshellarg($temp_file . '.php'));
-    unlink($temp_file . '.php');
-    unlink($temp_file);
+      file_put_contents($temp_file . '.php', $test_script);
+      $output = shell_exec('php ' . escapeshellarg($temp_file . '.php'));
+      unlink($temp_file . '.php');
+      unlink($temp_file);
 
-    $this->assertNotNull($output);
-    $output = (string) $output;
-    $this->assertStringNotContainsString("\033[2m", $output, 'Should not contain ANSI dim start code');
-    $this->assertStringNotContainsString("\033[22m", $output, 'Should not contain ANSI dim end code');
-    $this->assertStringContainsString('test output', $output, 'Should contain actual text');
-
-    $this->processStreamingOutput = FALSE;
-    self::$processStreamingOutputShouldDim = TRUE;
+      $this->assertNotNull($output);
+      $output = (string) $output;
+      $this->assertStringNotContainsString("\033[2m", $output, 'Should not contain ANSI dim start code');
+      $this->assertStringNotContainsString("\033[22m", $output, 'Should not contain ANSI dim end code');
+      $this->assertStringContainsString('test output', $output, 'Should contain actual text');
+    }
+    finally {
+      $this->processStreamingOutput = FALSE;
+      self::$processStreamingOutputShouldDim = TRUE;
+    }
   }
 
-  public function testCustomFailureMessages(): void {
+  public function testAssertProcessOutputContainsWithCustomMessage(): void {
     $this->processRun('echo', ['test output']);
 
     $custom_message = 'This is a custom failure message';
 
-    $this->expectException(AssertionFailedError::class);
+    $this->expectException(ExpectationFailedException::class);
     $this->expectExceptionMessage($custom_message);
 
     $this->assertProcessOutputContains('nonexistent', $custom_message);
   }
 
-  #[DataProvider('dataProviderDim')]
-  public function testDim(string $text, string $eol, string $expected): void {
+  #[DataProvider('dataProviderProcessColorDim')]
+  public function testProcessColorDim(string $text, string $eol, string $expected): void {
     $this->assertSame($expected, self::processColorDim($text, $eol));
   }
 
-  public static function dataProviderDim(): \Iterator {
+  public static function dataProviderProcessColorDim(): \Iterator {
     yield 'empty' => [
       '',
       "\n",
       "\033[2m\033[22m",
     ];
-
     yield 'single_line' => [
       'test',
       "\n",
       "\033[2mtest\033[22m",
     ];
-
     yield 'multiple_lines' => [
       "one\ntwo",
       "\n",
       "\033[2mone\033[22m\n\033[2mtwo\033[22m",
     ];
-
     yield 'custom_eol' => [
       "one\r\ntwo",
       "\r\n",
       "\033[2mone\033[22m\r\n\033[2mtwo\033[22m",
     ];
-
     yield 'empty_eol_falls_back_to_newline' => [
       "one\ntwo",
       '',
       "\033[2mone\033[22m\n\033[2mtwo\033[22m",
     ];
+  }
+
+  /**
+   * Runs a callback and returns what it wrote to STDOUT.
+   *
+   * @param callable $callback
+   *   The callback to run.
+   *
+   * @return string
+   *   Everything the callback wrote to STDOUT.
+   */
+  protected function captureStdout(callable $callback): string {
+    $name = 'phpunit_helpers_stream_capture';
+
+    if (!in_array($name, stream_get_filters(), TRUE)) {
+      stream_filter_register($name, StreamCaptureFilter::class);
+    }
+
+    StreamCaptureFilter::$captured = '';
+
+    $filter = stream_filter_append(STDOUT, $name, STREAM_FILTER_WRITE);
+    if ($filter === FALSE) {
+      throw new \RuntimeException('Unable to attach the capture filter to STDOUT.');
+    }
+
+    try {
+      $callback();
+    }
+    finally {
+      stream_filter_remove($filter);
+    }
+
+    return StreamCaptureFilter::$captured;
+  }
+
+  protected function makeStreamingCaptureCallback(string &$captured_output): callable {
+    return function ($type, $buffer) use (&$captured_output): void {
+      $prefix = $type === Process::ERR ? self::$processStreamingErrorOutputChars : self::$processStreamingStandardOutputChars;
+
+      $parts = preg_split('/(\r\n|\n|\r)/', $buffer, -1, PREG_SPLIT_DELIM_CAPTURE);
+      $count = is_array($parts) ? count($parts) : 0;
+
+      for ($i = 0; $i < $count; $i += 2) {
+        $line = $parts[$i] ?? '';
+        $eol = $parts[$i + 1] ?? '';
+
+        if ($line === '' && $eol === '') {
+          continue;
+        }
+
+        $captured_output .= $prefix . $line . $eol;
+      }
+    };
   }
 
 }

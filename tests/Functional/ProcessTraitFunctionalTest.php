@@ -13,7 +13,7 @@ use PHPUnit\Framework\Attributes\CoversNothing;
 #[CoversNothing]
 final class ProcessTraitFunctionalTest extends UnitTestCase {
 
-  public function testProcessTraitStreamingWithDebugEnabled(): void {
+  public function testProcessStreamingWithDebugEnabled(): void {
     $output = $this->runPhpunit(TRUE);
     $combined = $output['combined'];
 
@@ -41,7 +41,6 @@ final class ProcessTraitFunctionalTest extends UnitTestCase {
     $this->assertStringContainsString('Failed stdout', (string) $combined);
     $this->assertStringContainsString('Failed stderr', (string) $combined);
 
-    // Process output headers and footers appear.
     $this->assertStringContainsString('⬇⬇⬇ STANDARD OUTPUT ⬇⬇⬇', (string) $combined);
     $this->assertStringContainsString('⬆⬆⬆ STANDARD OUTPUT ⬆⬆⬆', (string) $combined);
     $this->assertStringContainsString('▼▼▼ ERROR OUTPUT ▼▼▼', (string) $combined);
@@ -50,7 +49,7 @@ final class ProcessTraitFunctionalTest extends UnitTestCase {
     $this->assertStreamingTiming($output['real_time_output']);
   }
 
-  public function testProcessTraitStreamingWithDebugDisabled(): void {
+  public function testProcessStreamingWithDebugDisabled(): void {
     $output = $this->runPhpunit(FALSE);
     $combined = $output['combined'];
 
@@ -77,7 +76,6 @@ final class ProcessTraitFunctionalTest extends UnitTestCase {
     $this->assertStringContainsString('Failed stdout', (string) $combined);
     $this->assertStringContainsString('Failed stderr', (string) $combined);
 
-    // Process output headers and footers appear.
     $this->assertStringContainsString('⬇⬇⬇ STANDARD OUTPUT ⬇⬇⬇', (string) $combined);
     $this->assertStringContainsString('⬆⬆⬆ STANDARD OUTPUT ⬆⬆⬆', (string) $combined);
     $this->assertStringContainsString('▼▼▼ ERROR OUTPUT ▼▼▼', (string) $combined);
@@ -100,7 +98,7 @@ final class ProcessTraitFunctionalTest extends UnitTestCase {
     $process = proc_open($command, $descriptors, $pipes);
 
     if (!is_resource($process)) {
-      $this->fail('Failed to start PHPUnit process');
+      $this->fail('Failed to start PHPUnit process.');
     }
 
     fclose($pipes[0]);

@@ -214,8 +214,7 @@ trait ProcessTrait {
    * Handles quoted arguments and escaping properly. Supports both single
    * and double quotes. The end-of-options marker (--) is emitted as an
    * ordinary token: the parser draws no option/positional distinction, and
-   * the target program interprets the marker. processRun() places
-   * caller-supplied arguments before it.
+   * the target program interprets the marker.
    *
    * The parser deliberately allows backslash escaping inside single quotes
    * (e.g., 'It\'s working'). POSIX shells treat backslashes inside single
@@ -444,12 +443,12 @@ trait ProcessTrait {
     foreach ($expected as $value) {
       if (is_string($value)) {
         $this->assertStringContainsString($value, $output, $message ?: sprintf(
-            "Process output does not contain '%s'.%sOutput:%s%s",
-            $value,
-            PHP_EOL,
-            PHP_EOL,
-            $output
-          ) . $this->assertionSuffix());
+          "Process output does not contain '%s'.%sOutput:%s%s",
+          $value,
+          PHP_EOL,
+          PHP_EOL,
+          $output
+        ) . $this->assertionSuffix());
       }
     }
   }
@@ -471,12 +470,12 @@ trait ProcessTrait {
     foreach ($expected as $value) {
       if (is_string($value)) {
         $this->assertStringNotContainsString($value, $output, $message ?: sprintf(
-            "Process output contains '%s' but should not.%sOutput:%s%s",
-            $value,
-            PHP_EOL,
-            PHP_EOL,
-            $output
-          ) . $this->assertionSuffix());
+          "Process output contains '%s' but should not.%sOutput:%s%s",
+          $value,
+          PHP_EOL,
+          PHP_EOL,
+          $output
+        ) . $this->assertionSuffix());
       }
     }
   }
@@ -498,12 +497,12 @@ trait ProcessTrait {
     foreach ($expected as $value) {
       if (is_string($value)) {
         $this->assertStringContainsString($value, $output, $message ?: sprintf(
-            "Process error output does not contain '%s'.%sOutput:%s%s",
-            $value,
-            PHP_EOL,
-            PHP_EOL,
-            $output
-          ) . $this->assertionSuffix());
+          "Process error output does not contain '%s'.%sOutput:%s%s",
+          $value,
+          PHP_EOL,
+          PHP_EOL,
+          $output
+        ) . $this->assertionSuffix());
       }
     }
   }
@@ -525,12 +524,12 @@ trait ProcessTrait {
     foreach ($expected as $value) {
       if (is_string($value)) {
         $this->assertStringNotContainsString($value, $output, $message ?: sprintf(
-            "Process error output contains '%s' but should not.%sOutput:%s%s",
-            $value,
-            PHP_EOL,
-            PHP_EOL,
-            $output
-          ) . $this->assertionSuffix());
+          "Process error output contains '%s' but should not.%sOutput:%s%s",
+          $value,
+          PHP_EOL,
+          PHP_EOL,
+          $output
+        ) . $this->assertionSuffix());
       }
     }
   }
@@ -642,12 +641,12 @@ trait ProcessTrait {
     foreach ($expected as $value) {
       if (is_string($value)) {
         $this->assertStringContainsString($value, $output, $message ?: sprintf(
-            "Process output does not contain '%s'.%sOutput:%s%s",
-            $value,
-            PHP_EOL,
-            PHP_EOL,
-            $output
-          ) . $this->assertionSuffix());
+          "Process output does not contain '%s'.%sOutput:%s%s",
+          $value,
+          PHP_EOL,
+          PHP_EOL,
+          $output
+        ) . $this->assertionSuffix());
       }
     }
   }
@@ -673,12 +672,12 @@ trait ProcessTrait {
     foreach ($expected as $value) {
       if (is_string($value)) {
         $this->assertStringNotContainsString($value, $output, $message ?: sprintf(
-            "Process output contains '%s' but should not.%sOutput:%s%s",
-            $value,
-            PHP_EOL,
-            PHP_EOL,
-            $output
-          ) . $this->assertionSuffix());
+          "Process output contains '%s' but should not.%sOutput:%s%s",
+          $value,
+          PHP_EOL,
+          PHP_EOL,
+          $output
+        ) . $this->assertionSuffix());
       }
     }
   }

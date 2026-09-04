@@ -17,7 +17,6 @@ final class StringTraitTest extends UnitTestCase {
 
   #[DataProvider('dataProviderAssertStringContainsOrNot')]
   public function testAssertStringContainsOrNot(
-    string $name,
     string $haystack,
     array|string $expected,
     bool $case_insensitive,
@@ -66,7 +65,6 @@ final class StringTraitTest extends UnitTestCase {
 
   public static function dataProviderAssertStringContainsOrNot(): \Iterator {
     yield 'shortcut_mode_substring_matching' => [
-      'shortcut_mode_substring_matching',
       'This is a test string with some content',
       ['test', 'string', 'content'],
       TRUE,
@@ -76,7 +74,6 @@ final class StringTraitTest extends UnitTestCase {
       NULL,
     ];
     yield 'mixed_mode_all_prefixes' => [
-      'mixed_mode_all_prefixes',
       'apple pie banana split',
       ['* apple', '* pie', '! orange', '! cake'],
       TRUE,
@@ -86,7 +83,6 @@ final class StringTraitTest extends UnitTestCase {
       NULL,
     ];
     yield 'present_matching' => [
-      'present_matching',
       'apple pie and banana split',
       ['* apple', '* pie'],
       TRUE,
@@ -96,7 +92,6 @@ final class StringTraitTest extends UnitTestCase {
       NULL,
     ];
     yield 'absent_matching' => [
-      'absent_matching',
       'apple pie and banana split',
       ['- orange', '! cake'],
       TRUE,
@@ -106,7 +101,6 @@ final class StringTraitTest extends UnitTestCase {
       NULL,
     ];
     yield 'case_insensitive_matching' => [
-      'case_insensitive_matching',
       'Apple PIE and Banana SPLIT',
       ['* apple', '* pie', '! ORANGE'],
       TRUE,
@@ -116,7 +110,6 @@ final class StringTraitTest extends UnitTestCase {
       NULL,
     ];
     yield 'case_sensitive_matching' => [
-      'case_sensitive_matching',
       'Apple PIE and Banana SPLIT',
       ['* Apple', '* PIE', '! apple'],
       FALSE,
@@ -126,7 +119,6 @@ final class StringTraitTest extends UnitTestCase {
       NULL,
     ];
     yield 'single_string_input' => [
-      'single_string_input',
       'This is a test string',
       '* test',
       TRUE,
@@ -136,7 +128,6 @@ final class StringTraitTest extends UnitTestCase {
       NULL,
     ];
     yield 'empty_expected_array' => [
-      'empty_expected_array',
       'This is a test string',
       [],
       TRUE,
@@ -146,7 +137,6 @@ final class StringTraitTest extends UnitTestCase {
       NULL,
     ];
     yield 'complex_real_world_scenario' => [
-      'complex_real_world_scenario',
       'The quick brown fox jumps over the lazy dog. Error: file not found.',
       [
         '* quick',
@@ -165,7 +155,6 @@ final class StringTraitTest extends UnitTestCase {
       NULL,
     ];
     yield 'invalid_prefix_length' => [
-      'invalid_prefix_length',
       'test',
       ['* test'],
       TRUE,
@@ -175,7 +164,6 @@ final class StringTraitTest extends UnitTestCase {
       'All prefix arguments must be exactly one character long.',
     ];
     yield 'non_unique_prefixes' => [
-      'non_unique_prefixes',
       'test',
       ['* test'],
       TRUE,
@@ -185,7 +173,6 @@ final class StringTraitTest extends UnitTestCase {
       'All prefix arguments must be unique.',
     ];
     yield 'inconsistent_prefix_usage' => [
-      'inconsistent_prefix_usage',
       'test string',
       ['* test', 'string'],
       TRUE,
@@ -195,7 +182,6 @@ final class StringTraitTest extends UnitTestCase {
       'All strings must have valid prefixes in mixed mode. First invalid: "string"',
     ];
     yield 'empty_value_after_stripping_prefix' => [
-      'empty_value_after_stripping_prefix',
       'test',
       ['+ '],
       TRUE,
@@ -205,7 +191,6 @@ final class StringTraitTest extends UnitTestCase {
       'Value cannot be empty after stripping prefix: "+ "',
     ];
     yield 'present_failure' => [
-      'present_failure',
       'apple pie',
       ['* nonexistent'],
       TRUE,
@@ -215,7 +200,6 @@ final class StringTraitTest extends UnitTestCase {
       NULL,
     ];
     yield 'absent_failure' => [
-      'absent_failure',
       'apple pie banana',
       ['! apple'],
       TRUE,
@@ -225,7 +209,6 @@ final class StringTraitTest extends UnitTestCase {
       NULL,
     ];
     yield 'case_sensitive_exact_match_present' => [
-      'case_sensitive_exact_match_present',
       'Hello',
       ['+ Hello'],
       FALSE,
@@ -235,7 +218,6 @@ final class StringTraitTest extends UnitTestCase {
       NULL,
     ];
     yield 'case_sensitive_substring_present' => [
-      'case_sensitive_substring_present',
       'Hello World',
       ['* Hello'],
       FALSE,
@@ -245,7 +227,6 @@ final class StringTraitTest extends UnitTestCase {
       NULL,
     ];
     yield 'case_sensitive_exact_match_absent' => [
-      'case_sensitive_exact_match_absent',
       'Hello World',
       ['- hello'],
       FALSE,
@@ -255,7 +236,6 @@ final class StringTraitTest extends UnitTestCase {
       NULL,
     ];
     yield 'case_sensitive_substring_absent' => [
-      'case_sensitive_substring_absent',
       'Hello World',
       ['! goodbye'],
       FALSE,
@@ -265,7 +245,6 @@ final class StringTraitTest extends UnitTestCase {
       NULL,
     ];
     yield 'custom_messages_with_exact_match' => [
-      'custom_messages_with_exact_match',
       'test',
       ['+ test'],
       TRUE,
@@ -275,7 +254,6 @@ final class StringTraitTest extends UnitTestCase {
       NULL,
     ];
     yield 'empty_separator_mixed_mode_present_exact' => [
-      'empty_separator_mixed_mode_present_exact',
       'apple',
       ['+apple'],
       TRUE,
@@ -285,7 +263,6 @@ final class StringTraitTest extends UnitTestCase {
       NULL,
     ];
     yield 'empty_separator_mixed_mode_present_contains' => [
-      'empty_separator_mixed_mode_present_contains',
       'This contains apple and banana',
       ['*apple', '*banana'],
       TRUE,
@@ -295,7 +272,6 @@ final class StringTraitTest extends UnitTestCase {
       NULL,
     ];
     yield 'empty_separator_mixed_mode_absent_exact' => [
-      'empty_separator_mixed_mode_absent_exact',
       'apple',
       ['-orange'],
       TRUE,
@@ -305,7 +281,6 @@ final class StringTraitTest extends UnitTestCase {
       NULL,
     ];
     yield 'empty_separator_mixed_mode_absent_contains' => [
-      'empty_separator_mixed_mode_absent_contains',
       'This contains apple and banana',
       ['!orange', '!grape'],
       TRUE,
@@ -315,7 +290,6 @@ final class StringTraitTest extends UnitTestCase {
       NULL,
     ];
     yield 'empty_separator_inconsistent_prefix_usage' => [
-      'empty_separator_inconsistent_prefix_usage',
       'test string',
       ['*test', 'string'],
       TRUE,
@@ -325,7 +299,6 @@ final class StringTraitTest extends UnitTestCase {
       'All strings must have valid prefixes in mixed mode. First invalid: "string"',
     ];
     yield 'empty_separator_empty_value_after_stripping' => [
-      'empty_separator_empty_value_after_stripping',
       'test',
       ['+'],
       TRUE,

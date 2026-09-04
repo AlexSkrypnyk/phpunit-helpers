@@ -28,7 +28,7 @@ class ErrorOutputCommand extends Command {
       $error_output->writeln('Test Error');
     }
     else {
-      fwrite(STDERR, "Test Error" . PHP_EOL);
+      fwrite(STDERR, 'Test Error' . PHP_EOL);
     }
     $output->writeln('Output message');
 

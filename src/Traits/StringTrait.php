@@ -14,7 +14,7 @@ trait StringTrait {
   /**
    * Asserts string contains or does not contain expected values with prefixes.
    *
-   * Supports four single-character prefixes for precise matching control:
+   * Supports four single-character prefixes to control matching:
    * - '+' = exact match present
    * - '*' = substring present
    * - '-' = exact match absent
@@ -49,6 +49,8 @@ trait StringTrait {
    *   When prefix arguments are invalid (not single characters or not unique).
    * @throws \RuntimeException
    *   When prefix usage is inconsistent or values are empty after stripping.
+   * @throws \PHPUnit\Framework\AssertionFailedError
+   *   When an assertion on the haystack fails.
    */
   protected function assertStringContainsOrNot(
     string $haystack,

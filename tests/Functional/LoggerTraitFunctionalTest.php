@@ -22,7 +22,8 @@ final class LoggerTraitFunctionalTest extends UnitTestCase {
    */
   protected function setUp(): void {
     parent::setUp();
-    self::logSetVerbose(FALSE);
+    self::logSetOutputStream(NULL);
+    self::logSetVerbose(TRUE);
 
     $reflection_class = new \ReflectionClass(self::class);
     $steps_property = $reflection_class->getProperty('logSteps');
@@ -41,29 +42,19 @@ final class LoggerTraitFunctionalTest extends UnitTestCase {
   }
 
   /**
-   * Functional test: Demonstrate basic logging to STDERR.
-   *
-   * This test outputs to real STDERR to show what the logging looks like.
+   * Demonstrates basic logging to STDERR.
    */
   #[DoesNotPerformAssertions]
   public function testFunctionalBasicLogging(): void {
-    self::logSetOutputStream(NULL);
-    self::logSetVerbose(TRUE);
-
     self::log('This is a basic log message');
     self::logSection('TEST SECTION', 'This is a test section with content');
   }
 
   /**
-   * Functional test: Demonstrate step workflow to STDERR.
-   *
-   * This test shows a complete step workflow with timing.
+   * Demonstrates a complete step workflow with timing to STDERR.
    */
   #[DoesNotPerformAssertions]
   public function testFunctionalStepWorkflow(): void {
-    self::logSetOutputStream(NULL);
-    self::logSetVerbose(TRUE);
-
     self::logStepStart('Processing data');
     self::logSubstep('Loading configuration');
     self::logNote('Using default settings');
@@ -81,15 +72,10 @@ final class LoggerTraitFunctionalTest extends UnitTestCase {
   }
 
   /**
-   * Functional test: Demonstrate section formatting variations.
-   *
-   * This test shows different section formatting options.
+   * Demonstrates section formatting variations.
    */
   #[DoesNotPerformAssertions]
   public function testFunctionalSectionFormatting(): void {
-    self::logSetOutputStream(NULL);
-    self::logSetVerbose(TRUE);
-
     self::logSection('STANDARD SECTION', 'This is a standard section with single border');
     self::logSection('DOUBLE BORDER SECTION', 'This section uses double border characters', TRUE);
     self::logSection('WIDE SECTION', 'This section has a wider minimum width', FALSE, 90);
@@ -97,15 +83,10 @@ final class LoggerTraitFunctionalTest extends UnitTestCase {
   }
 
   /**
-   * Functional test: Demonstrate file logging to STDERR.
-   *
-   * This test shows file content logging.
+   * Demonstrates file content logging to STDERR.
    */
   #[DoesNotPerformAssertions]
   public function testFunctionalFileLogging(): void {
-    self::logSetOutputStream(NULL);
-    self::logSetVerbose(TRUE);
-
     $temp_file = tempnam(sys_get_temp_dir(), 'logger_functional_test');
     file_put_contents($temp_file, "Sample file content\nLine 2\nLine 3\n");
 
@@ -115,23 +96,15 @@ final class LoggerTraitFunctionalTest extends UnitTestCase {
   }
 
   /**
-   * Functional test: Demonstrate hierarchical step logging to STDERR.
-   *
-   * This test shows nested step workflows with hierarchy visualization.
+   * Demonstrates hierarchical step logging to STDERR.
    */
   #[DoesNotPerformAssertions]
   public function testFunctionalHierarchicalSteps(): void {
-    self::logSetOutputStream(NULL);
-    self::logSetVerbose(TRUE);
-
     $this->stepDeploymentProcess();
 
     self::logStepSummary('DEPLOYMENT SUMMARY');
   }
 
-  /**
-   * Main deployment process step.
-   */
   protected function stepDeploymentProcess(): void {
     self::logStepStart('Starting main deployment workflow');
     self::log('Initializing deployment environment');
@@ -147,9 +120,6 @@ final class LoggerTraitFunctionalTest extends UnitTestCase {
     self::logStepFinish('Main deployment process completed');
   }
 
-  /**
-   * Database migration step.
-   */
   protected function stepDatabaseMigration(): void {
     self::logStepStart('Preparing database migration');
     self::log('Connecting to production database');
@@ -177,9 +147,6 @@ final class LoggerTraitFunctionalTest extends UnitTestCase {
     self::logStepFinish('Database migration completed');
   }
 
-  /**
-   * Application deployment step.
-   */
   protected function stepApplicationDeployment(): void {
     self::logStepStart('Deploying application to production');
     self::logSection('APPLICATION SERVER', 'Preparing production deployment', TRUE);
@@ -194,9 +161,6 @@ final class LoggerTraitFunctionalTest extends UnitTestCase {
     self::logStepFinish('Application deployment finished');
   }
 
-  /**
-   * Asset compilation step (deeply nested).
-   */
   protected function stepAssetCompilation(): void {
     self::logStepStart('Compiling and optimizing assets');
     self::log('Initializing build environment');
@@ -227,9 +191,6 @@ final class LoggerTraitFunctionalTest extends UnitTestCase {
     self::logStepFinish('Asset compilation completed');
   }
 
-  /**
-   * Health checks step.
-   */
   protected function stepHealthChecks(): void {
     self::logStepStart('Running system health checks');
     self::logSection('POST-DEPLOYMENT VERIFICATION', 'Validating system functionality');

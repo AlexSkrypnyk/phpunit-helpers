@@ -103,12 +103,16 @@ final class EnvTraitTest extends TestCase {
   public function testEnvUnsetPrefixWithSystemEnv(): void {
     self::envReset();
     putenv('TEST_SYS_PREFIX_VAR=test_value');
-    $this->assertTrue(self::envIsSet('TEST_SYS_PREFIX_VAR'));
+    try {
+      $this->assertTrue(self::envIsSet('TEST_SYS_PREFIX_VAR'));
 
-    self::envUnsetPrefix('TEST_SYS_PREFIX_');
+      self::envUnsetPrefix('TEST_SYS_PREFIX_');
 
-    $this->assertFalse(self::envIsSet('TEST_SYS_PREFIX_VAR'));
-    putenv('TEST_SYS_PREFIX_VAR');
+      $this->assertFalse(self::envIsSet('TEST_SYS_PREFIX_VAR'));
+    }
+    finally {
+      putenv('TEST_SYS_PREFIX_VAR');
+    }
   }
 
   public function testEnvReset(): void {

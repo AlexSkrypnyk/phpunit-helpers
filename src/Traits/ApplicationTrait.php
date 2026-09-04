@@ -221,32 +221,22 @@ trait ApplicationTrait {
 
       if ($this->applicationTester->getStatusCode() !== 0) {
         // An expected failure keeps the application output; only an unexpected
-        // one is converted into a diagnostic by the catch blocks below.
+        // one is converted into a diagnostic by the catch block below.
         if (!$expect_fail) {
           throw new \Exception(sprintf("Application exited with non-zero code.\nThe output was:\n%s\nThe error output was:\n%s", $this->applicationTester->getDisplay(), $this->applicationTester->getErrorOutput()));
         }
       }
       // AssertionFailedError descends from \RuntimeException, so throwing it
       // here would be caught below. Record the outcome and throw after the
-      // catch blocks instead.
+      // catch block instead.
       elseif ($expect_fail) {
         $succeeded_unexpectedly = TRUE;
       }
     }
-    catch (\RuntimeException $exception) {
-      // Expected to succeed, but failed.
-      if (!$expect_fail) {
-        throw new AssertionFailedError('Application exited with an error:' . PHP_EOL . $exception->getMessage(), $exception->getCode(), $exception);
-      }
-      // Expected to fail, so capture the output.
-      $output = $exception->getMessage();
-    }
     catch (\Exception $exception) {
       if (!$expect_fail) {
-        // Expected to succeed, but failed.
         throw new AssertionFailedError('Application exited with an error:' . PHP_EOL . $exception->getMessage(), $exception->getCode(), $exception);
       }
-      // Expected to fail, so capture the output.
       $output = $exception->getMessage();
     }
 
@@ -500,7 +490,8 @@ trait ApplicationTrait {
    */
   public function assertApplicationAnyOutputContains(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized.');
-    $output = $this->applicationTester->getDisplay() . $this->applicationTester->getErrorOutput();
+    $output = $this->applicationTester->getDisplay();
+    $output .= $this->applicationTester->getErrorOutput();
 
     $expected = is_array($expected) ? $expected : [$expected];
 
@@ -527,7 +518,8 @@ trait ApplicationTrait {
    */
   public function assertApplicationAnyOutputNotContains(array|string $expected, ?string $message = NULL): void {
     $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized.');
-    $output = $this->applicationTester->getDisplay() . $this->applicationTester->getErrorOutput();
+    $output = $this->applicationTester->getDisplay();
+    $output .= $this->applicationTester->getErrorOutput();
 
     $expected = is_array($expected) ? $expected : [$expected];
 
