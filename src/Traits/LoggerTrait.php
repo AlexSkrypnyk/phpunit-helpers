@@ -81,7 +81,7 @@ trait LoggerTrait {
    *   The output stream resource (STDERR if not set).
    */
   protected static function logGetOutputStream() {
-    return static::$logOutputStream ?: STDERR;
+    return static::$logOutputStream ?? STDERR;
   }
 
   /**
