@@ -1,6 +1,6 @@
 <p align="center">
-  <a href="" rel="noopener">
-  <img width=200px height=200px src="https://placehold.jp/000000/ffffff/200x200.png?text=PHPUnit+Helpers&css=%7B%22border-radius%22%3A%22%20100px%22%7D" alt="PHPUnit Helpers logo"></a>
+  <a href="https://github.com/AlexSkrypnyk/phpunit-helpers" rel="noopener">
+  <img width=200px height=200px src="logo.png" alt="PHPUnit Helpers logo"></a>
 </p>
 
 <h1 align="center">Helpers to work with PHPUnit</h1>
@@ -19,62 +19,75 @@
 
 ---
 
-## Features
+## 🧩 Features
 
 | Name                                                    | Source                                         | Description                                                        |
 |---------------------------------------------------------|------------------------------------------------|--------------------------------------------------------------------|
-| [`UnitTestCase`](#UnitTestCase)                         | [src](src/UnitTestCase.php)                    | Base test class that includes essential traits for PHPUnit testing |
+| [`UnitTestCase`](#unittestcase)                         | [src](src/UnitTestCase.php)                    | Base test class that includes essential traits for PHPUnit testing |
 | [`AssertArrayTrait`](#assertarraytrait)                 | [src](src/Traits/AssertArrayTrait.php)         | Custom assertions for arrays                                       |
 | [`ApplicationTrait`](#applicationtrait)                 | [src](src/Traits/ApplicationTrait.php)         | Test Symfony Console applications with assertions                  |
 | [`EnvTrait`](#envtrait)                                 | [src](src/Traits/EnvTrait.php)                 | Manage environment variables during tests                          |
 | [`LocationsTrait`](#locationstrait)                     | [src](src/Traits/LocationsTrait.php)           | Manage file system locations and directories for tests             |
 | [`ProcessTrait`](#processtrait)                         | [src](src/Traits/ProcessTrait.php)             | Run and assert on command line processes during tests              |
-| [`ReflectionTrait`](#reflectiontrait)                   | [src](src/Traits/ReflectionTrait.php)          | Access protected/private methods and properties                    |
 | [`SerializableClosureTrait`](#serializableclosuretrait) | [src](src/Traits/SerializableClosureTrait.php) | Make closures serializable for use in data providers               |
-| [`StringTrait`](#stringtrait)                           | [src](src/Traits/StringTrait.php)              | Advanced string assertions with exact/substring matching           |
+| [`ReflectionTrait`](#reflectiontrait)                   | [src](src/Traits/ReflectionTrait.php)          | Access protected and private methods and properties                |
 | [`TuiTrait`](#tuitrait)                                 | [src](src/Traits/TuiTrait.php)                 | Interact with and test Textual User Interfaces                     |
-| [`LoggerTrait`](#loggertrait)                           | [src](src/Traits/LoggerTrait.php)              | Comprehensive hierarchical logging system for test debugging       |
+| [`StringTrait`](#stringtrait)                           | [src](src/Traits/StringTrait.php)              | String assertions with exact and substring matching                |
+| [`LoggerTrait`](#loggertrait)                           | [src](src/Traits/LoggerTrait.php)              | Hierarchical logging with step tracking for test debugging         |
 
-## Installation
+## 📋 Requirements
+
+- PHP 8.3 or newer
+- PHPUnit 12.5.24 or newer, or PHPUnit 13
+
+Two traits need a package that this library does not require itself, so add it to your own project when you use them:
+
+| Trait                      | Additional package                |
+|----------------------------|-----------------------------------|
+| `ApplicationTrait`         | `symfony/console`                 |
+| `SerializableClosureTrait` | `laravel/serializable-closure`    |
+
+## 📦 Installation
 
     composer require --dev alexskrypnyk/phpunit-helpers
 
-## Usage
+## 🚀 Usage
 
-This package provides a collection of traits that can be used in your PHPUnit
-tests to make testing easier. Below is a description of each trait and how to
-use it.
+This package provides a collection of traits that can be used in your PHPUnit tests to make testing easier. Below is a description of each trait and how to use it.
 
 ### `UnitTestCase`
 
-The `UnitTestCase` class is the base class for unit tests. It includes the
-`ReflectionTrait` and `LocationsTrait` to provide useful methods for testing.
+The `UnitTestCase` class is the base class for unit tests. It includes the `ReflectionTrait` and `LocationsTrait` to provide useful methods for testing.
 
-The class also provides an `info()` method that collects additional information
-about the test from methods that end with 'Info'. Methods containing "test" in
-their name are automatically excluded from info collection to avoid conflicts
-with test methods.
+`setUp()` initialises the test locations and `tearDown()` removes the workspace directory again. The workspace is kept when the test failed or errored, or when debug mode is on, so the produced files can be inspected.
+
+The class also provides an `info()` method that collects additional information about the test from methods whose name ends with `Info`. Methods containing `test` in their name are excluded to avoid conflicts with test methods. The collected information is also appended to the message of any failing assertion, so a failure report carries the test's context without any extra call.
 
 ```php
 use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
 
 class MyTest extends UnitTestCase {
-  public function testExample() {
-    // Test implementation that benefits from included traits.
-    echo $this->info(); // Displays information from *Info methods
+
+  public function testExample(): void {
+    // Test implementation that benefits from the included traits.
+    echo $this->info();
   }
-  
+
   public static function environmentInfo(): string {
     return 'Environment: ' . getenv('APP_ENV');
   }
-  
+
   public function testFixtureInfo(): string {
-    // This method will be excluded from info() output
-    // because it contains "test" in the method name
+    // Excluded from info() because the name contains "test".
     return 'This will not appear in info()';
   }
+
 }
 ```
+
+Debug mode is enabled by the `DEBUG` environment variable or the `--debug` argument, and is readable with `UnitTestCase::isDebug()`:
+
+    DEBUG=1 vendor/bin/phpunit
 
 ### `AssertArrayTrait`
 
@@ -85,17 +98,32 @@ use AlexSkrypnyk\PhpunitHelpers\Traits\AssertArrayTrait;
 use PHPUnit\Framework\TestCase;
 
 class MyAssertArrayTest extends TestCase {
+
   use AssertArrayTrait;
 
-  public function testCustomAssertions() {
+  public function testCustomAssertions(): void {
     $array = ['This is a test', 'Another value'];
 
-    // Assert that a string is present in an array.
+    // Assert that a string is present in one of the array values.
     $this->assertArrayContainsString('test', $array);
-    
-    // Assert with custom failure message.
-    $this->assertArrayContainsString('test', $array, 'Custom message: test string not found');
+
+    // Assert with a custom failure message.
+    $this->assertArrayContainsString('test', $array, 'Not found');
+
+    // Assert that a string is absent from all array values.
+    $this->assertArrayNotContainsString('missing', $array);
+
+    // Assert that an array contains all elements of a sub-array.
+    // Nested arrays are searched recursively.
+    $this->assertArrayContainsArray(
+      ['a', 'b', ['c', 'd']],
+      ['a', ['c', 'd']]
+    );
+
+    // Assert that an array contains none of the sub-array elements.
+    $this->assertArrayNotContainsArray(['a', 'b'], ['z']);
   }
+
 }
 ```
 
@@ -108,115 +136,118 @@ use AlexSkrypnyk\PhpunitHelpers\Traits\ApplicationTrait;
 use PHPUnit\Framework\TestCase;
 
 class MyApplicationTest extends TestCase {
+
   use ApplicationTrait;
 
   protected function setUp(): void {
-    // Configure application behavior
-    $this->applicationCwd = NULL; // Current working directory (NULL for current PHP process dir)
-    $this->applicationShowOutput = FALSE; // Whether to show output during execution
+    // Working directory, NULL for the current PHP process directory.
+    $this->applicationCwd = NULL;
+    // Whether to show the output during execution.
+    $this->applicationShowOutput = FALSE;
   }
 
   protected function tearDown(): void {
-    // Clean up application resources
     $this->applicationTearDown();
   }
 
-  public function testConsoleApplication() {
-    // Initialize application from a loader file
+  public function testConsoleApplication(): void {
+    // Initialize the application from a loader file that returns an
+    // Application instance.
     $this->applicationInitFromLoader('/path/to/application_loader.php');
 
-    // Or initialize from a command class
-    $this->applicationInitFromCommand(MyCommand::class, TRUE); // TRUE for making it the default command
+    // Or initialize it from a command class or object. The second
+    // argument makes it the single default command.
+    $this->applicationInitFromCommand(MyCommand::class, TRUE);
 
-    // Run the application with input arguments and options
+    // Both initializers return the ApplicationTester. The application
+    // and the tester are also available on demand.
+    $application = $this->applicationGet();
+    $tester = $this->applicationGetTester();
+
+    // Run the application with input arguments and options.
     $output = $this->applicationRun(
-      ['argument1', '--option1=value1'],  // Input arguments and options
-      ['capture_stderr_separately' => TRUE], // Application tester options
-      FALSE // Whether a failure is expected (default: FALSE)
+      // Input arguments and options.
+      ['argument1', '--option1=value1'],
+      // Application tester options.
+      ['capture_stderr_separately' => TRUE],
+      // Whether a failure is expected. Defaults to FALSE.
+      FALSE
     );
 
-    // Assert that the application executed successfully
+    // Assert on the exit code.
     $this->assertApplicationSuccessful();
-
-    // Or assert that the application failed
     $this->assertApplicationFailed();
 
-    // Assert that the application output contains string(s)
+    // Assert that the output contains string(s).
     $this->assertApplicationOutputContains('Expected output');
-    $this->assertApplicationOutputContains(['String1', 'String2']); // Can check multiple strings
-    
-    // Assert with custom failure message
-    $this->assertApplicationOutputContains('Expected output', 'Custom message: Expected output not found');
+    $this->assertApplicationOutputContains(['String1', 'String2']);
+    $this->assertApplicationOutputContains('Expected', 'Not found');
 
-    // Assert that the application output does not contain string(s)
+    // Assert that the output does not contain string(s).
     $this->assertApplicationOutputNotContains('Unexpected output');
 
-    // Assert that the application error output contains string(s)
+    // The same assertions are available for the error output.
     $this->assertApplicationErrorOutputContains('Expected error');
-
-    // Assert that the application error output does not contain string(s)
     $this->assertApplicationErrorOutputNotContains('Unexpected error');
 
-    // Assert in one call using four single-character prefixes:
-    // '+' = exact match present, '*' = substring present
-    // '-' = exact match absent,  '!' = substring absent
-    
-    // Shortcut mode: no prefixes means all strings should be present as substrings
+    // And for the standard and error output combined.
+    $this->assertApplicationAnyOutputContains('In either output');
+    $this->assertApplicationAnyOutputNotContains('In neither output');
+
+    // Assert several conditions in one call using prefixes. See the
+    // StringTrait section for the full prefix reference.
+    // Shortcut mode: no prefixes, all must be present as substrings.
     $this->assertApplicationOutputContainsOrNot(['Expected', 'Output']);
-    
-    // Mixed mode: if any string has prefix, ALL must have prefixes
-    $this->assertApplicationOutputContainsOrNot(['* Expected', '! Unexpected']);
-    $this->assertApplicationErrorOutputContainsOrNot(['* Expected error', '! Unexpected error']);
 
-    // Assert against combined output (standard + error)
-    $this->assertApplicationAnyOutputContains('Expected in either output');
-    $this->assertApplicationAnyOutputNotContains('Should not be in any output');
-
-    // Assert that combined output (standard + error) contains or does not contain string(s)
-    // Shortcut mode (no prefixes)
-    $this->assertApplicationAnyOutputContainsOrNot(['Expected', 'in either output']);
-
-    // Mixed mode with prefixes
-    $this->assertApplicationAnyOutputContainsOrNot([
-      '* Expected in either output',
-      '! Should not be in any output',
-    ]);
-
-    // Exact match examples
+    // Mixed mode: if any string has a prefix, all of them must.
     $this->assertApplicationOutputContainsOrNot([
-      '+ Exact output match',  // Output must equal this exactly
-      '- Not exact match',      // Output must not equal this exactly
+      // Present as a substring.
+      '* Expected',
+      // Absent as a substring.
+      '! Unexpected',
+    ]);
+    $this->assertApplicationErrorOutputContainsOrNot(['* Error']);
+    $this->assertApplicationAnyOutputContainsOrNot(['* Either', '! No']);
+
+    // '+' and '-' compare against the whole trimmed output, so they
+    // only make sense for a single-line output.
+    $this->assertApplicationOutputContainsOrNot([
+      // The whole output must equal this.
+      '+ Hello, World!',
     ]);
 
-    // Get debug info about the application (output, error output)
+    // Get debug info about the application (output, error output).
     echo $this->applicationInfo();
   }
+
 }
 ```
 
 ### `EnvTrait`
 
-The `EnvTrait` helps manage environment variables during tests.
+The `EnvTrait` helps manage environment variables during tests. Every method is static, so it is also usable from data providers.
 
 ```php
 use AlexSkrypnyk\PhpunitHelpers\Traits\EnvTrait;
 use PHPUnit\Framework\TestCase;
 
 class MyEnvTest extends TestCase {
+
   use EnvTrait;
 
-  public function testEnvironmentVariables() {
+  public function testEnvironmentVariables(): void {
     // Set an environment variable.
     self::envSet('MY_VAR', 'value');
 
     // Set multiple environment variables.
     self::envSetMultiple(['VAR1' => 'value1', 'VAR2' => 'value2']);
 
-    // Get an environment variable.
+    // Get an environment variable. Returns FALSE when it is not set.
     $value = self::envGet('MY_VAR');
 
-    // Check if an environment variable is set.
-    $isSet = self::envIsSet('MY_VAR');
+    // Check whether an environment variable is set.
+    $is_set = self::envIsSet('MY_VAR');
+    $is_unset = self::envIsUnset('MY_VAR');
 
     // Unset an environment variable.
     self::envUnset('MY_VAR');
@@ -224,157 +255,202 @@ class MyEnvTest extends TestCase {
     // Unset multiple environment variables.
     self::envUnsetMultiple(['VAR1', 'VAR2']);
 
-    // Unset all environment variables with a specific prefix.
+    // Unset every environment variable with a given prefix.
     self::envUnsetPrefix('MY_');
 
-    // Reset all environment variables.
+    // Set environment variables from an input array. Matching entries
+    // are removed from the input array unless the third argument is
+    // FALSE.
+    $input = ['MY_VAR' => 'value', 'other' => 'kept'];
+    self::envFromInput($input, 'MY_');
+
+    // Unset every variable that was set through this trait.
     self::envReset();
   }
+
 }
 ```
 
 ### `LocationsTrait`
 
-The `LocationsTrait` provides methods to manage file system locations during
-tests. It maintains a set of predefined directories as static properties.
+The `LocationsTrait` provides methods to manage file system locations during tests. It maintains a set of predefined directories as static properties, so they are also reachable from data providers.
 
 ```php
 use AlexSkrypnyk\PhpunitHelpers\Traits\LocationsTrait;
 use PHPUnit\Framework\TestCase;
 
 class MyLocationsTest extends TestCase {
+
   use LocationsTrait;
 
   protected function setUp(): void {
-    // Initialize test directories.
-    self::locationsInit();
+    // Create the test directories.
+    $this->locationsInit();
 
-    // Now you can use the predefined directory properties:
-    echo self::$root;      // Root directory of the project
-    echo self::$fixtures;  // Path to fixtures directory
-    echo self::$workspace; // Main workspace directory for test run
-    echo self::$repo;      // Source directory for operations
-    echo self::$sut;       // System Under Test directory where tests run
-    echo self::$tmp;       // Temporary files directory
+    // Root directory of the project.
+    echo self::$root;
+    // Fixtures directory, or NULL when it does not exist.
+    echo self::$fixtures;
+    // Workspace directory holding the assets of a single test run.
+    echo self::$workspace;
+    // Source directory for operations.
+    echo self::$repo;
+    // System Under Test directory where the test runs.
+    echo self::$sut;
+    // Temporary files directory.
+    echo self::$tmp;
 
-    // You can also print all locations with:
+    // The same paths are available through accessors.
+    echo self::locationsRoot();
+    echo self::locationsFixtures();
+    echo self::locationsWorkspace();
+    echo self::locationsRepo();
+    echo self::locationsSut();
+    echo self::locationsTmp();
+
+    // Print all locations at once.
     echo self::locationsInfo();
   }
 
   protected function tearDown(): void {
-    // Clean up test directories.
-    self::locationsTearDown();
+    // Remove the workspace directory and everything below it.
+    $this->locationsTearDown();
   }
 
-  public function testFileOperations() {
-    // Get a specific fixtures directory path.
-    $fixturesDir = self::locationsFixtureDir('my-fixture');
+  /**
+   * Override to point at a different fixtures directory.
+   *
+   * Defaults to 'tests/Fixtures', relative to the repository root.
+   */
+  public static function locationsFixturesDir(): string {
+    return 'tests/Fixtures';
+  }
 
-    // Copy files to the SUT directory.
+  public function testFileOperations(): void {
+    // Get a named fixtures directory, creating it if needed.
+    $fixtures_dir = $this->locationsFixtureDir('my-fixture');
+
+    // Without a name, the directory is derived from the test name, and
+    // a named data set adds a further subdirectory. The data set named
+    // 'baseline' maps to the '_baseline' directory.
+    $fixtures_dir = $this->locationsFixtureDir();
+
+    // Copy files into the SUT directory. A random numeric suffix is
+    // appended to each name, so the created paths are returned rather
+    // than derived.
     $files = self::locationsCopyFilesToSut(['file1.txt', 'file2.txt']);
+    $this->assertFileExists($files[0]);
 
-    // Files will be available in self::$sut directory
-    $this->assertFileExists(self::$sut . '/file1.txt1234'); // Note: random suffix added by default
+    // Pass FALSE as the third argument to keep the original names.
+    $files = self::locationsCopyFilesToSut(['file1.txt'], NULL, FALSE);
+    $this->assertFileExists(self::$sut . '/file1.txt');
+
+    // Copy between arbitrary directories. '.git', 'node_modules' and
+    // 'vendor' are always excluded.
+    $created = self::locationsCopy(self::$repo, self::$sut);
+
+    // Create a directory if needed and return its real path.
+    $path = self::locationsMkdir(self::$tmp . '/nested');
+
+    // Resolve a real path, throwing when it does not exist.
+    $real = self::locationsRealpath($path);
   }
+
 }
 ```
 
 ### `ProcessTrait`
 
-The `ProcessTrait` provides methods to run command line processes and assert on
-their output and exit codes. It integrates with the Symfony Process component
-for
-safe and controlled command execution.
+The `ProcessTrait` provides methods to run command line processes and assert on their output and exit codes. It integrates with the Symfony Process component for safe and controlled command execution.
 
 ```php
 use AlexSkrypnyk\PhpunitHelpers\Traits\ProcessTrait;
 use PHPUnit\Framework\TestCase;
 
 class MyProcessTest extends TestCase {
+
   use ProcessTrait;
 
   protected function setUp(): void {
-    // Configure process behavior.
-    $this->processCwd = NULL; // Current working directory (NULL for current PHP process dir).
-    $this->processStreamingOutput = FALSE; // Whether to stream an output during process execution.
+    // Working directory, NULL for the current PHP process directory.
+    $this->processCwd = NULL;
+    // Whether to stream the output while the process runs.
+    $this->processStreamingOutput = FALSE;
   }
 
   protected function tearDown(): void {
-    // Stop any running processes.
+    // Stop the process if it is still running.
     $this->processTearDown();
   }
 
-  public function testCommandExecution() {
-    // Run a command with arguments, inputs, environment variables, and timeouts.
-    // The method validates command safety and ensures all arguments are scalar values.
+  public function testCommandExecution(): void {
+    // Run a command with arguments, inputs, environment variables and
+    // timeouts. The command name is validated, and every argument must
+    // be scalar. An environment variable set to FALSE is removed from
+    // the inherited environment.
     $process = $this->processRun(
-      'echo',                        // Command to execute
-      ['Hello', 'World'],            // Command arguments
-      ['Input1', 'Input2'],          // Interactive process inputs
-      ['ENV_VAR' => 'value'],        // Environment variables
-      60,                            // Process timeout in seconds
-      30                             // Process idle timeout in seconds
+      // Command to execute, optionally with arguments.
+      'echo',
+      // Additional command arguments.
+      ['Hello', 'World'],
+      // Inputs for an interactive process.
+      ['Input1', 'Input2'],
+      // Additional environment variables.
+      ['ENV_VAR' => 'value'],
+      // Process timeout in seconds.
+      60,
+      // Process idle timeout in seconds.
+      30
     );
 
-    // Assert that the process executed successfully.
-    $this->assertProcessSuccessful();
+    // The most recent process is also available on demand.
+    $process = $this->processGet();
 
-    // Assert that the process failed.
+    // Assert on the exit code.
+    $this->assertProcessSuccessful();
     $this->assertProcessFailed();
 
-    // Assert that the process output contains string(s).
+    // Assert that the output contains string(s).
     $this->assertProcessOutputContains('Hello World');
-    $this->assertProcessOutputContains(['Hello', 'World']); // Can check for multiple strings
-    
-    // Assert with custom failure message.
-    $this->assertProcessOutputContains('Hello World', 'Custom message: Expected output not found');
+    $this->assertProcessOutputContains(['Hello', 'World']);
+    $this->assertProcessOutputContains('Hello', 'Not found');
 
-    // Assert that the process output does not contain string(s).
+    // Assert that the output does not contain string(s).
     $this->assertProcessOutputNotContains('Error');
-    $this->assertProcessOutputNotContains('Error', 'Custom message: Unexpected error found');
-    $this->assertProcessOutputNotContains(['Error1', 'Error2']); // Can check multiple strings
+    $this->assertProcessOutputNotContains(['Error1', 'Error2']);
 
-    // Assert that the process error output contains string(s).
+    // The same assertions are available for the error output.
     $this->assertProcessErrorOutputContains('Warning');
-    $this->assertProcessErrorOutputContains(['Warning1', 'Warning2']); // Can check multiple strings
-
-    // Assert that the process error output does not contain string(s).
     $this->assertProcessErrorOutputNotContains('Critical');
-    $this->assertProcessErrorOutputNotContains(['Critical1', 'Critical2']); // Can check multiple strings
 
-    // Assert with advanced prefix control using four single-character prefixes:
-    // '+' = exact match present, '*' = substring present
-    // '-' = exact match absent,  '!' = substring absent
+    // And for the standard and error output combined.
+    $this->assertProcessAnyOutputContains('In either output');
+    $this->assertProcessAnyOutputNotContains('In neither output');
 
-    // Shortcut mode: no prefixes means all strings should be present as substrings.
-    $this->assertProcessOutputContainsOrNot(['Hello', 'World']); // All should be present
+    // Assert several conditions in one call using prefixes. See the
+    // StringTrait section for the full prefix reference.
+    // Shortcut mode: no prefixes, all must be present as substrings.
+    $this->assertProcessOutputContainsOrNot(['Hello', 'World']);
 
-    // Mixed mode: if any string has prefix, ALL must have prefixes.
-    $this->assertProcessOutputContainsOrNot(['+ Hello', '! Error']);
-    $this->assertProcessErrorOutputContainsOrNot(['* Warning', '- Critical']);
+    // Mixed mode: if any string has a prefix, all of them must.
+    $this->assertProcessOutputContainsOrNot(['* Hello', '! Error']);
+    $this->assertProcessErrorOutputContainsOrNot(['* Warning']);
+    $this->assertProcessAnyOutputContainsOrNot(['* Hello', '! Error']);
 
-    // Assert that combined output (stdout + stderr) contains string(s).
-    $this->assertProcessAnyOutputContains('Expected in either output');
-    $this->assertProcessAnyOutputContains(['String1', 'String2']); // Can check multiple strings
-
-    // Assert that combined output (stdout + stderr) does not contain string(s).
-    $this->assertProcessAnyOutputNotContains('Should not appear anywhere');
-    $this->assertProcessAnyOutputNotContains(['Unwanted1', 'Unwanted2']); // Can check multiple strings
-
-    // Assert combined output with advanced prefix control.
-    $this->assertProcessAnyOutputContainsOrNot(['+ Expected', '! Unwanted']);
-
-    // Get debug info about the process (output, error output).
-    echo $this->processInfo();
+    // '+' and '-' compare against the whole trimmed output, so they
+    // only make sense for a single-line output.
+    $this->assertProcessOutputContainsOrNot([
+      // The whole output must equal this.
+      '+ Hello World',
+    ]);
   }
+
 }
 ```
 
 ### `SerializableClosureTrait`
 
-The `SerializableClosureTrait` makes closures serializable so they can be used
-in
-data providers. It works with both traditional closures and arrow functions.
+The `SerializableClosureTrait` makes closures serializable so they can be used in data providers. It works with both traditional closures and arrow functions, and requires the `laravel/serializable-closure` package.
 
 ```php
 use AlexSkrypnyk\PhpunitHelpers\Traits\SerializableClosureTrait;
@@ -382,48 +458,52 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class MyClosureTest extends TestCase {
+
   use SerializableClosureTrait;
 
-  #[DataProvider('dataProvider')]
-  public function testWithClosure($callback) {
+  #[DataProvider('dataProviderWithClosure')]
+  public function testWithClosure($callback): void {
     // Unwrap the closure before using it.
     $callback = self::cu($callback);
-    $result = $callback('argument');
-    $this->assertEquals('ARGUMENT', $result);
+    $this->assertEquals('ARGUMENT', $callback('argument'));
   }
 
-  public static function dataProvider() {
+  public static function dataProviderWithClosure(): array {
     return [
       'traditional' => [
-        self::cw(function($value) {
+        self::cw(function ($value) {
           return strtoupper($value);
-        })
+        }),
       ],
       'arrow_function' => [
-        self::cw(fn($value) => strtoupper($value))
+        self::cw(fn($value) => strtoupper($value)),
       ],
     ];
   }
+
 }
 ```
 
 ### `ReflectionTrait`
 
-The `ReflectionTrait` provides methods to access and manipulate protected or
-private members of classes or objects.
+The `ReflectionTrait` provides methods to access and manipulate protected or private members of classes or objects.
 
 ```php
 use AlexSkrypnyk\PhpunitHelpers\Traits\ReflectionTrait;
 use PHPUnit\Framework\TestCase;
 
 class MyReflectionTest extends TestCase {
+
   use ReflectionTrait;
 
-  public function testProtectedMethod() {
+  public function testProtectedMethod(): void {
     $object = new SomeClass();
 
-    // Call a protected method.
-    $result = self::callProtectedMethod($object, 'protectedMethod', ['argument']);
+    // Call a protected method. Pass a class name instead of an object
+    // to call a protected static method.
+    $result = self::callProtectedMethod($object, 'protectedMethod', [
+      'argument',
+    ]);
 
     // Set a protected property value.
     self::setProtectedValue($object, 'protectedProperty', 'new value');
@@ -431,57 +511,64 @@ class MyReflectionTest extends TestCase {
     // Get a protected property value.
     $value = self::getProtectedValue($object, 'protectedProperty');
   }
+
 }
 ```
 
 ### `TuiTrait`
 
-The `TuiTrait` provides constants and methods for interacting with a Textual
-User Interface (TUI) during tests, handling keystroke simulation and input
-entries. It supports both full-string input and character-by-character input
-simulation.
+The `TuiTrait` provides constants and methods for interacting with a Textual User Interface (TUI) during tests, handling keystroke simulation and input entries. It supports both full-string input and character-by-character input simulation.
+
+A "keystroke" is a single key or special key, while an "entry" is one or more keystrokes forming a complete input.
 
 ```php
 use AlexSkrypnyk\PhpunitHelpers\Traits\TuiTrait;
 use PHPUnit\Framework\TestCase;
 
 class MyTuiTest extends TestCase {
+
   use TuiTrait;
 
-  public function testTuiInteraction() {
-    // Define default entries for all sets.
+  public function testTuiInteraction(): void {
+    // Define the default entries for all sets.
     $default_entries = [
       'answer1' => 'value1',
-      'answer2' => self::TUI_DEFAULT, // Use default value (empty string by default)
+      // Replaced with the default value, an empty string by default.
+      'answer2' => self::TUI_DEFAULT,
       'answer3' => 'value3',
       'answer4' => 'value4',
     ];
 
-    // First entry set: use default for 'answer1'.
+    // First entry set: use the default for 'answer1'.
     $entries_set1 = ['answer1' => self::TUI_DEFAULT] + $default_entries;
     $processed_entries = self::tuiEntries($entries_set1);
 
-    // Process entries with a custom default value instead of empty string
-    $processed_entries = self::tuiEntries($entries_set1, 'custom_default');
+    // Process entries with a custom default value.
+    $processed_entries = self::tuiEntries($entries_set1, 'custom');
 
-    // Second entry set: skip 'answer2' (will not be included in the output).
+    // Second entry set: skip 'answer2' so it is left out entirely.
     $entries_set2 = ['answer2' => self::TUI_SKIP] + $default_entries;
     $processed_entries = self::tuiEntries($entries_set2);
 
-    // Convert entries to keystrokes for testing character-by-character input.
-    // This is useful for testing TUIs that accept input one character at a time.
+    // Convert entries to keystrokes for character-by-character input.
     $keystrokes = self::tuiKeystrokes($entries_set1);
 
-    // Advanced keystroke conversion with options
+    // Keystroke conversion with options.
     $keystrokes = self::tuiKeystrokes(
-      $entries_set1,           // Entries to convert
-      3,                       // Number of characters to clear before entering new text
-      self::KEYS['TAB'],       // Custom accept key (Enter key by default)
-      self::KEYS['BACKSPACE']  // Custom clear key (Backspace by default)
+      // Entries to convert.
+      $entries_set1,
+      // Number of characters to clear before entering new text.
+      3,
+      // Accept key. Defaults to the Enter key.
+      self::KEYS['TAB'],
+      // Clear key. Defaults to the Backspace key.
+      self::KEYS['BACKSPACE']
     );
 
-    // Special keys are available via constants for simulating keyboard interaction.
-    // Some examples of available special keys:
+    // Convert a single entry into its keystrokes.
+    $split = self::tuiEntryToKeystroke('ab' . self::KEYS['ENTER']);
+
+    // Special keys are available as constants.
     $up_key = self::KEYS['UP'];
     $enter_key = self::KEYS['ENTER'];
     $tab_key = self::KEYS['TAB'];
@@ -489,224 +576,239 @@ class MyTuiTest extends TestCase {
     $ctrl_c = self::KEYS['CTRL_C'];
     $backspace = self::KEYS['BACKSPACE'];
 
-    // Arrow keys are supported in multiple formats for compatibility
-    $up_arrow = self::KEYS['UP_ARROW']; // Alternative up arrow format
+    // Arrow keys are supported in more than one format.
+    $up_arrow = self::KEYS['UP_ARROW'];
 
-    // Yes/No entries are predefined for convenience.
-    $yes = self::$tuiYes; // 'y' by default
-    $no = self::$tuiNo;   // 'n' by default
+    // Yes and No entries are predefined and can be overridden.
+    $yes = self::$tuiYes;
+    $no = self::$tuiNo;
 
-    // Check if a value is a special key.
-    $is_key = self::tuiIsKey($enter_key); // Returns true
-    $is_key = self::tuiIsKey('not_a_key'); // Returns false
+    // Check whether a value is, or contains, a special key.
+    $is_key = self::tuiIsKey($enter_key);
+    $has_key = self::tuiHasKey('abc' . $enter_key);
   }
+
 }
 ```
 
 ### `StringTrait`
 
-The `StringTrait` provides simple string assertion capabilities with four single-character prefixes for substring presence and absence checks, with configurable case sensitivity.
+The `StringTrait` provides the `assertStringContainsOrNot()` assertion used by the `ApplicationTrait` and `ProcessTrait` prefix assertions. Four single-character prefixes control how each expected value is matched:
+
+| Prefix | Meaning              | Compared against    |
+|--------|----------------------|---------------------|
+| `+`    | Exact match present  | The entire haystack |
+| `*`    | Substring present    | Any position        |
+| `-`    | Exact match absent   | The entire haystack |
+| `!`    | Substring absent     | Any position        |
+
+`+` and `-` compare the value against the whole haystack, not against a word inside it, so they are only useful for short, single-line strings.
+
+There are two modes. In shortcut mode no value carries a prefix and all of them are treated as "substring present". In mixed mode at least one value carries a prefix, and then every value must carry one.
 
 ```php
 use AlexSkrypnyk\PhpunitHelpers\Traits\StringTrait;
 use PHPUnit\Framework\TestCase;
 
 class MyStringTest extends TestCase {
+
   use StringTrait;
 
-  public function testSimpleStringMatching() {
+  public function testSimpleStringMatching(): void {
     $haystack = 'The quick brown fox jumps over the lazy dog';
 
-    // Four prefix types for string control:
-    $this->assertStringContainsOrNot(
-      $haystack,
-      [
-        '+ quick',     // Exact match present
-        '* brown',     // Substring present
-        '- slow',      // Exact match absent
-        '! elephant',  // Substring absent
-      ]
-    );
+    // Shortcut mode: all values must be present as substrings.
+    $this->assertStringContainsOrNot($haystack, [
+      'quick',
+      'brown',
+      'fox',
+    ]);
 
-    // Shortcut mode (no prefixes) - all treated as substring present
-    $this->assertStringContainsOrNot(
-      $haystack,
-      ['quick', 'brown', 'fox']  // All must be present as substrings
-    );
+    // Mixed mode: every value carries a prefix.
+    $this->assertStringContainsOrNot($haystack, [
+      // Present as a substring.
+      '* brown',
+      // Absent as an exact match of the whole haystack.
+      '- slow',
+      // Absent as a substring.
+      '! elephant',
+    ]);
 
-    // Case-insensitive matching (default behavior)
+    // '+' matches the whole haystack.
+    $this->assertStringContainsOrNot('Hello', ['+ Hello']);
+
+    // Matching is case-insensitive by default.
+    $this->assertStringContainsOrNot('Hello WORLD', ['* world']);
+
+    // Case-sensitive matching, with the defaults spelled out.
     $this->assertStringContainsOrNot(
       'Hello WORLD',
-      ['+ hello', '* world']
-    );
-
-    // Case-sensitive matching
-    $this->assertStringContainsOrNot(
-      'Hello WORLD',
-      ['+ Hello', '- hello'], // 'hello' should not be found (case sensitive)
+      ['* WORLD', '! world'],
       'Expected exact match for "%s" in haystack',
       'Expected substring "%s" in haystack',
       'Expected no exact match for "%s" in haystack',
       'Expected substring "%s" not in haystack',
-      '+', '*', '-', '!',  // Default prefixes
-      ' ',                 // Default separator
-      FALSE                // Case sensitive
+      // Prefixes: present exact, present contains, absent exact,
+      // absent contains.
+      '+', '*', '-', '!',
+      // Separator between the prefix and the value.
+      ' ',
+      // Case-insensitive matching, turned off here.
+      FALSE
     );
 
-    // Custom prefixes
+    // Custom prefixes.
     $this->assertStringContainsOrNot(
       $haystack,
-      ['# quick', '~ brown', '_ slow', '? elephant'],
+      ['~ brown', '_ slow', '? elephant'],
       'Expected exact match for "%s" in haystack',
       'Expected substring "%s" in haystack',
       'Expected no exact match for "%s" in haystack',
       'Expected substring "%s" not in haystack',
-      '#', // present exact
-      '~', // present contains
-      '_', // absent exact
-      '?'  // absent contains
+      // Present exact.
+      '#',
+      // Present contains.
+      '~',
+      // Absent exact.
+      '_',
+      // Absent contains.
+      '?'
     );
   }
+
 }
 ```
 
-**Features:**
-- **Four Assertion Types:** Exact vs substring matching, present vs absent
-- **Four Configurable Prefixes:** `+` exact present, `*` substring present, `-` exact absent, `!` substring absent
-- **Prefix Separator:** Configurable separator (space by default) between prefix and value
-- **Case Sensitivity Control:** Case-insensitive by default, can be turned off
-- **Mode Validation:** Enforces consistent prefix usage (all or none)
-- **Standard PHPUnit Assertions:** Uses `assertEquals`, `assertStringContainsString`, `assertNotEquals`, `assertStringNotContainsString`
+All four prefixes must be single, unique characters, and a value that is empty after its prefix is stripped raises a `RuntimeException`.
 
 ### `LoggerTrait`
 
-The `LoggerTrait` provides comprehensive hierarchical logging system for test debugging with step tracking, timing, and nested workflows. All logging is controlled by a verbose flag that defaults to `FALSE` for clean test output.
+The `LoggerTrait` provides a hierarchical logging system for test debugging, with step tracking, timing and nested workflows. Output is written to `STDERR` and is suppressed unless verbose mode is enabled, so the default test output stays clean.
 
 ```php
 use AlexSkrypnyk\PhpunitHelpers\Traits\LoggerTrait;
 use PHPUnit\Framework\TestCase;
 
 class MyLoggerTest extends TestCase {
+
   use LoggerTrait;
 
   protected function setUp(): void {
-    // Enable verbose logging for debugging
     static::logSetVerbose(TRUE);
   }
 
-  public function testHierarchicalWorkflow() {
-    // Basic logging methods
+  public function testHierarchicalWorkflow(): void {
     static::log('Basic debug message');
     static::logSection('SECTION TITLE', 'Section content');
     static::logFile('/path/to/file.txt', 'Optional description');
-    
-    // Step tracking with automatic timing and hierarchy
+
+    // Step tracking with automatic timing. The step name is taken from
+    // the calling method, so the argument is only a message.
     static::logStepStart('Optional step message');
     static::logSubstep('Processing data');
     static::logNote('Additional context information');
-    
-    // Nested steps automatically create hierarchy
-    $this->nestedStepMethod();
-    
+
+    // A step started inside another step nests below it.
+    $this->stepNested();
+
     static::logStepFinish('Step completed successfully');
-    
-    // Generate hierarchical summary with timing
-    static::logStepSummary('WORKFLOW SUMMARY');
+
+    // logStepSummary() returns the table rather than printing it.
+    static::logSection('WORKFLOW SUMMARY', static::logStepSummary(), TRUE, 80);
   }
-  
-  private function nestedStepMethod(): void {
+
+  protected function stepNested(): void {
     static::logStepStart('Nested operation');
-    // Work here creates deeper hierarchy level
     static::logStepFinish('Nested operation complete');
   }
+
 }
 ```
 
 **Available logging methods:**
-- `log(string)` - Basic message logging
-- `logSection(string, ?string, bool, int)` - Bordered sections with optional double borders and custom width
-- `logFile(string, ?string)` - File content logging with borders
-- `logStepStart(?string)` - Begin step tracking with automatic method name detection
-- `logStepFinish(?string)` - End step tracking with elapsed time calculation
-- `logSubstep(string)` - Indented substep messages
-- `logNote(string)` - Indented note messages
-- `logStepSummary(string)` - Hierarchical step summary table with configurable indentation
-- `logInfo()` - Step summary with a heading, used by `UnitTestCase::info()`
-- `logSetVerbose(bool)` - Control verbose mode
-- `logSetOutputStream(resource|null)` - Set custom output stream (defaults to STDERR)
 
-**Key features:**
-- Hierarchical step tracking with parent-child relationships
-- Automatic timing and elapsed time calculation
-- Configurable indentation for nested workflows
-- Method name detection via debug_backtrace
-- Memory-efficient step stack management
-- Support for custom output streams and silent mode
+- `log(string)` - basic message logging
+- `logSection(string, ?string, bool, int)` - bordered section with an optional double border and a minimum width
+- `logFile(string, ?string)` - file contents between section borders
+- `logStepStart(?string)` - begin step tracking, naming the step after the calling method
+- `logStepFinish(?string)` - end step tracking and record the elapsed time
+- `logSubstep(string)` - indented substep message
+- `logNote(string)` - indented note message
+- `logStepSummary(string)` - return the step summary table, indenting nested steps by the given string, which defaults to two spaces
+- `logInfo()` - the step summary under a heading, collected by `UnitTestCase::info()`
+- `logSetVerbose(bool)` - enable or disable output
+- `logSetOutputStream(resource|null)` - set the output stream, or NULL for `STDERR`
 
-**Example hierarchical summary output:**
-```
-===============================[ WORKFLOW SUMMARY ]===============================
+**Example step summary output:**
 
-+----------------------------------+----------+---------+
-| Step                             | Status   | Elapsed |
-+----------------------------------+----------+---------+
-| stepDeploymentProcess            | Complete | 2m 15s  |
-|   stepDatabaseMigration          | Complete | 1m 23s  |
-|   stepApplicationDeployment      | Complete | 45s     |
-|     stepAssetCompilation         | Complete | 32s     |
-|   stepHealthChecks               | Complete | 27s     |
-+----------------------------------+----------+---------+
+```text
+==============================[ WORKFLOW SUMMARY ]==============================
++-----------------------------+----------+---------+
+| Step                        | Status   | Elapsed |
++-----------------------------+----------+---------+
+| stepDeploymentProcess       | Complete | 2m 15s  |
+|   stepDatabaseMigration     | Complete | 1m 23s  |
+|   stepApplicationDeployment | Complete | 45s     |
+|     stepAssetCompilation    | Complete | 32s     |
++-----------------------------+----------+---------+
+================================================================================
 ```
 
-### Using Multiple Traits
+### Using multiple traits
 
-You can combine multiple traits in a single test class:
+Traits can be combined in a single test class:
 
 ```php
-use AlexSkrypnyk\PhpunitHelpers\Traits\AssertArrayTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\ApplicationTrait;
+use AlexSkrypnyk\PhpunitHelpers\Traits\AssertArrayTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\EnvTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\LoggerTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\ProcessTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\ReflectionTrait;
-use AlexSkrypnyk\PhpunitHelpers\Traits\StringTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\TuiTrait;
 use PHPUnit\Framework\TestCase;
 
 class MyCombinedTest extends TestCase {
-  use AssertArrayTrait;
+
   use ApplicationTrait;
+  use AssertArrayTrait;
   use EnvTrait;
   use LoggerTrait;
-  use ProcessTrait; // Note: ProcessTrait automatically includes StringTrait
+  // ApplicationTrait and ProcessTrait both include StringTrait.
+  use ProcessTrait;
   use ReflectionTrait;
-  use StringTrait;
   use TuiTrait;
 
   // Your test methods.
+
 }
 ```
 
-Or simply extend the `UnitTestCase` class which already includes some of the
-most useful traits:
+Or extend `UnitTestCase`, which already includes the `LocationsTrait` and `ReflectionTrait`:
 
 ```php
-use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
 use AlexSkrypnyk\PhpunitHelpers\Traits\EnvTrait;
+use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
 
 class MyTest extends UnitTestCase {
-  use EnvTrait; // Add additional traits as needed.
 
-  // Your test methods will have access to all traits.
+  // Add further traits as needed.
+  use EnvTrait;
+
+  // Your test methods.
+
 }
 ```
 
-## Maintenance
+Every trait declares `@mixin \PHPUnit\Framework\TestCase`, so it must be used inside a PHPUnit test class.
 
-    composer install
-    composer lint
-    composer test
+## 🤝 Contributing
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for local development setup and the linting and testing commands.
+
+## 🔄 Updating
+
+To pull the latest infrastructure from the template into this project, ask Claude Code to "update scaffold" - see [`AGENTS.md`](AGENTS.md) for details.
 
 ---
-_This repository was created using the [Scaffold](https://getscaffold.dev/)
-project template_
+_This repository was created using the [Scaffold](https://getscaffold.dev/) project template_

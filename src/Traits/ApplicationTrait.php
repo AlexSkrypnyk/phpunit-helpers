@@ -10,10 +10,9 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\ApplicationTester;
 
 /**
- * Trait ApplicationTrait.
+ * Runs a Symfony application and provides assertions for its output.
  *
- * Runs a Symfony application from a command or a loader and provides assertions
- * for its output.
+ * The application is created from a command or a loader.
  *
  * @mixin \PHPUnit\Framework\TestCase
  */
@@ -112,22 +111,12 @@ trait ApplicationTrait {
 
     $this->application = $application;
 
-    $this->application->setAutoExit(FALSE);
-    $this->application->setCatchExceptions(TRUE);
+    $application->setAutoExit(FALSE);
+    $application->setCatchExceptions(TRUE);
 
-    if ($this->applicationCwd !== NULL) {
-      $original_cwd = getcwd();
-      if ($original_cwd !== FALSE) {
-        chdir($this->applicationCwd);
-        // @codeCoverageIgnoreStart
-        register_shutdown_function(function () use ($original_cwd): void {
-          chdir($original_cwd);
-        });
-        // @codeCoverageIgnoreEnd
-      }
-    }
+    $this->applicationChdir();
 
-    $this->applicationTester = new ApplicationTester($this->application);
+    $this->applicationTester = new ApplicationTester($application);
     return $this->applicationTester;
   }
 
@@ -146,14 +135,15 @@ trait ApplicationTrait {
    *   When the provided object or class is not a command.
    */
   public function applicationInitFromCommand(string|object $object_or_class, bool $is_single_command = TRUE): ApplicationTester {
-    $this->application = new Application();
+    $application = new Application();
+    $this->application = $application;
 
     $instance = is_object($object_or_class) ? $object_or_class : new $object_or_class();
     if (!$instance instanceof Command) {
       throw new \InvalidArgumentException('The provided object is not an instance of Command.');
     }
 
-    $this->application->add($instance);
+    $application->add($instance);
 
     $name = $instance->getName();
     if ($name === NULL) {
@@ -161,25 +151,38 @@ trait ApplicationTrait {
       throw new \InvalidArgumentException('Command name cannot be null after being added to application.');
       // @codeCoverageIgnoreEnd
     }
-    $this->application->setDefaultCommand($name, $is_single_command);
+    $application->setDefaultCommand($name, $is_single_command);
 
-    $this->application->setAutoExit(FALSE);
-    $this->application->setCatchExceptions(TRUE);
+    $application->setAutoExit(FALSE);
+    $application->setCatchExceptions(TRUE);
 
-    if ($this->applicationCwd !== NULL) {
-      $original_cwd = getcwd();
-      if ($original_cwd !== FALSE) {
-        chdir($this->applicationCwd);
-        // @codeCoverageIgnoreStart
-        register_shutdown_function(function () use ($original_cwd): void {
-          chdir($original_cwd);
-        });
-        // @codeCoverageIgnoreEnd
-      }
+    $this->applicationChdir();
+
+    $this->applicationTester = new ApplicationTester($application);
+    return $this->applicationTester;
+  }
+
+  /**
+   * Change into the configured application working directory.
+   *
+   * The directory in effect before the switch is restored on shutdown.
+   */
+  protected function applicationChdir(): void {
+    if ($this->applicationCwd === NULL) {
+      return;
     }
 
-    $this->applicationTester = new ApplicationTester($this->application);
-    return $this->applicationTester;
+    $original_cwd = getcwd();
+
+    if ($original_cwd !== FALSE) {
+      chdir($this->applicationCwd);
+
+      // @codeCoverageIgnoreStart
+      register_shutdown_function(function () use ($original_cwd): void {
+        chdir($original_cwd);
+      });
+      // @codeCoverageIgnoreEnd
+    }
   }
 
   /**

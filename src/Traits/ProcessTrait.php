@@ -8,8 +8,6 @@ use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
 
 /**
- * Trait ProcessTrait.
- *
  * Runs a test process and provides assertions for its output.
  *
  * @mixin \PHPUnit\Framework\TestCase
@@ -169,7 +167,7 @@ trait ProcessTrait {
 
     // The process inherits all system env vars. Setting a var to FALSE
     // removes it from the inherited environment.
-    foreach ($env as &$env_value) {
+    foreach ($env as $env_value) {
       if (!is_scalar($env_value)) {
         throw new \InvalidArgumentException('All environment variables must be scalar values.');
       }

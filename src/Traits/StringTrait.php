@@ -91,18 +91,8 @@ trait StringTrait {
 
     $has_prefix_count = 0;
     foreach ($expected as $value) {
-      foreach ($prefixes as $prefix) {
-        $prefix_with_separator = $prefix . $prefix_separator;
-        if ($prefix_separator === '') {
-          if (str_starts_with($value, $prefix)) {
-            $has_prefix_count++;
-            break;
-          }
-        }
-        elseif (str_starts_with($value, $prefix_with_separator)) {
-          $has_prefix_count++;
-          break;
-        }
+      if (static::stringMatchPrefix($value, $prefixes, $prefix_separator) !== NULL) {
+        $has_prefix_count++;
       }
     }
 
@@ -110,48 +100,21 @@ trait StringTrait {
 
     if ($mixed_mode && $has_prefix_count !== count($expected)) {
       $first_invalid = NULL;
+
       foreach ($expected as $value) {
-        $has_valid_prefix = FALSE;
-        foreach ($prefixes as $prefix) {
-          $prefix_with_separator = $prefix . $prefix_separator;
-          if ($prefix_separator === '') {
-            if (str_starts_with($value, $prefix)) {
-              $has_valid_prefix = TRUE;
-              break;
-            }
-          }
-          elseif (str_starts_with($value, $prefix_with_separator)) {
-            $has_valid_prefix = TRUE;
-            break;
-          }
-        }
-        if (!$has_valid_prefix) {
+        if (static::stringMatchPrefix($value, $prefixes, $prefix_separator) === NULL) {
           $first_invalid = $value;
           break;
         }
       }
+
       throw new \RuntimeException(sprintf('All strings must have valid prefixes in mixed mode. First invalid: "%s".', $first_invalid));
     }
 
     foreach ($expected as $expected_value) {
       if ($mixed_mode) {
-        $prefix = NULL;
-        $value = NULL;
-        foreach ($prefixes as $test_prefix) {
-          $prefix_with_separator = $test_prefix . $prefix_separator;
-          if ($prefix_separator === '') {
-            if (str_starts_with($expected_value, $test_prefix)) {
-              $prefix = $test_prefix;
-              $value = substr($expected_value, strlen($test_prefix));
-              break;
-            }
-          }
-          elseif (str_starts_with($expected_value, $prefix_with_separator)) {
-            $prefix = $test_prefix;
-            $value = substr($expected_value, strlen($prefix_with_separator));
-            break;
-          }
-        }
+        $prefix = static::stringMatchPrefix($expected_value, $prefixes, $prefix_separator);
+        $value = $prefix === NULL ? NULL : substr($expected_value, strlen($prefix . $prefix_separator));
 
         if ($value === '') {
           throw new \RuntimeException(sprintf('Value cannot be empty after stripping prefix: "%s".', $expected_value));
@@ -200,6 +163,29 @@ trait StringTrait {
         }
       }
     }
+  }
+
+  /**
+   * Find which prefix a value starts with.
+   *
+   * @param string $value
+   *   The value to inspect.
+   * @param array<int, string> $prefixes
+   *   The prefixes to match against.
+   * @param string $separator
+   *   Separator between a prefix and the value.
+   *
+   * @return string|null
+   *   The matched prefix, or NULL when the value carries none.
+   */
+  protected static function stringMatchPrefix(string $value, array $prefixes, string $separator): ?string {
+    foreach ($prefixes as $prefix) {
+      if (str_starts_with($value, $prefix . $separator)) {
+        return $prefix;
+      }
+    }
+
+    return NULL;
   }
 
 }

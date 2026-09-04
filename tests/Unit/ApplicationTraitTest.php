@@ -155,8 +155,7 @@ final class ApplicationTraitTest extends UnitTestCase {
     $this->applicationInitFromCommand(GreetingCommand::class);
 
     // The fwrite(STDOUT, ...) call is excluded from coverage, so it cannot
-    // be tested directly. The test only verifies the application runs
-    // successfully.
+    // be tested directly.
     $this->applicationRun(['name' => 'TestUser']);
     $this->assertApplicationSuccessful();
     $this->assertApplicationOutputContains('Hello, TestUser!');
