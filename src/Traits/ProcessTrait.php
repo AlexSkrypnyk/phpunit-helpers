@@ -444,12 +444,12 @@ trait ProcessTrait {
     foreach ($expected as $value) {
       if (is_string($value)) {
         $this->assertStringContainsString($value, $output, $message ?: sprintf(
-            "Process output does not contain '%s'.%sOutput:%s%s",
-            $value,
-            PHP_EOL,
-            PHP_EOL,
-            $output
-          ) . $this->assertionSuffix());
+          "Process output does not contain '%s'.%sOutput:%s%s",
+          $value,
+          PHP_EOL,
+          PHP_EOL,
+          $output
+        ) . $this->assertionSuffix());
       }
     }
   }
@@ -471,12 +471,12 @@ trait ProcessTrait {
     foreach ($expected as $value) {
       if (is_string($value)) {
         $this->assertStringNotContainsString($value, $output, $message ?: sprintf(
-            "Process output contains '%s' but should not.%sOutput:%s%s",
-            $value,
-            PHP_EOL,
-            PHP_EOL,
-            $output
-          ) . $this->assertionSuffix());
+          "Process output contains '%s' but should not.%sOutput:%s%s",
+          $value,
+          PHP_EOL,
+          PHP_EOL,
+          $output
+        ) . $this->assertionSuffix());
       }
     }
   }
@@ -498,12 +498,12 @@ trait ProcessTrait {
     foreach ($expected as $value) {
       if (is_string($value)) {
         $this->assertStringContainsString($value, $output, $message ?: sprintf(
-            "Process error output does not contain '%s'.%sOutput:%s%s",
-            $value,
-            PHP_EOL,
-            PHP_EOL,
-            $output
-          ) . $this->assertionSuffix());
+          "Process error output does not contain '%s'.%sOutput:%s%s",
+          $value,
+          PHP_EOL,
+          PHP_EOL,
+          $output
+        ) . $this->assertionSuffix());
       }
     }
   }
@@ -525,12 +525,12 @@ trait ProcessTrait {
     foreach ($expected as $value) {
       if (is_string($value)) {
         $this->assertStringNotContainsString($value, $output, $message ?: sprintf(
-            "Process error output contains '%s' but should not.%sOutput:%s%s",
-            $value,
-            PHP_EOL,
-            PHP_EOL,
-            $output
-          ) . $this->assertionSuffix());
+          "Process error output contains '%s' but should not.%sOutput:%s%s",
+          $value,
+          PHP_EOL,
+          PHP_EOL,
+          $output
+        ) . $this->assertionSuffix());
       }
     }
   }
@@ -642,12 +642,12 @@ trait ProcessTrait {
     foreach ($expected as $value) {
       if (is_string($value)) {
         $this->assertStringContainsString($value, $output, $message ?: sprintf(
-            "Process output does not contain '%s'.%sOutput:%s%s",
-            $value,
-            PHP_EOL,
-            PHP_EOL,
-            $output
-          ) . $this->assertionSuffix());
+          "Process output does not contain '%s'.%sOutput:%s%s",
+          $value,
+          PHP_EOL,
+          PHP_EOL,
+          $output
+        ) . $this->assertionSuffix());
       }
     }
   }
@@ -673,12 +673,12 @@ trait ProcessTrait {
     foreach ($expected as $value) {
       if (is_string($value)) {
         $this->assertStringNotContainsString($value, $output, $message ?: sprintf(
-            "Process output contains '%s' but should not.%sOutput:%s%s",
-            $value,
-            PHP_EOL,
-            PHP_EOL,
-            $output
-          ) . $this->assertionSuffix());
+          "Process output contains '%s' but should not.%sOutput:%s%s",
+          $value,
+          PHP_EOL,
+          PHP_EOL,
+          $output
+        ) . $this->assertionSuffix());
       }
     }
   }
