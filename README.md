@@ -335,12 +335,15 @@ class MyLocationsTest extends TestCase {
     // 'baseline' maps to the '_baseline' directory.
     $fixtures_dir = $this->locationsFixtureDir();
 
-    // Copy files into the SUT directory.
+    // Copy files into the SUT directory. A random numeric suffix is
+    // appended to each name, so the created paths are returned rather
+    // than derived.
     $files = self::locationsCopyFilesToSut(['file1.txt', 'file2.txt']);
+    $this->assertFileExists($files[0]);
 
-    // A random numeric suffix is appended by default. Pass FALSE as the
-    // third argument to keep the original file names.
-    $this->assertFileExists(self::$sut . '/file1.txt1234');
+    // Pass FALSE as the third argument to keep the original names.
+    $files = self::locationsCopyFilesToSut(['file1.txt'], NULL, FALSE);
+    $this->assertFileExists(self::$sut . '/file1.txt');
 
     // Copy between arbitrary directories. '.git', 'node_modules' and
     // 'vendor' are always excluded.
@@ -731,14 +734,14 @@ class MyLoggerTest extends TestCase {
 - `logStepFinish(?string)` - end step tracking and record the elapsed time
 - `logSubstep(string)` - indented substep message
 - `logNote(string)` - indented note message
-- `logStepSummary(string)` - return the step summary table, indenting nested steps by the given string
+- `logStepSummary(string)` - return the step summary table, indenting nested steps by the given string, which defaults to two spaces
 - `logInfo()` - the step summary under a heading, collected by `UnitTestCase::info()`
 - `logSetVerbose(bool)` - enable or disable output
 - `logSetOutputStream(resource|null)` - set the output stream, or NULL for `STDERR`
 
 **Example step summary output:**
 
-```
+```text
 ==============================[ WORKFLOW SUMMARY ]==============================
 +-----------------------------+----------+---------+
 | Step                        | Status   | Elapsed |
