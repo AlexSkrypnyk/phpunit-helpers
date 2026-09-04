@@ -60,7 +60,7 @@ final class ApplicationTraitTest extends UnitTestCase {
     file_put_contents($temp_file, '<?php return ' . $returned . ';');
 
     $this->expectException(\InvalidArgumentException::class);
-    $this->expectExceptionMessage('Loader must return an instance of Application');
+    $this->expectExceptionMessage('Loader must return an instance of Application.');
 
     $this->applicationInitFromLoader($temp_file);
   }
@@ -95,7 +95,7 @@ final class ApplicationTraitTest extends UnitTestCase {
 
   public function testApplicationInitFromCommandInvalidClass(): void {
     $this->expectException(\InvalidArgumentException::class);
-    $this->expectExceptionMessage('The provided object is not an instance of Command');
+    $this->expectExceptionMessage('The provided object is not an instance of Command.');
 
     $this->applicationInitFromCommand(\stdClass::class);
   }
@@ -273,7 +273,7 @@ final class ApplicationTraitTest extends UnitTestCase {
 
   public function testApplicationRunWithoutInit(): void {
     $this->expectException(\RuntimeException::class);
-    $this->expectExceptionMessage('Application is not initialized');
+    $this->expectExceptionMessage('Application is not initialized.');
 
     $this->applicationRun([]);
   }
@@ -495,7 +495,7 @@ final class ApplicationTraitTest extends UnitTestCase {
     $this->applicationTester = NULL;
 
     $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Application is not initialized');
+    $this->expectExceptionMessage('Application is not initialized.');
 
     $this->assertApplicationSuccessful();
   }
@@ -504,7 +504,7 @@ final class ApplicationTraitTest extends UnitTestCase {
     $this->applicationTester = NULL;
 
     $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Application is not initialized');
+    $this->expectExceptionMessage('Application is not initialized.');
 
     $this->assertApplicationFailed();
   }
@@ -513,7 +513,7 @@ final class ApplicationTraitTest extends UnitTestCase {
     $this->applicationTester = NULL;
 
     $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Application is not initialized');
+    $this->expectExceptionMessage('Application is not initialized.');
 
     $this->assertApplicationOutputContains('test');
   }
@@ -522,7 +522,7 @@ final class ApplicationTraitTest extends UnitTestCase {
     $this->applicationTester = NULL;
 
     $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Application is not initialized');
+    $this->expectExceptionMessage('Application is not initialized.');
 
     $this->assertApplicationOutputNotContains('test');
   }
@@ -531,7 +531,7 @@ final class ApplicationTraitTest extends UnitTestCase {
     $this->applicationTester = NULL;
 
     $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Application is not initialized');
+    $this->expectExceptionMessage('Application is not initialized.');
 
     $this->assertApplicationErrorOutputContains('test');
   }
@@ -540,7 +540,7 @@ final class ApplicationTraitTest extends UnitTestCase {
     $this->applicationTester = NULL;
 
     $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Application is not initialized');
+    $this->expectExceptionMessage('Application is not initialized.');
 
     $this->assertApplicationErrorOutputNotContains('test');
   }
@@ -549,7 +549,7 @@ final class ApplicationTraitTest extends UnitTestCase {
     $this->applicationTester = NULL;
 
     $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Application is not initialized');
+    $this->expectExceptionMessage('Application is not initialized.');
 
     $this->assertApplicationOutputContainsOrNot('test');
   }
@@ -558,7 +558,7 @@ final class ApplicationTraitTest extends UnitTestCase {
     $this->applicationTester = NULL;
 
     $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Application is not initialized');
+    $this->expectExceptionMessage('Application is not initialized.');
 
     $this->assertApplicationErrorOutputContainsOrNot('test');
   }
@@ -567,7 +567,7 @@ final class ApplicationTraitTest extends UnitTestCase {
     $this->applicationTester = NULL;
 
     $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Application is not initialized');
+    $this->expectExceptionMessage('Application is not initialized.');
 
     $this->assertApplicationAnyOutputContainsOrNot('test');
   }

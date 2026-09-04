@@ -73,12 +73,12 @@ trait StringTrait {
 
     foreach ($prefixes as $prefix) {
       if (strlen($prefix) !== 1) {
-        throw new \InvalidArgumentException('All prefix arguments must be exactly one character long');
+        throw new \InvalidArgumentException('All prefix arguments must be exactly one character long.');
       }
     }
 
     if (count(array_unique($prefixes)) !== 4) {
-      throw new \InvalidArgumentException('All prefix arguments must be unique');
+      throw new \InvalidArgumentException('All prefix arguments must be unique.');
     }
 
     $expected = is_array($expected) ? $expected : [$expected];
@@ -128,7 +128,7 @@ trait StringTrait {
           break;
         }
       }
-      throw new \RuntimeException(sprintf('All strings must have valid prefixes in mixed mode. First invalid: "%s"', $first_invalid));
+      throw new \RuntimeException(sprintf('All strings must have valid prefixes in mixed mode. First invalid: "%s".', $first_invalid));
     }
 
     foreach ($expected as $expected_value) {
@@ -152,7 +152,7 @@ trait StringTrait {
         }
 
         if ($value === '') {
-          throw new \RuntimeException(sprintf('Value cannot be empty after stripping prefix: "%s"', $expected_value));
+          throw new \RuntimeException(sprintf('Value cannot be empty after stripping prefix: "%s".', $expected_value));
         }
       }
       else {

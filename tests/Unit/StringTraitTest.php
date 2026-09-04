@@ -172,7 +172,7 @@ final class StringTraitTest extends UnitTestCase {
       ['++', '*', '-', '!', ' '],
       ['Expected exact match for "%s" in haystack', 'Expected substring "%s" in haystack', 'Expected no exact match for "%s" in haystack', 'Expected substring "%s" not in haystack'],
       \InvalidArgumentException::class,
-      'All prefix arguments must be exactly one character long',
+      'All prefix arguments must be exactly one character long.',
     ];
     yield 'non_unique_prefixes' => [
       'non_unique_prefixes',
@@ -182,7 +182,7 @@ final class StringTraitTest extends UnitTestCase {
       ['+', '+', '-', '!', ' '],
       ['Expected exact match for "%s" in haystack', 'Expected substring "%s" in haystack', 'Expected no exact match for "%s" in haystack', 'Expected substring "%s" not in haystack'],
       \InvalidArgumentException::class,
-      'All prefix arguments must be unique',
+      'All prefix arguments must be unique.',
     ];
     yield 'inconsistent_prefix_usage' => [
       'inconsistent_prefix_usage',
