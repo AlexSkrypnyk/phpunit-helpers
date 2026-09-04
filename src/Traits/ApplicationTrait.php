@@ -19,7 +19,6 @@ use Symfony\Component\Console\Tester\ApplicationTester;
  */
 trait ApplicationTrait {
 
-  use ReflectionTrait;
   use StringTrait;
 
   /**
@@ -487,6 +486,62 @@ trait ApplicationTrait {
       $message ?: "Application error output should not exactly match '%s'",
       $message ?: "Application error output contains '%s' but should not"
     );
+  }
+
+  /**
+   * Asserts that either application output contains expected string(s).
+   *
+   * Checks the standard output and error output combined into a single string.
+   *
+   * @param array|string $expected
+   *   Expected string or strings to check for in either output.
+   * @param ?string $message
+   *   Optional failure message.
+   */
+  public function assertApplicationAnyOutputContains(array|string $expected, ?string $message = NULL): void {
+    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
+    $output = $this->applicationTester->getDisplay() . $this->applicationTester->getErrorOutput();
+
+    $expected = is_array($expected) ? $expected : [$expected];
+
+    foreach ($expected as $value) {
+      if (is_string($value)) {
+        $this->assertStringContainsString($value, $output, $message ?: sprintf(
+          "Application standard or error output does not contain '%s'.%sOutput:%s%s",
+          $value,
+          PHP_EOL,
+          PHP_EOL,
+          $output
+        ));
+      }
+    }
+  }
+
+  /**
+   * Asserts that neither application output contains expected string(s).
+   *
+   * @param array|string $expected
+   *   String or strings that should not be in either output.
+   * @param ?string $message
+   *   Optional failure message.
+   */
+  public function assertApplicationAnyOutputNotContains(array|string $expected, ?string $message = NULL): void {
+    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
+    $output = $this->applicationTester->getDisplay() . $this->applicationTester->getErrorOutput();
+
+    $expected = is_array($expected) ? $expected : [$expected];
+
+    foreach ($expected as $value) {
+      if (is_string($value)) {
+        $this->assertStringNotContainsString($value, $output, $message ?: sprintf(
+          "Application standard or error output contains '%s' but should not.%sOutput:%s%s",
+          $value,
+          PHP_EOL,
+          PHP_EOL,
+          $output
+        ));
+      }
+    }
   }
 
   /**
