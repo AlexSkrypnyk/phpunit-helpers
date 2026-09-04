@@ -391,10 +391,10 @@ trait LoggerTrait {
   }
 
   /**
-   * Print the logger info.
+   * Build the logger info.
    *
    * @return string
-   *   The locations' info.
+   *   A heading followed by the step summary table.
    */
   public function logInfo(): string {
     $lines = '';

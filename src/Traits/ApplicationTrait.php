@@ -590,7 +590,7 @@ trait ApplicationTrait {
   }
 
   /**
-   * Print the application info.
+   * Build the application info.
    *
    * @return string
    *   The application info.
