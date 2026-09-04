@@ -20,7 +20,6 @@ class StreamCaptureFilter extends \php_user_filter {
   /**
    * {@inheritdoc}
    */
-  #[\Override]
   public function filter($in, $out, &$consumed, bool $closing): int {
     while ($bucket = stream_bucket_make_writeable($in)) {
       static::$captured .= $bucket->data;
