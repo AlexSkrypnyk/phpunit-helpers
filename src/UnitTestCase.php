@@ -100,6 +100,9 @@ abstract class UnitTestCase extends TestCase {
   /**
    * Suffix appended to every assertion failure message.
    *
+   * PHPUnit 11 exposes no hook that can reach the message, so nothing is
+   * appended there.
+   *
    * @return string
    *   The assertion suffix.
    */
@@ -117,7 +120,8 @@ abstract class UnitTestCase extends TestCase {
     catch (AssertionFailedError $exception) {
       // runBare() is final and emits the failure event from its own catch
       // block, so onNotSuccessfulTest() runs too late to change the reported
-      // message. This hook is called from inside that block.
+      // message. This hook is called from inside that block, and PHPUnit 11
+      // has no equivalent, so it never calls this method there.
       $suffix = $this->assertionSuffix();
 
       if ($suffix !== '') {
