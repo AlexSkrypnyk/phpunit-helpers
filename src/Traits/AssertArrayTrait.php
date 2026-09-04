@@ -75,32 +75,29 @@ trait AssertArrayTrait {
    */
   public function assertArrayContainsArray(array $array, array $sub_array, ?string $message = NULL): void {
     foreach ($sub_array as $value) {
-      if (is_array($value)) {
-        $found = FALSE;
+      if (!is_array($value)) {
+        $this->assertContains($value, $array, $message ?: sprintf("Value '%s' not found in array.", $value));
+        continue;
+      }
 
-        if (in_array($value, $array, TRUE)) {
-          $found = TRUE;
-        }
-        else {
-          foreach ($array as $item) {
-            if (is_array($item)) {
-              try {
-                $this->assertArrayContainsArray($item, [$value], $message);
-                $found = TRUE;
-                break;
-              }
-              catch (\Throwable) {
-                // Continue searching.
-              }
+      $found = in_array($value, $array, TRUE);
+
+      if (!$found) {
+        foreach ($array as $item) {
+          if (is_array($item)) {
+            try {
+              $this->assertArrayContainsArray($item, [$value], $message);
+              $found = TRUE;
+              break;
+            }
+            catch (\Throwable) {
+              // Continue searching.
             }
           }
         }
+      }
 
-        $this->assertTrue($found, $message ?: 'Expected sub-array not found.');
-      }
-      else {
-        $this->assertContains($value, $array, $message ?: sprintf("Value '%s' not found in array.", $value));
-      }
+      $this->assertTrue($found, $message ?: 'Expected sub-array not found.');
     }
   }
 
@@ -128,24 +125,24 @@ trait AssertArrayTrait {
     }
 
     foreach ($sub_array as $value) {
-      if (is_array($value)) {
-        if (in_array($value, $array, TRUE)) {
-          $this->fail($message ?: 'Unexpected sub-array found.');
-        }
+      if (!is_array($value)) {
+        $this->assertNotContains($value, $array, $message ?: sprintf("Unexpected value '%s' found in array.", $value));
+        continue;
+      }
 
-        foreach ($array as $item) {
-          if (is_array($item)) {
-            try {
-              $this->assertArrayNotContainsArray($item, [$value], $message);
-            }
-            catch (\Throwable) {
-              $this->fail($message ?: 'Unexpected sub-array found.');
-            }
+      if (in_array($value, $array, TRUE)) {
+        $this->fail($message ?: 'Unexpected sub-array found.');
+      }
+
+      foreach ($array as $item) {
+        if (is_array($item)) {
+          try {
+            $this->assertArrayNotContainsArray($item, [$value], $message);
+          }
+          catch (\Throwable) {
+            $this->fail($message ?: 'Unexpected sub-array found.');
           }
         }
-      }
-      else {
-        $this->assertNotContains($value, $array, $message ?: sprintf("Unexpected value '%s' found in array.", $value));
       }
     }
   }
