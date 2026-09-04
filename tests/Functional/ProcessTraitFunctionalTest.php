@@ -13,7 +13,7 @@ use PHPUnit\Framework\Attributes\CoversNothing;
 #[CoversNothing]
 final class ProcessTraitFunctionalTest extends UnitTestCase {
 
-  public function testProcessTraitStreamingWithDebugEnabled(): void {
+  public function testProcessStreamingWithDebugEnabled(): void {
     $output = $this->runPhpunit(TRUE);
     $combined = $output['combined'];
 
@@ -50,7 +50,7 @@ final class ProcessTraitFunctionalTest extends UnitTestCase {
     $this->assertStreamingTiming($output['real_time_output']);
   }
 
-  public function testProcessTraitStreamingWithDebugDisabled(): void {
+  public function testProcessStreamingWithDebugDisabled(): void {
     $output = $this->runPhpunit(FALSE);
     $combined = $output['combined'];
 
@@ -100,7 +100,7 @@ final class ProcessTraitFunctionalTest extends UnitTestCase {
     $process = proc_open($command, $descriptors, $pipes);
 
     if (!is_resource($process)) {
-      $this->fail('Failed to start PHPUnit process');
+      $this->fail('Failed to start PHPUnit process.');
     }
 
     fclose($pipes[0]);
