@@ -81,7 +81,7 @@ trait ProcessTrait {
    */
   public function processGet(): Process {
     if (!$this->process instanceof Process) {
-      throw new \RuntimeException('Process is not initialized');
+      throw new \RuntimeException('Process is not initialized.');
     }
     return $this->process;
   }
@@ -370,7 +370,7 @@ trait ProcessTrait {
    *   Optional message to include in the failure output if the process failed.
    */
   public function assertProcessSuccessful(?string $message = NULL): void {
-    $this->assertNotNull($this->process, 'Process is not initialized');
+    $this->assertNotNull($this->process, 'Process is not initialized.');
 
     if (!$this->process->isSuccessful()) {
       $this->fail('PROCESS FAILED' . PHP_EOL . ($message ? 'Message: ' . $message . PHP_EOL : '') . $this->processFormatOutput() . $this->assertionSuffix());
@@ -388,7 +388,7 @@ trait ProcessTrait {
    *   succeeded.
    */
   public function assertProcessFailed(?string $message = NULL): void {
-    $this->assertNotNull($this->process, 'Process is not initialized');
+    $this->assertNotNull($this->process, 'Process is not initialized.');
 
     if ($this->process->isSuccessful()) {
       $this->fail('PROCESS SUCCEEDED but failure was expected' . PHP_EOL . ($message ? 'Message: ' . $message . PHP_EOL : '') . $this->processFormatOutput() . $this->assertionSuffix());
@@ -403,7 +403,7 @@ trait ProcessTrait {
    */
   protected function processFormatOutput(): string {
     if (!$this->process instanceof Process) {
-      return 'Process is not initialized' . PHP_EOL;
+      return 'Process is not initialized.' . PHP_EOL;
     }
 
     $process_output = $this->process->getOutput();
@@ -436,7 +436,7 @@ trait ProcessTrait {
    *   Optional failure message.
    */
   public function assertProcessOutputContains(array|string $expected, ?string $message = NULL): void {
-    $this->assertNotNull($this->process, 'Process is not initialized');
+    $this->assertNotNull($this->process, 'Process is not initialized.');
     $output = $this->process->getOutput();
 
     $expected = is_array($expected) ? $expected : [$expected];
@@ -463,7 +463,7 @@ trait ProcessTrait {
    *   Optional failure message.
    */
   public function assertProcessOutputNotContains(array|string $expected, ?string $message = NULL): void {
-    $this->assertNotNull($this->process, 'Process is not initialized');
+    $this->assertNotNull($this->process, 'Process is not initialized.');
     $output = $this->process->getOutput();
 
     $expected = is_array($expected) ? $expected : [$expected];
@@ -490,7 +490,7 @@ trait ProcessTrait {
    *   Optional failure message.
    */
   public function assertProcessErrorOutputContains(array|string $expected, ?string $message = NULL): void {
-    $this->assertNotNull($this->process, 'Process is not initialized');
+    $this->assertNotNull($this->process, 'Process is not initialized.');
     $output = $this->process->getErrorOutput();
 
     $expected = is_array($expected) ? $expected : [$expected];
@@ -517,7 +517,7 @@ trait ProcessTrait {
    *   Optional failure message.
    */
   public function assertProcessErrorOutputNotContains(array|string $expected, ?string $message = NULL): void {
-    $this->assertNotNull($this->process, 'Process is not initialized');
+    $this->assertNotNull($this->process, 'Process is not initialized.');
     $output = $this->process->getErrorOutput();
 
     $expected = is_array($expected) ? $expected : [$expected];
@@ -562,7 +562,7 @@ trait ProcessTrait {
    *   When prefix usage is inconsistent (some have prefixes, others don't).
    */
   public function assertProcessOutputContainsOrNot(array|string $expected, ?string $message = NULL): void {
-    $this->assertNotNull($this->process, 'Process is not initialized');
+    $this->assertNotNull($this->process, 'Process is not initialized.');
 
     $output = $this->process->getOutput();
     // Trim trailing whitespace for more intuitive exact matching.
@@ -605,7 +605,7 @@ trait ProcessTrait {
    *   When prefix usage is inconsistent (some have prefixes, others don't).
    */
   public function assertProcessErrorOutputContainsOrNot(array|string $expected, ?string $message = NULL): void {
-    $this->assertNotNull($this->process, 'Process is not initialized');
+    $this->assertNotNull($this->process, 'Process is not initialized.');
 
     $output = $this->process->getErrorOutput();
     // Trim trailing whitespace for more intuitive exact matching.
@@ -632,7 +632,7 @@ trait ProcessTrait {
    *   Optional failure message.
    */
   public function assertProcessAnyOutputContains(array|string $expected, ?string $message = NULL): void {
-    $this->assertNotNull($this->process, 'Process is not initialized');
+    $this->assertNotNull($this->process, 'Process is not initialized.');
 
     $output = $this->process->getOutput();
     $output .= $this->process->getErrorOutput();
@@ -663,7 +663,7 @@ trait ProcessTrait {
    *   Optional failure message.
    */
   public function assertProcessAnyOutputNotContains(array|string $expected, ?string $message = NULL): void {
-    $this->assertNotNull($this->process, 'Process is not initialized');
+    $this->assertNotNull($this->process, 'Process is not initialized.');
 
     $output = $this->process->getOutput();
     $output .= $this->process->getErrorOutput();
@@ -711,7 +711,7 @@ trait ProcessTrait {
    *   When prefix usage is inconsistent (some have prefixes, others don't).
    */
   public function assertProcessAnyOutputContainsOrNot(array|string $expected, ?string $message = NULL): void {
-    $this->assertNotNull($this->process, 'Process is not initialized');
+    $this->assertNotNull($this->process, 'Process is not initialized.');
 
     $output = $this->process->getOutput();
     $output .= $this->process->getErrorOutput();

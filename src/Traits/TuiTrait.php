@@ -135,7 +135,7 @@ trait TuiTrait {
   public static function tuiEntries(array $entries, string $default = ''): array {
     foreach ($entries as $key => $value) {
       if (!is_scalar($value)) {
-        throw new \InvalidArgumentException(sprintf('TUI entry "%s" must be a scalar value. Got: %s', $key, gettype($value)));
+        throw new \InvalidArgumentException(sprintf('TUI entry "%s" must be a scalar value. Got: %s.', $key, gettype($value)));
       }
 
       if ($value === static::TUI_SKIP) {

@@ -99,7 +99,7 @@ trait ApplicationTrait {
    */
   public function applicationInitFromLoader(string $loader_path): ApplicationTester {
     if (!file_exists($loader_path)) {
-      throw new \InvalidArgumentException(sprintf('Loader file not found: %s', $loader_path));
+      throw new \InvalidArgumentException(sprintf('Loader file not found: %s.', $loader_path));
     }
 
     // Validate before assigning: the property is typed, so assigning a wrong
@@ -107,7 +107,7 @@ trait ApplicationTrait {
     $application = require $loader_path;
 
     if (!$application instanceof Application) {
-      throw new \InvalidArgumentException('Loader must return an instance of Application');
+      throw new \InvalidArgumentException('Loader must return an instance of Application.');
     }
 
     $this->application = $application;
@@ -150,7 +150,7 @@ trait ApplicationTrait {
 
     $instance = is_object($object_or_class) ? $object_or_class : new $object_or_class();
     if (!$instance instanceof Command) {
-      throw new \InvalidArgumentException('The provided object is not an instance of Command');
+      throw new \InvalidArgumentException('The provided object is not an instance of Command.');
     }
 
     $this->application->add($instance);
@@ -158,7 +158,7 @@ trait ApplicationTrait {
     $name = $instance->getName();
     if ($name === NULL) {
       // @codeCoverageIgnoreStart
-      throw new \InvalidArgumentException('Command name cannot be null after being added to application');
+      throw new \InvalidArgumentException('Command name cannot be null after being added to application.');
       // @codeCoverageIgnoreEnd
     }
     $this->application->setDefaultCommand($name, $is_single_command);
@@ -267,7 +267,7 @@ trait ApplicationTrait {
    *   Optional failure message.
    */
   public function assertApplicationSuccessful(?string $message = NULL): void {
-    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
+    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized.');
     $this->assertSame(0, $this->applicationTester->getStatusCode(), $message ?: sprintf(
       'Application failed with exit code %d: %s%sOutput:%s%s',
       $this->applicationTester->getStatusCode(),
@@ -285,7 +285,7 @@ trait ApplicationTrait {
    *   Optional failure message.
    */
   public function assertApplicationFailed(?string $message = NULL): void {
-    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
+    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized.');
     $this->assertNotSame(0, $this->applicationTester->getStatusCode(), $message ?: sprintf(
       'Application succeeded when failure was expected.%sOutput:%s%s',
       PHP_EOL,
@@ -303,7 +303,7 @@ trait ApplicationTrait {
    *   Optional failure message.
    */
   public function assertApplicationOutputContains(array|string $expected, ?string $message = NULL): void {
-    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
+    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized.');
     $output = $this->applicationTester->getDisplay();
 
     $expected = is_array($expected) ? $expected : [$expected];
@@ -330,7 +330,7 @@ trait ApplicationTrait {
    *   Optional failure message.
    */
   public function assertApplicationOutputNotContains(array|string $expected, ?string $message = NULL): void {
-    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
+    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized.');
     $output = $this->applicationTester->getDisplay();
 
     $expected = is_array($expected) ? $expected : [$expected];
@@ -357,7 +357,7 @@ trait ApplicationTrait {
    *   Optional failure message.
    */
   public function assertApplicationErrorOutputContains(array|string $expected, ?string $message = NULL): void {
-    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
+    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized.');
     $output = $this->applicationTester->getErrorOutput();
 
     $expected = is_array($expected) ? $expected : [$expected];
@@ -384,7 +384,7 @@ trait ApplicationTrait {
    *   Optional failure message.
    */
   public function assertApplicationErrorOutputNotContains(array|string $expected, ?string $message = NULL): void {
-    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
+    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized.');
     $output = $this->applicationTester->getErrorOutput();
 
     $expected = is_array($expected) ? $expected : [$expected];
@@ -429,7 +429,7 @@ trait ApplicationTrait {
    *   When prefix usage is inconsistent (some have prefixes, others don't).
    */
   public function assertApplicationOutputContainsOrNot(array|string $expected, ?string $message = NULL): void {
-    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
+    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized.');
 
     $output = $this->applicationTester->getDisplay();
     // Trim trailing whitespace for more intuitive exact matching.
@@ -472,7 +472,7 @@ trait ApplicationTrait {
    *   When prefix usage is inconsistent (some have prefixes, others don't).
    */
   public function assertApplicationErrorOutputContainsOrNot(array|string $expected, ?string $message = NULL): void {
-    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
+    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized.');
 
     $output = $this->applicationTester->getErrorOutput();
     // Trim trailing whitespace for more intuitive exact matching.
@@ -572,7 +572,7 @@ trait ApplicationTrait {
    *   When prefix usage is inconsistent (some have prefixes, others don't).
    */
   public function assertApplicationAnyOutputContainsOrNot(array|string $expected, ?string $message = NULL): void {
-    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
+    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized.');
 
     $output = $this->applicationTester->getDisplay();
     $output .= $this->applicationTester->getErrorOutput();
