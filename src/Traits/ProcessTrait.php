@@ -33,7 +33,7 @@ trait ProcessTrait {
   /**
    * Stream output of the process while it is running.
    */
-  protected bool $processStreamOutput = FALSE;
+  protected bool $processStreamingOutput = FALSE;
 
   /**
    * Characters to prefix streaming standard output.
@@ -195,7 +195,7 @@ trait ProcessTrait {
     $this->process->setIdleTimeout($idle_timeout);
 
     try {
-      $this->process->run($this->processStreamOutput ? $this->processStreamingOutputCallback() : NULL);
+      $this->process->run($this->processStreamingOutput ? $this->processStreamingOutputCallback() : NULL);
     }
     // @codeCoverageIgnoreStart
     catch (ProcessTimedOutException $process_timed_out_exception) {
@@ -328,7 +328,7 @@ trait ProcessTrait {
         $line = $prefix . $line . $eol;
 
         if (static::$processStreamingOutputShouldDim) {
-          $line = static::dim($line);
+          $line = static::processColorDim($line);
         }
 
         // Start the output on a new line for STDOUT.
@@ -352,7 +352,7 @@ trait ProcessTrait {
    * @return string
    *   The dimmed text.
    */
-  protected static function dim(string $text, string $eol = "\n"): string {
+  protected static function processColorDim(string $text, string $eol = "\n"): string {
     // Ensure $eol is non-empty for explode().
     $eol = $eol ?: "\n";
     $lines = explode($eol, $text);

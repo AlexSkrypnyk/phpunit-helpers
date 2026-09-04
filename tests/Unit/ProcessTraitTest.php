@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AlexSkrypnyk\PhpunitHelpers\Tests\Unit;
 
+use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\StreamCaptureFilter;
 use AlexSkrypnyk\PhpunitHelpers\Traits\ProcessTrait;
 use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
 use PHPUnit\Framework\AssertionFailedError;
@@ -19,7 +20,7 @@ final class ProcessTraitTest extends UnitTestCase {
 
   protected function setUp(): void {
     parent::setUp();
-    $this->processStreamOutput = FALSE;
+    $this->processStreamingOutput = FALSE;
   }
 
   protected function tearDown(): void {
@@ -481,7 +482,7 @@ final class ProcessTraitTest extends UnitTestCase {
 
     // Override processStreamingOutputCallback method temporarily.
     $reflection = new \ReflectionClass($this);
-    $property = $reflection->getProperty('processStreamOutput');
+    $property = $reflection->getProperty('processStreamingOutput');
     $property->setValue($this, TRUE);
 
     // Capture streaming output by overriding the actual method.
@@ -1234,6 +1235,81 @@ EOL;
     $callback(Process::ERR, "");
   }
 
+  #[DataProvider('dataProviderProcessStreamingOutputCallbackDimming')]
+  public function testProcessStreamingOutputCallbackDimming(bool $should_dim, string $type, string $expected): void {
+    $original = self::$processStreamingOutputShouldDim;
+    self::$processStreamingOutputShouldDim = $should_dim;
+
+    $callback = $this->processStreamingOutputCallback();
+
+    try {
+      $output = $this->captureStdout(static function () use ($callback, $type): void {
+        $callback($type, "line one\n");
+      });
+    }
+    finally {
+      self::$processStreamingOutputShouldDim = $original;
+    }
+
+    $this->assertSame($expected, $output);
+  }
+
+  public static function dataProviderProcessStreamingOutputCallbackDimming(): \Iterator {
+    yield 'stdout_dimmed' => [
+      TRUE,
+      Process::OUT,
+      "\n\033[2m>> line one\033[22m\n\033[2m\033[22m",
+    ];
+    yield 'stdout_plain' => [
+      FALSE,
+      Process::OUT,
+      "\n>> line one\n",
+    ];
+    yield 'stderr_dimmed' => [
+      TRUE,
+      Process::ERR,
+      "\033[2mXX line one\033[22m\n\033[2m\033[22m",
+    ];
+    yield 'stderr_plain' => [
+      FALSE,
+      Process::ERR,
+      "XX line one\n",
+    ];
+  }
+
+  /**
+   * Runs a callback and returns what it wrote to STDOUT.
+   *
+   * @param callable $callback
+   *   The callback to run.
+   *
+   * @return string
+   *   Everything the callback wrote to STDOUT.
+   */
+  protected function captureStdout(callable $callback): string {
+    $name = 'phpunit_helpers_stream_capture';
+
+    if (!in_array($name, stream_get_filters(), TRUE)) {
+      stream_filter_register($name, StreamCaptureFilter::class);
+    }
+
+    StreamCaptureFilter::$captured = '';
+
+    $filter = stream_filter_append(STDOUT, $name, STREAM_FILTER_WRITE);
+    if ($filter === FALSE) {
+      throw new \RuntimeException('Unable to attach the capture filter to STDOUT.');
+    }
+
+    try {
+      $callback();
+    }
+    finally {
+      stream_filter_remove($filter);
+    }
+
+    return StreamCaptureFilter::$captured;
+  }
+
   public function testProcessRunWithZeroArguments(): void {
     $this->processRun('echo', []);
 
@@ -1344,7 +1420,7 @@ EOL;
   }
 
   public function testStreamingOutputWithDimmingEnabled(): void {
-    $this->processStreamOutput = TRUE;
+    $this->processStreamingOutput = TRUE;
     self::$processStreamingOutputShouldDim = TRUE;
 
     $temp_file = tempnam(sys_get_temp_dir(), 'phpunit_stdout_test');
@@ -1352,13 +1428,14 @@ EOL;
     $test_script = sprintf('
 <?php
 require_once "%s/vendor/autoload.php";
+use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\StreamCaptureFilter;
 use AlexSkrypnyk\PhpunitHelpers\Traits\ProcessTrait;
 
 class TestClass {
   use ProcessTrait;
   
   public function enableStreamingWithDimming() {
-    $this->processStreamOutput = true;
+    $this->processStreamingOutput = true;
     static::$processStreamingOutputShouldDim = true;
   }
 }
@@ -1379,11 +1456,11 @@ $test->processRun("echo", ["test output"]);
     $this->assertStringContainsString("\033[22m", $output, 'Should contain ANSI dim end code');
     $this->assertStringContainsString('test output', $output, 'Should contain actual text');
 
-    $this->processStreamOutput = FALSE;
+    $this->processStreamingOutput = FALSE;
   }
 
   public function testStreamingOutputWithDimmingDisabled(): void {
-    $this->processStreamOutput = TRUE;
+    $this->processStreamingOutput = TRUE;
     self::$processStreamingOutputShouldDim = FALSE;
 
     $temp_file = tempnam(sys_get_temp_dir(), 'phpunit_stdout_test');
@@ -1391,13 +1468,14 @@ $test->processRun("echo", ["test output"]);
     $test_script = sprintf('
 <?php
 require_once "%s/vendor/autoload.php";
+use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\StreamCaptureFilter;
 use AlexSkrypnyk\PhpunitHelpers\Traits\ProcessTrait;
 
 class TestClass {
   use ProcessTrait;
   
   public function enableStreamingWithoutDimming() {
-    $this->processStreamOutput = true;
+    $this->processStreamingOutput = true;
     static::$processStreamingOutputShouldDim = false;
   }
 }
@@ -1418,7 +1496,7 @@ $test->processRun("echo", ["test output"]);
     $this->assertStringNotContainsString("\033[22m", $output, 'Should not contain ANSI dim end code');
     $this->assertStringContainsString('test output', $output, 'Should contain actual text');
 
-    $this->processStreamOutput = FALSE;
+    $this->processStreamingOutput = FALSE;
     self::$processStreamingOutputShouldDim = TRUE;
   }
 
@@ -1435,7 +1513,7 @@ $test->processRun("echo", ["test output"]);
 
   #[DataProvider('dataProviderDim')]
   public function testDim(string $text, string $eol, string $expected): void {
-    $this->assertSame($expected, self::dim($text, $eol));
+    $this->assertSame($expected, self::processColorDim($text, $eol));
   }
 
   public static function dataProviderDim(): \Iterator {

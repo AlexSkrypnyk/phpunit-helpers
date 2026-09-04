@@ -30,20 +30,20 @@ final class LoggerTraitTest extends UnitTestCase {
    */
   protected function setUp(): void {
     parent::setUp();
-    self::loggerSetVerbose(FALSE);
+    self::logSetVerbose(FALSE);
 
     $buffer = fopen('php://memory', 'r+');
     if ($buffer === FALSE) {
       throw new \RuntimeException('Failed to create memory buffer');
     }
     $this->logBuffer = $buffer;
-    self::loggerSetOutputStream($this->logBuffer);
+    self::logSetOutputStream($this->logBuffer);
 
     $reflection_class = new \ReflectionClass(self::class);
-    $steps_property = $reflection_class->getProperty('loggerSteps');
+    $steps_property = $reflection_class->getProperty('logSteps');
     $steps_property->setValue(NULL, []);
 
-    $stack_property = $reflection_class->getProperty('loggerStepStack');
+    $stack_property = $reflection_class->getProperty('logStepStack');
     $stack_property->setValue(NULL, []);
   }
 
@@ -55,7 +55,7 @@ final class LoggerTraitTest extends UnitTestCase {
       fclose($this->logBuffer);
     }
 
-    self::loggerSetOutputStream(NULL);
+    self::logSetOutputStream(NULL);
 
     parent::tearDown();
   }
@@ -75,7 +75,7 @@ final class LoggerTraitTest extends UnitTestCase {
    * Test verbose mode setter and getter.
    */
   public function testVerboseMode(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
     self::log('Verbose message');
     self::logSection('Verbose Section', 'Verbose content');
 
@@ -89,9 +89,9 @@ final class LoggerTraitTest extends UnitTestCase {
       throw new \RuntimeException('Failed to create memory buffer');
     }
     $this->logBuffer = $buffer;
-    self::loggerSetOutputStream($this->logBuffer);
+    self::logSetOutputStream($this->logBuffer);
 
-    self::loggerSetVerbose(FALSE);
+    self::logSetVerbose(FALSE);
     self::log('Silent message');
     self::logSection('Silent Section', 'Silent content');
 
@@ -103,7 +103,7 @@ final class LoggerTraitTest extends UnitTestCase {
    * Test log method with verbose mode disabled.
    */
   public function testLogSilentMode(): void {
-    self::loggerSetVerbose(FALSE);
+    self::logSetVerbose(FALSE);
 
     self::log('Test message');
 
@@ -115,7 +115,7 @@ final class LoggerTraitTest extends UnitTestCase {
    * Test log method with verbose mode enabled.
    */
   public function testLogVerboseMode(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
     self::log('Test message');
 
@@ -127,7 +127,7 @@ final class LoggerTraitTest extends UnitTestCase {
    * Test logSection method - with visual output for inspection.
    */
   public function testLogSection(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
     self::logSection('TEST TITLE');
 
@@ -153,7 +153,7 @@ final class LoggerTraitTest extends UnitTestCase {
    * Test logSection method with invalid min_width parameter.
    */
   public function testLogSectionWithInvalidMinWidth(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
     $this->expectException(\InvalidArgumentException::class);
     $this->expectExceptionMessage('Minimum width must be a positive integer.');
@@ -165,7 +165,7 @@ final class LoggerTraitTest extends UnitTestCase {
    * Test logSection method with negative min_width parameter.
    */
   public function testLogSectionWithNegativeMinWidth(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
     $this->expectException(\InvalidArgumentException::class);
     $this->expectExceptionMessage('Minimum width must be a positive integer.');
@@ -178,7 +178,7 @@ final class LoggerTraitTest extends UnitTestCase {
    */
   #[DoesNotPerformAssertions]
   public function testLogFileWithExistingFile(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
     $temp_file = tempnam(sys_get_temp_dir(), 'logger_test');
     file_put_contents($temp_file, 'Test file content');
@@ -193,7 +193,7 @@ final class LoggerTraitTest extends UnitTestCase {
    * Test logFile method with unreadable file.
    */
   public function testLogFileWithUnreadableFile(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
     $temp_file = tempnam(sys_get_temp_dir(), 'logger_test');
     file_put_contents($temp_file, 'Test content');
@@ -216,7 +216,7 @@ final class LoggerTraitTest extends UnitTestCase {
    * Test logFile method with non-existent file.
    */
   public function testLogFileWithNonExistentFile(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
     $this->expectException(\InvalidArgumentException::class);
     $this->expectExceptionMessage('File /non/existent/file does not exist.');
@@ -229,7 +229,7 @@ final class LoggerTraitTest extends UnitTestCase {
    */
   #[DoesNotPerformAssertions]
   public function testLogFileWithVerboseDisabled(): void {
-    self::loggerSetVerbose(FALSE);
+    self::logSetVerbose(FALSE);
 
     $temp_file = tempnam(sys_get_temp_dir(), 'logger_test');
     file_put_contents($temp_file, 'Test content');
@@ -244,7 +244,7 @@ final class LoggerTraitTest extends UnitTestCase {
    */
   #[DoesNotPerformAssertions]
   public function testLogSectionWithVerboseDisabled(): void {
-    self::loggerSetVerbose(FALSE);
+    self::logSetVerbose(FALSE);
 
     self::logSection('TEST TITLE', 'Test message');
   }
@@ -254,7 +254,7 @@ final class LoggerTraitTest extends UnitTestCase {
    */
   #[DoesNotPerformAssertions]
   public function testSilentModeForAllMethods(): void {
-    self::loggerSetVerbose(FALSE);
+    self::logSetVerbose(FALSE);
 
     self::log('Test message');
     self::logSection('TEST TITLE', 'Test message');
@@ -270,11 +270,11 @@ final class LoggerTraitTest extends UnitTestCase {
    */
   #[DoesNotPerformAssertions]
   public function testVerboseModePersistence(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
     self::log('Message 1');
 
-    self::loggerSetVerbose(FALSE);
+    self::logSetVerbose(FALSE);
 
     self::log('Message 2');
   }
@@ -283,7 +283,7 @@ final class LoggerTraitTest extends UnitTestCase {
    * Test logStepStart method with verbose mode enabled.
    */
   public function testLogStepStartVerboseMode(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
     self::logStepStart();
 
@@ -296,10 +296,10 @@ final class LoggerTraitTest extends UnitTestCase {
    * Test logStepStart method with custom step method prefix.
    */
   public function testLogStepStartWithCustomPrefix(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
-    $original_prefix = self::$loggerStepMethodPrefix;
-    self::$loggerStepMethodPrefix = 'process';
+    $original_prefix = self::$logStepMethodPrefix;
+    self::$logStepMethodPrefix = 'process';
 
     try {
       $this->processTest();
@@ -308,7 +308,7 @@ final class LoggerTraitTest extends UnitTestCase {
       $this->assertStringContainsString('PROCESS START | processTest', $output);
     }
     finally {
-      self::$loggerStepMethodPrefix = $original_prefix;
+      self::$logStepMethodPrefix = $original_prefix;
     }
   }
 
@@ -317,7 +317,7 @@ final class LoggerTraitTest extends UnitTestCase {
    */
   #[DoesNotPerformAssertions]
   public function testLogStepStartSilentMode(): void {
-    self::loggerSetVerbose(FALSE);
+    self::logSetVerbose(FALSE);
 
     self::logStepStart();
     self::logStepStart('Silent step start');
@@ -327,7 +327,7 @@ final class LoggerTraitTest extends UnitTestCase {
    * Test logStepFinish method with verbose mode enabled.
    */
   public function testLogStepFinishVerboseMode(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
     self::logStepStart();
     self::logStepFinish('Completed the test step');
@@ -342,10 +342,10 @@ final class LoggerTraitTest extends UnitTestCase {
    * Test logStepFinish method with custom step method prefix.
    */
   public function testLogStepFinishWithCustomPrefix(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
-    $original_prefix = self::$loggerStepMethodPrefix;
-    self::$loggerStepMethodPrefix = 'process';
+    $original_prefix = self::$logStepMethodPrefix;
+    self::$logStepMethodPrefix = 'process';
 
     try {
       $this->processFinishTest();
@@ -355,7 +355,7 @@ final class LoggerTraitTest extends UnitTestCase {
       $this->assertStringContainsString('PROCESS DONE | processFinishTest | 0s', $output);
     }
     finally {
-      self::$loggerStepMethodPrefix = $original_prefix;
+      self::$logStepMethodPrefix = $original_prefix;
     }
   }
 
@@ -364,7 +364,7 @@ final class LoggerTraitTest extends UnitTestCase {
    */
   #[DoesNotPerformAssertions]
   public function testLogStepFinishSilentMode(): void {
-    self::loggerSetVerbose(FALSE);
+    self::logSetVerbose(FALSE);
 
     self::logStepFinish();
     self::logStepFinish('Silent step finish');
@@ -375,7 +375,7 @@ final class LoggerTraitTest extends UnitTestCase {
    */
   #[DoesNotPerformAssertions]
   public function testLogSubstepVerboseMode(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
     self::logSubstep('Processing substep 1');
     self::logSubstep('Processing substep 2');
@@ -386,7 +386,7 @@ final class LoggerTraitTest extends UnitTestCase {
    */
   #[DoesNotPerformAssertions]
   public function testLogSubstepSilentMode(): void {
-    self::loggerSetVerbose(FALSE);
+    self::logSetVerbose(FALSE);
 
     self::logSubstep('Silent substep');
   }
@@ -396,7 +396,7 @@ final class LoggerTraitTest extends UnitTestCase {
    */
   #[DoesNotPerformAssertions]
   public function testLogNoteVerboseMode(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
     self::logNote('Important note about the process');
     self::logNote('Another note with details');
@@ -407,7 +407,7 @@ final class LoggerTraitTest extends UnitTestCase {
    */
   #[DoesNotPerformAssertions]
   public function testLogNoteSilentMode(): void {
-    self::loggerSetVerbose(FALSE);
+    self::logSetVerbose(FALSE);
 
     self::logNote('Silent note');
   }
@@ -416,7 +416,7 @@ final class LoggerTraitTest extends UnitTestCase {
    * Test step logging workflow - with visual output for inspection.
    */
   public function testStepLoggingWorkflow(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
     self::logStepStart('Test workflow');
     self::logSubstep('Initializing');
@@ -442,7 +442,7 @@ final class LoggerTraitTest extends UnitTestCase {
    * With visual output for inspection.
    */
   public function testStepMethodsRespectVerboseMode(): void {
-    self::loggerSetVerbose(FALSE);
+    self::logSetVerbose(FALSE);
     self::logStepStart('Silent step');
     self::logSubstep('Silent substep');
     self::logNote('Silent note');
@@ -456,14 +456,14 @@ final class LoggerTraitTest extends UnitTestCase {
       throw new \RuntimeException('Failed to create memory buffer');
     }
     $this->logBuffer = $buffer;
-    self::loggerSetOutputStream($this->logBuffer);
+    self::logSetOutputStream($this->logBuffer);
 
     // Clear steps tracked by the silent calls to avoid interference.
     $reflection_class = new \ReflectionClass(self::class);
-    $steps_property = $reflection_class->getProperty('loggerSteps');
+    $steps_property = $reflection_class->getProperty('logSteps');
     $steps_property->setValue(NULL, []);
 
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
     self::logStepStart('Verbose step');
     self::logSubstep('Verbose substep');
     self::logNote('Verbose note');
@@ -483,7 +483,7 @@ final class LoggerTraitTest extends UnitTestCase {
    */
   #[DoesNotPerformAssertions]
   public function testElapsedTimeCalculation(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
     self::logStepStart('Timed step');
     // Delay long enough to show measurable elapsed time.
@@ -496,7 +496,7 @@ final class LoggerTraitTest extends UnitTestCase {
    */
   #[DoesNotPerformAssertions]
   public function testLogStepFinishWithoutStart(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
     // A finish without a start shows no elapsed time and does not throw.
     self::logStepFinish('Orphan step');
@@ -507,7 +507,7 @@ final class LoggerTraitTest extends UnitTestCase {
    */
   #[DoesNotPerformAssertions]
   public function testStepRestart(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
     self::logStepStart('First step');
 
@@ -524,10 +524,10 @@ final class LoggerTraitTest extends UnitTestCase {
    */
   #[DoesNotPerformAssertions]
   public function testStepNameMismatch(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
     $reflection_class = new \ReflectionClass(self::class);
-    $steps_property = $reflection_class->getProperty('loggerSteps');
+    $steps_property = $reflection_class->getProperty('logSteps');
 
     $steps_property->setValue(NULL, [
       [
@@ -543,19 +543,19 @@ final class LoggerTraitTest extends UnitTestCase {
   }
 
   /**
-   * Test formatElapsedTime method with various durations.
+   * Test logFormatElapsedTime method with various durations.
    */
   #[DataProvider('dataProviderFormatElapsedTime')]
   public function testFormatElapsedTime(float $input_seconds, string $expected_output): void {
     $reflection_class = new \ReflectionClass(self::class);
-    $method = $reflection_class->getMethod('formatElapsedTime');
+    $method = $reflection_class->getMethod('logFormatElapsedTime');
 
     $result = $method->invoke(NULL, $input_seconds);
     $this->assertSame($expected_output, $result);
   }
 
   /**
-   * Provides test data for formatElapsedTime method.
+   * Provides test data for logFormatElapsedTime method.
    *
    * @return \Iterator<string, array{float, string}>
    *   Test cases: [input_seconds, expected_output]
@@ -575,7 +575,7 @@ final class LoggerTraitTest extends UnitTestCase {
    * Test logStepSummary with no steps tracked.
    */
   public function testLogStepSummaryWithNoSteps(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
     self::logStepSummary();
 
@@ -587,7 +587,7 @@ final class LoggerTraitTest extends UnitTestCase {
    * Test logStepSummary with verbose mode disabled.
    */
   public function testLogStepSummaryWithVerboseDisabled(): void {
-    self::loggerSetVerbose(FALSE);
+    self::logSetVerbose(FALSE);
 
     self::logStepStart('Test step');
     self::logStepFinish('Test step');
@@ -600,7 +600,7 @@ final class LoggerTraitTest extends UnitTestCase {
       throw new \RuntimeException('Failed to create memory buffer');
     }
     $this->logBuffer = $buffer;
-    self::loggerSetOutputStream($this->logBuffer);
+    self::logSetOutputStream($this->logBuffer);
 
     self::logStepSummary();
 
@@ -661,10 +661,10 @@ final class LoggerTraitTest extends UnitTestCase {
    * Test that all steps are tracked in the array.
    */
   public function testStepArrayTracking(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
     $reflection_class = new \ReflectionClass(self::class);
-    $steps_property = $reflection_class->getProperty('loggerSteps');
+    $steps_property = $reflection_class->getProperty('logSteps');
 
     $this->assertEmpty($steps_property->getValue());
 
@@ -695,16 +695,16 @@ final class LoggerTraitTest extends UnitTestCase {
   }
 
   /**
-   * Test loggerSetOutputStream method.
+   * Test logSetOutputStream method.
    */
   public function testLoggerSetOutputStream(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
     $custom_buffer = fopen('php://memory', 'r+');
     if ($custom_buffer === FALSE) {
       throw new \RuntimeException('Failed to create custom buffer');
     }
-    self::loggerSetOutputStream($custom_buffer);
+    self::logSetOutputStream($custom_buffer);
 
     self::log('Custom stream test');
 
@@ -719,30 +719,30 @@ final class LoggerTraitTest extends UnitTestCase {
    * Test output stream fallback to STDERR when set to NULL.
    */
   public function testLoggerOutputStreamFallback(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
-    self::loggerSetOutputStream(NULL);
+    self::logSetOutputStream(NULL);
 
     $reflection_class = new \ReflectionClass(self::class);
-    $method = $reflection_class->getMethod('getOutputStream');
+    $method = $reflection_class->getMethod('logGetOutputStream');
 
     $stream = $method->invoke(NULL);
     $this->assertSame(STDERR, $stream);
   }
 
   /**
-   * Test loggerSetOutputStream validation with invalid input.
+   * Test logSetOutputStream validation with invalid input.
    */
   public function testLoggerSetOutputStreamWithInvalidInput(): void {
     $this->expectException(\InvalidArgumentException::class);
     $this->expectExceptionMessage('Stream must be a valid resource or NULL.');
 
     // @phpstan-ignore-next-line argument.type
-    self::loggerSetOutputStream('invalid_stream');
+    self::logSetOutputStream('invalid_stream');
   }
 
   /**
-   * Test loggerSetOutputStream validation with various invalid types.
+   * Test logSetOutputStream validation with various invalid types.
    */
   public function testLoggerSetOutputStreamWithVariousInvalidTypes(): void {
     $invalid_inputs = [
@@ -756,7 +756,7 @@ final class LoggerTraitTest extends UnitTestCase {
     foreach ($invalid_inputs as $type => $invalid_input) {
       try {
         // @phpstan-ignore-next-line argument.type
-        self::loggerSetOutputStream($invalid_input);
+        self::logSetOutputStream($invalid_input);
         $this->fail(sprintf('Expected InvalidArgumentException for %s input', $type));
       }
       catch (\InvalidArgumentException $e) {
@@ -766,7 +766,7 @@ final class LoggerTraitTest extends UnitTestCase {
   }
 
   /**
-   * Test loggerSetOutputStream accepts valid resource.
+   * Test logSetOutputStream accepts valid resource.
    */
   public function testLoggerSetOutputStreamWithValidResource(): void {
     $valid_resource = fopen('php://memory', 'r+');
@@ -774,10 +774,10 @@ final class LoggerTraitTest extends UnitTestCase {
       throw new \RuntimeException('Failed to create test resource');
     }
 
-    self::loggerSetOutputStream($valid_resource);
+    self::logSetOutputStream($valid_resource);
 
     $reflection_class = new \ReflectionClass(self::class);
-    $method = $reflection_class->getMethod('getOutputStream');
+    $method = $reflection_class->getMethod('logGetOutputStream');
 
     $stream = $method->invoke(NULL);
     $this->assertSame($valid_resource, $stream);
@@ -789,7 +789,7 @@ final class LoggerTraitTest extends UnitTestCase {
    * Test substep and note output formatting.
    */
   public function testSubstepAndNoteOutput(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
     self::logSubstep('Processing data');
     self::logNote('Important detail');
@@ -804,7 +804,7 @@ final class LoggerTraitTest extends UnitTestCase {
    */
   #[DataProvider('dataProviderLoggerMethodsVerboseMode')]
   public function testLoggerMethodsVerboseMode(bool $verbose_mode, string $description, callable $test_method): void {
-    self::loggerSetVerbose($verbose_mode);
+    self::logSetVerbose($verbose_mode);
 
     $test_method(self::class);
 
@@ -844,7 +844,7 @@ final class LoggerTraitTest extends UnitTestCase {
    */
   #[DataProvider('dataProviderStepMethods')]
   public function testStepMethods(string $step_name, ?string $message, array $expected_output): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
     if (str_contains($expected_output[0], 'START')) {
       self::logStepStart($message);
@@ -881,14 +881,14 @@ final class LoggerTraitTest extends UnitTestCase {
    */
   #[DataProvider('dataProviderSectionFormatting')]
   public function testSectionFormatting(string $title, ?string $message, bool $double_border, int $min_width, array $expected_strings): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
     $buffer = fopen('php://memory', 'r+');
     if ($buffer === FALSE) {
       throw new \RuntimeException('Failed to create memory buffer');
     }
     $this->logBuffer = $buffer;
-    self::loggerSetOutputStream($this->logBuffer);
+    self::logSetOutputStream($this->logBuffer);
 
     self::logSection($title, $message, $double_border, $min_width);
 
@@ -933,12 +933,12 @@ final class LoggerTraitTest extends UnitTestCase {
    * Test hierarchical step tracking with parent stack.
    */
   public function testHierarchicalStepTracking(): void {
-    self::loggerSetVerbose(TRUE);
+    self::logSetVerbose(TRUE);
 
     $reflection_class = new \ReflectionClass(self::class);
-    $steps_property = $reflection_class->getProperty('loggerSteps');
+    $steps_property = $reflection_class->getProperty('logSteps');
 
-    $stack_property = $reflection_class->getProperty('loggerStepStack');
+    $stack_property = $reflection_class->getProperty('logStepStack');
 
     self::logStepStart('Level 1');
     $steps = $steps_property->getValue();
@@ -1036,13 +1036,13 @@ final class LoggerTraitTest extends UnitTestCase {
   }
 
   /**
-   * Test loggerInfo method.
+   * Test logInfo method.
    */
   public function testLoggerInfo(): void {
     self::logStepStart('TestStep');
     self::logStepFinish('TestStep');
 
-    $info = $this->loggerInfo();
+    $info = $this->logInfo();
 
     $this->assertStringContainsString('STEP SUMMARY', $info);
     $this->assertStringContainsString('testLoggerInfo', $info);
@@ -1050,10 +1050,10 @@ final class LoggerTraitTest extends UnitTestCase {
   }
 
   /**
-   * Test loggerInfo with no steps.
+   * Test logInfo with no steps.
    */
   public function testLoggerInfoEmpty(): void {
-    $info = $this->loggerInfo();
+    $info = $this->logInfo();
 
     $this->assertStringContainsString('STEP SUMMARY', $info);
     $this->assertSame("STEP SUMMARY\n", $info);

@@ -22,13 +22,13 @@ final class LoggerTraitFunctionalTest extends UnitTestCase {
    */
   protected function setUp(): void {
     parent::setUp();
-    self::loggerSetVerbose(FALSE);
+    self::logSetVerbose(FALSE);
 
     $reflection_class = new \ReflectionClass(self::class);
-    $steps_property = $reflection_class->getProperty('loggerSteps');
+    $steps_property = $reflection_class->getProperty('logSteps');
     $steps_property->setValue(NULL, []);
 
-    $stack_property = $reflection_class->getProperty('loggerStepStack');
+    $stack_property = $reflection_class->getProperty('logStepStack');
     $stack_property->setValue(NULL, []);
   }
 
@@ -36,7 +36,7 @@ final class LoggerTraitFunctionalTest extends UnitTestCase {
    * {@inheritdoc}
    */
   protected function tearDown(): void {
-    self::loggerSetOutputStream(NULL);
+    self::logSetOutputStream(NULL);
     parent::tearDown();
   }
 
@@ -47,8 +47,8 @@ final class LoggerTraitFunctionalTest extends UnitTestCase {
    */
   #[DoesNotPerformAssertions]
   public function testFunctionalBasicLogging(): void {
-    self::loggerSetOutputStream(NULL);
-    self::loggerSetVerbose(TRUE);
+    self::logSetOutputStream(NULL);
+    self::logSetVerbose(TRUE);
 
     self::log('This is a basic log message');
     self::logSection('TEST SECTION', 'This is a test section with content');
@@ -61,8 +61,8 @@ final class LoggerTraitFunctionalTest extends UnitTestCase {
    */
   #[DoesNotPerformAssertions]
   public function testFunctionalStepWorkflow(): void {
-    self::loggerSetOutputStream(NULL);
-    self::loggerSetVerbose(TRUE);
+    self::logSetOutputStream(NULL);
+    self::logSetVerbose(TRUE);
 
     self::logStepStart('Processing data');
     self::logSubstep('Loading configuration');
@@ -87,8 +87,8 @@ final class LoggerTraitFunctionalTest extends UnitTestCase {
    */
   #[DoesNotPerformAssertions]
   public function testFunctionalSectionFormatting(): void {
-    self::loggerSetOutputStream(NULL);
-    self::loggerSetVerbose(TRUE);
+    self::logSetOutputStream(NULL);
+    self::logSetVerbose(TRUE);
 
     self::logSection('STANDARD SECTION', 'This is a standard section with single border');
     self::logSection('DOUBLE BORDER SECTION', 'This section uses double border characters', TRUE);
@@ -103,8 +103,8 @@ final class LoggerTraitFunctionalTest extends UnitTestCase {
    */
   #[DoesNotPerformAssertions]
   public function testFunctionalFileLogging(): void {
-    self::loggerSetOutputStream(NULL);
-    self::loggerSetVerbose(TRUE);
+    self::logSetOutputStream(NULL);
+    self::logSetVerbose(TRUE);
 
     $temp_file = tempnam(sys_get_temp_dir(), 'logger_functional_test');
     file_put_contents($temp_file, "Sample file content\nLine 2\nLine 3\n");
@@ -121,8 +121,8 @@ final class LoggerTraitFunctionalTest extends UnitTestCase {
    */
   #[DoesNotPerformAssertions]
   public function testFunctionalHierarchicalSteps(): void {
-    self::loggerSetOutputStream(NULL);
-    self::loggerSetVerbose(TRUE);
+    self::logSetOutputStream(NULL);
+    self::logSetVerbose(TRUE);
 
     $this->stepDeploymentProcess();
 

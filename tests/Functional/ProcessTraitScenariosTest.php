@@ -24,7 +24,7 @@ final class ProcessTraitScenariosTest extends UnitTestCase {
 
   protected function setUp(): void {
     parent::setUp();
-    $this->processStreamOutput = self::isDebug();
+    $this->processStreamingOutput = self::isDebug();
   }
 
   protected function tearDown(): void {
