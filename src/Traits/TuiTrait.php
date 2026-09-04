@@ -5,10 +5,7 @@ declare(strict_types=1);
 namespace AlexSkrypnyk\PhpunitHelpers\Traits;
 
 /**
- * Trait TuiTrait.
- *
- * Provides constants and methods for interacting with a
- * Textual User Interface (TUI).
+ * Provides helpers for interacting with a Textual User Interface (TUI).
  *
  * A "keystroke" is a single key or special key.
  * An "entry" consists of one or more keystrokes that form a complete input.

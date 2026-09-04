@@ -14,7 +14,7 @@ trait StringTrait {
   /**
    * Asserts string contains or does not contain expected values with prefixes.
    *
-   * Supports four single-character prefixes for precise matching control:
+   * Supports four single-character prefixes to control matching:
    * - '+' = exact match present
    * - '*' = substring present
    * - '-' = exact match absent

@@ -216,7 +216,7 @@ final class ApplicationTraitTest extends UnitTestCase {
 
     $this->applicationTester = new ApplicationTester($this->application);
 
-    // With expect_fail as true, the exception should be caught.
+    // With expect_fail as TRUE, the exception is caught.
     $this->applicationRun([], [], TRUE);
 
     $this->expectException(AssertionFailedError::class);
@@ -349,8 +349,8 @@ final class ApplicationTraitTest extends UnitTestCase {
 
     $this->applicationInitFromCommand($command);
 
-    // The applicationRun should not throw an exception when the command returns
-    // a non-zero exit code but expect_fail is TRUE.
+    // applicationRun() does not throw when the command returns a non-zero
+    // exit code but expect_fail is TRUE.
     $output = $this->applicationRun([], [], TRUE);
 
     $this->assertStringContainsString('Non-zero exit', $output);
@@ -552,7 +552,7 @@ final class ApplicationTraitTest extends UnitTestCase {
 
     $this->assertApplicationSuccessful();
 
-    // Test shortcut mode - no prefixes, all should be present as substrings.
+    // Without prefixes, every string must be present as a substring.
     $this->assertApplicationAnyOutputContainsOrNot([
       'Hello',
       'Test',
@@ -565,12 +565,11 @@ final class ApplicationTraitTest extends UnitTestCase {
 
     $this->assertApplicationSuccessful();
 
-    // Test exact match present (trailing whitespace is trimmed)
+    // Trailing whitespace is trimmed before the exact match.
     $this->assertApplicationOutputContainsOrNot([
       '+ Hello, World!',
     ]);
 
-    // Test exact match absent.
     $this->assertApplicationOutputContainsOrNot([
       '- Not exact match',
     ]);
@@ -646,7 +645,7 @@ final class ApplicationTraitTest extends UnitTestCase {
 
     $this->assertApplicationSuccessful();
 
-    // Test shortcut mode - no prefixes, all should be present as substrings.
+    // Without prefixes, every string must be present as a substring.
     $this->assertApplicationAnyOutputContainsOrNot([
       'Test Error',
       'Output message',
@@ -677,8 +676,8 @@ final class ApplicationTraitTest extends UnitTestCase {
       '+ Hello, World!',
     ]);
 
-    // Single-quoted, so this holds a literal backslash-n rather than a newline
-    // and therefore never equals the output.
+    // The single-quoted string holds a literal backslash-n, not a newline,
+    // so it never equals the output.
     $this->assertApplicationOutputContainsOrNot([
       '- Hello, World!\nExtra',
     ]);
@@ -729,12 +728,11 @@ final class ApplicationTraitTest extends UnitTestCase {
 
     $this->assertApplicationSuccessful();
 
-    // Exact match with multi-line output (no need for trailing \n)
+    // Exact match works without a trailing \n.
     $this->assertApplicationOutputContainsOrNot([
       '+ Line 1' . "\n" . 'Line 2' . "\n" . 'Line 3',
     ]);
 
-    // Partial match still works.
     $this->assertApplicationOutputContainsOrNot([
       '* Line 2',
     ]);

@@ -204,7 +204,6 @@ class LocationsTraitTest extends TestCase {
 
     $this->assertCount(0, $copied_files);
 
-    // Test with explicit base directory and no random suffix.
     $copied_files = self::locationsCopyFilesToSut($files, $source_dir, FALSE);
 
     $this->assertCount(2, $copied_files);
@@ -292,7 +291,6 @@ class LocationsTraitTest extends TestCase {
       $file_paths[$relative_path] = $full_path;
     }
 
-    // Create a symlink for the symlink test case.
     if (isset($source_files['link_target.txt'])) {
       $target = $source_dir . DIRECTORY_SEPARATOR . 'link_target.txt';
       $link = $source_dir . DIRECTORY_SEPARATOR . 'symlink.txt';

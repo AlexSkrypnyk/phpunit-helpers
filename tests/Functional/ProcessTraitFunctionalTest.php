@@ -41,7 +41,6 @@ final class ProcessTraitFunctionalTest extends UnitTestCase {
     $this->assertStringContainsString('Failed stdout', (string) $combined);
     $this->assertStringContainsString('Failed stderr', (string) $combined);
 
-    // Process output headers and footers appear.
     $this->assertStringContainsString('⬇⬇⬇ STANDARD OUTPUT ⬇⬇⬇', (string) $combined);
     $this->assertStringContainsString('⬆⬆⬆ STANDARD OUTPUT ⬆⬆⬆', (string) $combined);
     $this->assertStringContainsString('▼▼▼ ERROR OUTPUT ▼▼▼', (string) $combined);
@@ -77,7 +76,6 @@ final class ProcessTraitFunctionalTest extends UnitTestCase {
     $this->assertStringContainsString('Failed stdout', (string) $combined);
     $this->assertStringContainsString('Failed stderr', (string) $combined);
 
-    // Process output headers and footers appear.
     $this->assertStringContainsString('⬇⬇⬇ STANDARD OUTPUT ⬇⬇⬇', (string) $combined);
     $this->assertStringContainsString('⬆⬆⬆ STANDARD OUTPUT ⬆⬆⬆', (string) $combined);
     $this->assertStringContainsString('▼▼▼ ERROR OUTPUT ▼▼▼', (string) $combined);

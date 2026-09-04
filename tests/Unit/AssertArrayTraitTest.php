@@ -368,7 +368,6 @@ final class AssertArrayTraitTest extends TestCase {
       }
     }
 
-    // Use match statement for type-safe method calls.
     match ($method) {
       'assertArrayContainsArray' => $this->assertArrayContainsArray($args[0], $args[1]),
       'assertArrayNotContainsString' => $this->assertArrayNotContainsString($args[0], $args[1]),

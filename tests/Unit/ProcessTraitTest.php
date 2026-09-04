@@ -567,7 +567,6 @@ EOL;
   }
 
   public function testProcessStreamingCallbackWithEmptyBuffer(): void {
-    // The callback captures output instead of writing to STDOUT.
     $captured_output = '';
     $test_callback = $this->makeStreamingCaptureCallback($captured_output);
 
@@ -578,7 +577,6 @@ EOL;
   }
 
   public function testProcessStreamingCallbackWithDifferentLineEndings(): void {
-    // The callback captures output instead of writing to STDOUT.
     $captured_output = '';
     $test_callback = $this->makeStreamingCaptureCallback($captured_output);
 
@@ -600,7 +598,6 @@ EOL;
   }
 
   public function testProcessStreamingCallbackWithErrorOutput(): void {
-    // The callback captures output instead of writing to STDOUT.
     $captured_output = '';
     $test_callback = $this->makeStreamingCaptureCallback($captured_output);
 

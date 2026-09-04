@@ -317,12 +317,12 @@ trait LoggerTrait {
       return strlen($indentation . $step['name']);
     }, static::$logSteps);
     $max_name_length = max($name_lengths);
-    // Minimum for "Step" header.
+    // The "Step" header sets the minimum.
     $max_name_length = max($max_name_length, 4);
 
-    // "Complete" or "Running"
+    // The status is "Complete" or "Running".
     $max_status_length = 8;
-    // "Elapsed" header length
+    // The "Elapsed" header is 7 characters.
     $max_elapsed_length = 7;
 
     $header = sprintf(
