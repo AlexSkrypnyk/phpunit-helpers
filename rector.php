@@ -27,11 +27,13 @@ use Rector\Php71\Rector\Assign\AssignArrayToStringRector;
 use Rector\Php80\Rector\Switch_\ChangeSwitchToMatchRector;
 use Rector\Privatization\Rector\Class_\FinalizeTestCaseClassRector;
 use Rector\TypeDeclaration\Rector\StmtsAwareInterface\DeclareStrictTypesRector;
+use Rector\ValueObject\PhpVersion;
 
 return RectorConfig::configure()
   ->withPaths([
     __DIR__ . '/**',
   ])
+  ->withPhpVersion(PhpVersion::PHP_83)
   ->withPhpSets(php83: TRUE)
   ->withPreparedSets(
     deadCode: TRUE,
