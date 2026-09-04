@@ -24,6 +24,5 @@ if (isset($_SERVER['SCRIPT_FILENAME']) && is_string($_SERVER['SCRIPT_FILENAME'])
   $application->run();
 }
 else {
-  // If this file is included, return the application instance.
   return $application;
 }
