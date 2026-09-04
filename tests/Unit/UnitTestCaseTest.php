@@ -6,6 +6,7 @@ namespace AlexSkrypnyk\PhpunitHelpers\Tests\Unit;
 
 use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\InfoMethodsTrait;
 use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
+use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(UnitTestCase::class)]
@@ -45,6 +46,39 @@ final class UnitTestCaseTest extends UnitTestCase {
 
     $this->assertStringNotContainsString('This method contains test in the middle and should be excluded', $info);
     $this->assertStringNotContainsString('contestableSituationInfo', $info);
+  }
+
+  public function testInvokeTestMethodAppendsSuffixToFailure(): void {
+    $message = '';
+
+    try {
+      $this->invokeTestMethod('fixtureFailingAssertion', []);
+    }
+    catch (AssertionFailedError $assertion_failed_error) {
+      $message = $assertion_failed_error->getMessage();
+    }
+
+    $this->assertStringContainsString('Failed asserting', $message);
+    $this->assertStringContainsString('Additional information:', $message);
+    $this->assertStringContainsString('First info value', $message);
+  }
+
+  public function testInvokeTestMethodLeavesPassingMethodAlone(): void {
+    $this->assertNull($this->invokeTestMethod('fixturePassingAssertion', []));
+  }
+
+  /**
+   * Fails an assertion so the suffix path runs.
+   */
+  public function fixtureFailingAssertion(): void {
+    $this->assertSame('expected', 'actual');
+  }
+
+  /**
+   * Returns without failing so the suffix path is skipped.
+   */
+  public function fixturePassingAssertion(): void {
+    $this->addToAssertionCount(1);
   }
 
 }
