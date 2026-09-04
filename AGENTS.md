@@ -130,7 +130,7 @@ Tests carrying `#[Group('manual')]` are excluded from the default suite and are 
 
 GitHub Actions workflows test across:
 
-- PHP versions: 8.2, 8.3, 8.4, 8.5
+- PHP versions: 8.3, 8.4, 8.5
 - Dependency preferences: `normal` and `lowest`, which between them cover the supported PHPUnit range
 
 Key workflows:
