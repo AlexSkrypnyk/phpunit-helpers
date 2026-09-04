@@ -499,7 +499,7 @@ trait ApplicationTrait {
    *   Optional failure message.
    */
   public function assertApplicationAnyOutputContains(array|string $expected, ?string $message = NULL): void {
-    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
+    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized.');
     $output = $this->applicationTester->getDisplay() . $this->applicationTester->getErrorOutput();
 
     $expected = is_array($expected) ? $expected : [$expected];
@@ -526,7 +526,7 @@ trait ApplicationTrait {
    *   Optional failure message.
    */
   public function assertApplicationAnyOutputNotContains(array|string $expected, ?string $message = NULL): void {
-    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized');
+    $this->assertNotNull($this->applicationTester, $message ?: 'Application is not initialized.');
     $output = $this->applicationTester->getDisplay() . $this->applicationTester->getErrorOutput();
 
     $expected = is_array($expected) ? $expected : [$expected];
