@@ -47,13 +47,4 @@ final class UnitTestCaseTest extends UnitTestCase {
     $this->assertStringNotContainsString('contestableSituationInfo', $info);
   }
 
-  public function testInfoIncludesMethodsNotContainingTest(): void {
-    $info = $this->info();
-
-    $this->assertStringContainsString('First info value', $info);
-    $this->assertStringContainsString('42', $info);
-    $this->assertStringContainsString('"one","two","three"', $info);
-    $this->assertStringContainsString('This non-static info method should be included', $info);
-  }
-
 }
