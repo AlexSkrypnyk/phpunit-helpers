@@ -472,85 +472,33 @@ final class ApplicationTraitTest extends UnitTestCase {
     $this->assertStringContainsString('APPLICATION: Not initialized', $info);
   }
 
-  public function testAssertApplicationSuccessfulWhenNull(): void {
+  #[DataProvider('dataProviderAssertionsWhenNull')]
+  public function testAssertionsWhenNull(string $method, array $arguments): void {
     $this->applicationTester = NULL;
 
     $this->expectException(ExpectationFailedException::class);
     $this->expectExceptionMessage('Application is not initialized.');
 
-    $this->assertApplicationSuccessful();
+    $callable = [$this, $method];
+    if (!is_callable($callable)) {
+      throw new \RuntimeException(sprintf('Assertion method %s does not exist.', $method));
+    }
+
+    $callable(...$arguments);
   }
 
-  public function testAssertApplicationFailedWhenNull(): void {
-    $this->applicationTester = NULL;
-
-    $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Application is not initialized.');
-
-    $this->assertApplicationFailed();
-  }
-
-  public function testAssertApplicationOutputContainsWhenNull(): void {
-    $this->applicationTester = NULL;
-
-    $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Application is not initialized.');
-
-    $this->assertApplicationOutputContains('test');
-  }
-
-  public function testAssertApplicationOutputNotContainsWhenNull(): void {
-    $this->applicationTester = NULL;
-
-    $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Application is not initialized.');
-
-    $this->assertApplicationOutputNotContains('test');
-  }
-
-  public function testAssertApplicationErrorOutputContainsWhenNull(): void {
-    $this->applicationTester = NULL;
-
-    $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Application is not initialized.');
-
-    $this->assertApplicationErrorOutputContains('test');
-  }
-
-  public function testAssertApplicationErrorOutputNotContainsWhenNull(): void {
-    $this->applicationTester = NULL;
-
-    $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Application is not initialized.');
-
-    $this->assertApplicationErrorOutputNotContains('test');
-  }
-
-  public function testAssertApplicationOutputContainsOrNotWhenNull(): void {
-    $this->applicationTester = NULL;
-
-    $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Application is not initialized.');
-
-    $this->assertApplicationOutputContainsOrNot('test');
-  }
-
-  public function testAssertApplicationErrorOutputContainsOrNotWhenNull(): void {
-    $this->applicationTester = NULL;
-
-    $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Application is not initialized.');
-
-    $this->assertApplicationErrorOutputContainsOrNot('test');
-  }
-
-  public function testAssertApplicationAnyOutputContainsOrNotWhenNull(): void {
-    $this->applicationTester = NULL;
-
-    $this->expectException(ExpectationFailedException::class);
-    $this->expectExceptionMessage('Application is not initialized.');
-
-    $this->assertApplicationAnyOutputContainsOrNot('test');
+  public static function dataProviderAssertionsWhenNull(): \Iterator {
+    yield 'successful' => ['assertApplicationSuccessful', []];
+    yield 'failed' => ['assertApplicationFailed', []];
+    yield 'output_contains' => ['assertApplicationOutputContains', ['test']];
+    yield 'output_not_contains' => ['assertApplicationOutputNotContains', ['test']];
+    yield 'error_output_contains' => ['assertApplicationErrorOutputContains', ['test']];
+    yield 'error_output_not_contains' => ['assertApplicationErrorOutputNotContains', ['test']];
+    yield 'output_contains_or_not' => ['assertApplicationOutputContainsOrNot', ['test']];
+    yield 'error_output_contains_or_not' => ['assertApplicationErrorOutputContainsOrNot', ['test']];
+    yield 'any_output_contains' => ['assertApplicationAnyOutputContains', ['test']];
+    yield 'any_output_not_contains' => ['assertApplicationAnyOutputNotContains', ['test']];
+    yield 'any_output_contains_or_not' => ['assertApplicationAnyOutputContainsOrNot', ['test']];
   }
 
   public function testApplicationAnyOutputErrorCommandAssertions(): void {
