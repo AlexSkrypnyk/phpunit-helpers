@@ -38,7 +38,7 @@
 ## 📋 Requirements
 
 - PHP 8.3 or newer
-- PHPUnit 12.5.24 or newer, or PHPUnit 13
+- PHPUnit 11.4 or newer, including PHPUnit 12 and PHPUnit 13
 
 Two traits need a package that this library does not require itself, so add it to your own project when you use them:
 
@@ -61,7 +61,7 @@ The `UnitTestCase` class is the base class for unit tests. It includes the `Refl
 
 `setUp()` initialises the test locations and `tearDown()` removes the workspace directory again. The workspace is kept when the test failed or errored, or when debug mode is on, so the produced files can be inspected.
 
-The class also provides an `info()` method that collects additional information about the test from methods whose name ends with `Info`. Methods containing `test` in their name are excluded to avoid conflicts with test methods. The collected information is also appended to the message of any failing assertion, so a failure report carries the test's context without any extra call.
+The class also provides an `info()` method that collects additional information about the test from methods whose name ends with `Info`. Methods containing `test` in their name are excluded to avoid conflicts with test methods. The collected information is also appended to the message of any failing assertion, so a failure report carries the test's context without any extra call. Appending relies on a hook that PHPUnit added in 12.5.24; on earlier versions `info()` still works but failure messages are left untouched.
 
 ```php
 use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
