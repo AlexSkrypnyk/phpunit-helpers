@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AlexSkrypnyk\PhpunitHelpers\Tests\Functional;
 
+use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\AssertionSuffixTrait;
 use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
 
@@ -12,6 +13,8 @@ use PHPUnit\Framework\Attributes\CoversNothing;
  */
 #[CoversNothing]
 final class ProcessTraitFunctionalTest extends UnitTestCase {
+
+  use AssertionSuffixTrait;
 
   public function testProcessStreamingWithDebugEnabled(): void {
     $output = $this->runPhpunit(TRUE);
@@ -25,13 +28,12 @@ final class ProcessTraitFunctionalTest extends UnitTestCase {
 
     // The onNotSuccessfulTest() debug output appears in stderr.
     $this->assertStringContainsString('Error: ', (string) $output['stderr']);
-    $this->assertStringContainsString('Additional information:', (string) $output['stderr']);
+    $this->assertAssertionSuffix((string) $output['stderr']);
 
     // Common failure output.
     $this->assertStringContainsString('PROCESS FAILED', (string) $combined);
     $this->assertStringContainsString('PROCESS SUCCEEDED but failure was expected', (string) $combined);
-    $this->assertStringContainsString('Additional information:', (string) $combined);
-    $this->assertStringContainsString('LOCATIONS', (string) $combined);
+    $this->assertAssertionSuffix((string) $combined);
     $this->assertStringContainsString('Tests: 4', (string) $combined);
     $this->assertStringContainsString('Failures: 2', (string) $combined);
 
@@ -65,8 +67,7 @@ final class ProcessTraitFunctionalTest extends UnitTestCase {
     // Common failure output still appears.
     $this->assertStringContainsString('PROCESS FAILED', (string) $combined);
     $this->assertStringContainsString('PROCESS SUCCEEDED but failure was expected', (string) $combined);
-    $this->assertStringContainsString('Additional information:', (string) $combined);
-    $this->assertStringContainsString('LOCATIONS', (string) $combined);
+    $this->assertAssertionSuffix((string) $combined);
     $this->assertStringContainsString('Tests: 4', (string) $combined);
     $this->assertStringContainsString('Failures: 2', (string) $combined);
 
@@ -181,7 +182,24 @@ final class ProcessTraitFunctionalTest extends UnitTestCase {
     }
 
     $final_output = implode('', array_column($final_phase, 'data'));
-    $this->assertStringContainsString('Additional information:', $final_output);
+    $this->assertAssertionSuffix($final_output);
+  }
+
+  /**
+   * Asserts the assertion suffix is present only where the runtime adds it.
+   *
+   * @param string $haystack
+   *   The output to search.
+   */
+  protected function assertAssertionSuffix(string $haystack): void {
+    if (!self::supportsAssertionSuffix()) {
+      $this->assertStringNotContainsString('Additional information:', $haystack);
+
+      return;
+    }
+
+    $this->assertStringContainsString('Additional information:', $haystack);
+    $this->assertStringContainsString('LOCATIONS', $haystack);
   }
 
 }

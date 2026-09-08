@@ -22,3 +22,16 @@ parameters:
       message: '#.*no value type specified in iterable type array.#'
       path: tests/*
       reportUnmatched: false
+    -
+      # PHPUnit declares invokeTestMethod() from 12.5.24, so the parent call is
+      # undefined when analysis runs against an older supported version.
+      identifier: staticMethod.notFound
+      path: src/UnitTestCase.php
+      reportUnmatched: false
+    -
+      # PHPUnit 11 annotates assertNotEmpty() with '@phpstan-assert !empty',
+      # which narrows the value so that a following emptiness guard reads as
+      # always true. PHPUnit 12 dropped the annotation and needs the guard.
+      identifier: notIdentical.alwaysTrue
+      path: tests/Unit/LocationsTraitTest.php
+      reportUnmatched: false

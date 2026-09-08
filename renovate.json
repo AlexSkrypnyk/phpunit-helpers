@@ -17,6 +17,11 @@
             "enabled": false
         },
         {
+            "matchManagers": ["composer"],
+            "matchPackageNames": ["phpunit/phpunit"],
+            "rangeStrategy": "in-range-only"
+        },
+        {
             "matchPackageNames": ["*"],
             "groupName": "all dependencies",
             "groupSlug": "all"

@@ -111,7 +111,18 @@ abstract class UnitTestCase extends TestCase {
   }
 
   /**
-   * {@inheritdoc}
+   * Invokes the test method and appends the suffix to an assertion failure.
+   *
+   * PHPUnit declares this hook from 12.5.24, so earlier versions never call
+   * this method and append no suffix.
+   *
+   * @param string $methodName
+   *   The name of the test method to invoke.
+   * @param array<mixed> $testArguments
+   *   The arguments to invoke the test method with.
+   *
+   * @return mixed
+   *   The value returned by the test method.
    */
   protected function invokeTestMethod(string $methodName, array $testArguments): mixed {
     try {

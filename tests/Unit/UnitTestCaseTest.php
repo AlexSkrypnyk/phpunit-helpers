@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AlexSkrypnyk\PhpunitHelpers\Tests\Unit;
 
+use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\AssertionSuffixTrait;
 use AlexSkrypnyk\PhpunitHelpers\Tests\Fixtures\InfoMethodsTrait;
 use AlexSkrypnyk\PhpunitHelpers\UnitTestCase;
 use PHPUnit\Framework\AssertionFailedError;
@@ -12,6 +13,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 #[CoversClass(UnitTestCase::class)]
 final class UnitTestCaseTest extends UnitTestCase {
 
+  use AssertionSuffixTrait;
   use InfoMethodsTrait;
 
   public function testLocations(): void {
@@ -49,6 +51,10 @@ final class UnitTestCaseTest extends UnitTestCase {
   }
 
   public function testInvokeTestMethodAppendsSuffixToFailure(): void {
+    if (!self::supportsAssertionSuffix()) {
+      $this->markTestSkipped('PHPUnit does not provide invokeTestMethod().');
+    }
+
     $message = '';
 
     try {
@@ -64,6 +70,10 @@ final class UnitTestCaseTest extends UnitTestCase {
   }
 
   public function testInvokeTestMethodLeavesPassingMethodAlone(): void {
+    if (!self::supportsAssertionSuffix()) {
+      $this->markTestSkipped('PHPUnit does not provide invokeTestMethod().');
+    }
+
     $this->assertNull($this->invokeTestMethod('fixturePassingAssertion', []));
   }
 
