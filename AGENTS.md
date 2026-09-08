@@ -16,7 +16,7 @@ This project ships classes only - there is no CLI entry point:
 - **Consumed by:** other projects, via `composer require`
 - **Contents:** `src/Traits/` holds the reusable test traits; `src/UnitTestCase.php` is the base test case
 
-Add classes under `src/` and cover each one with a test in `tests/Unit/`.
+Add classes under `src/` and cover each one with a test in `tests/Unit/`. Benchmark subjects live in `benchmarks/`, autoloaded as `AlexSkrypnyk\PhpunitHelpers\Benchmarks\`.
 
 ### Namespace Structure
 
@@ -60,6 +60,22 @@ composer test-coverage
 
 # Run the tests excluded from the default suite
 ./vendor/bin/phpunit --group=manual
+```
+
+### Benchmarking
+
+```bash
+# Run the suite once and report the timings
+composer benchmark
+
+# Measure two checkouts and assert the head against the base (used by CI)
+composer benchmark-compare -- --base=.artifacts/bench/base --head=.artifacts/bench/head
+
+# Run a single benchmark class
+./vendor/bin/phpbench run benchmarks/ReflectionBench.php
+
+# Run with detailed output
+./vendor/bin/phpbench run --report=aggregate
 ```
 
 ### Building
@@ -120,6 +136,8 @@ Four deliberate exceptions, each of which stays as it is:
 
 Tests carrying `#[Group('manual')]` are excluded from the default suite and are run on demand to observe behaviour interactively.
 
+Benchmark subjects live in `benchmarks/` and cover the traits that do pure computation: reflection access, string assertions and array assertions. The traits that spawn processes or touch the filesystem are excluded on purpose, because their deviation on a shared runner swamps the cost being measured.
+
 ### Writing Tests
 
 - Coverage attributes: `#[CoversClass(ClassName::class)]`
@@ -136,6 +154,7 @@ GitHub Actions workflows test across:
 Key workflows:
 
 - `.github/workflows/test-php.yml` - PHP testing, linting and coverage upload (Codecov)
+- `.github/workflows/benchmark-php.yml` - PHPBench. On a pull request it checks out the base and head revisions into `base/` and `head/`, measures both with one toolchain on one runner, and fails when a subject gets slower by more than 15%. On a push to `main` it measures the merged revision alone and replaces the table on the `Performance benchmarks` issue when one is open. Nothing is stored between runs, so there is no baseline to refresh.
 - `.github/workflows/draft-release-notes.yml` - release notes drafting
 - `.github/workflows/assign-author.yml` - PR author auto-assign
 

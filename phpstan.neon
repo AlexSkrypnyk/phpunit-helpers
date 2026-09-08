@@ -7,6 +7,7 @@ parameters:
   level: 9
 
   paths:
+    - benchmarks
     - src
     - tests
 
@@ -15,6 +16,13 @@ parameters:
     - node_modules/*
 
   ignoreErrors:
+    -
+      # The traits declare their array parameters without a value type. The
+      # error is reported once per class that composes the trait, so the
+      # benchmarks repeat what the tests already suppress below.
+      message: '#.*no value type specified in iterable type array.#'
+      path: benchmarks/*
+      reportUnmatched: false
     -
       # Since tests and data providers do not have to have parameter docblocks,
       # it is not possible to specify the type of the parameter, so we ignore
