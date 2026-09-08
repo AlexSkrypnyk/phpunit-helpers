@@ -90,6 +90,7 @@ final class BenchmarkComparisonTest extends TestCase {
     $this->assertStringContainsString('no PHPBench configuration', $output, 'The run must warn that the base carries no configuration.');
     $this->assertStringContainsString('benchSleep', $output);
   }
+
   public function testWarnsWhenCheckoutPathsDifferInLength(): void {
     $base = $this->createCheckout('base', 1000);
     $head = $this->createCheckout('head-of-a-different-length', 1000);
