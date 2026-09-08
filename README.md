@@ -38,7 +38,7 @@
 ## 📋 Requirements
 
 - PHP 8.3 or newer
-- PHPUnit 11.4 or newer, including PHPUnit 12 and PHPUnit 13
+- PHPUnit 11.4 through PHPUnit 13
 
 Two traits need a package that this library does not require itself, so add it to your own project when you use them:
 
