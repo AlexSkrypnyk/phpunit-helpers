@@ -130,6 +130,8 @@ final class BenchmarkComparisonTest extends TestCase {
     $bench = <<<PHP
     <?php
 
+    declare(strict_types=1);
+
     use PhpBench\\Attributes\\Iterations;
     use PhpBench\\Attributes\\Revs;
 
