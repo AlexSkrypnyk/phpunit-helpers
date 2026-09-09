@@ -1,0 +1,118 @@
+name: Benchmark PHP
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+      - 'feature/**'
+
+jobs:
+  benchmark-php:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    permissions:
+      contents: read
+
+    steps:
+      # The two directory names are the same length on purpose. A subject that
+      # resolves against the working directory pays for every character of it,
+      # so unequal names would show up as a difference between the revisions.
+      - name: Checkout base revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+          persist-credentials: false
+
+      - name: Checkout head revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          path: head
+          persist-credentials: false
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ~/.cache/composer
+          key: ${{ runner.os }}-composer-${{ hashFiles('head/composer.json') }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: 8.3
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --working-dir=head
+
+      # One toolchain measures both revisions, so the comparison reflects the
+      # change to 'src' rather than a difference between two dependency trees.
+      - name: Reuse the head toolchain for the base revision
+        run: cp -R head/vendor base/vendor
+
+      - name: Compare benchmarks against the base revision
+        run: head/.github/scripts/benchmark-compare.sh --base=base --head=head
+
+  benchmark-php-report:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ~/.cache/composer
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.json') }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: 8.3
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install
+
+      # The pull request already gated this code, so the merged revision is
+      # measured on its own and recorded rather than compared again.
+      - name: Measure the merged revision
+        run: .github/scripts/benchmark-compare.sh -- --output html
+
+      - name: Find performance benchmarks issue
+        id: find-issue
+        run: |
+          ISSUE_NUMBER=$(gh issue list --state open --search "Performance benchmarks" --json number --jq '.[0].number')
+          echo "issue-number=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Format performance results for issue comment
+        run: |
+          echo "## 📊 Performance Benchmark Results" > issue_comment.md
+          echo "" >> issue_comment.md
+          echo "**Commit:** [\`${{ github.sha }}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})" >> issue_comment.md
+          echo "**Date:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> issue_comment.md
+          echo "<div>" >> issue_comment.md
+          sed -n '/<table/,/<\/table>/p' .logs/performance-report.html >> issue_comment.md
+          echo "</div>" >> issue_comment.md
+
+      - name: Post performance results to issue
+        if: steps.find-issue.outputs.issue-number != ''
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5
+        with:
+          issue-number: ${{ steps.find-issue.outputs.issue-number }}
+          body-path: issue_comment.md
+          edit-mode: replace
