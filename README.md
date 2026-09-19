@@ -39,6 +39,7 @@
 
 - PHP 8.3 or newer
 - PHPUnit 11.4 through PHPUnit 13
+- Symfony 6.4, or Symfony 7.2 through Symfony 8
 
 Two traits need a package that this library does not require itself, so add it to your own project when you use them:
 
