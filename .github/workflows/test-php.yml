@@ -66,6 +66,19 @@ jobs:
           composer --verbose validate
           composer normalize --dry-run
 
+      # Symfony 8 requires PHP 8.4, so these are the only legs that install it.
+      - name: Check that Symfony 8 is installed
+        if: matrix.php-versions != '8.3' && matrix.deps == 'normal'
+        run: |
+          for package in symfony/console symfony/filesystem symfony/finder symfony/process; do
+            version=$(composer show "${package}" --format=json | jq -r '.versions[0]')
+            echo "${package} ${version}"
+            if [[ "${version}" != v8.* ]]; then
+              echo "${package} is not installed at Symfony 8."
+              exit 1
+            fi
+          done
+
       - name: Check coding standards
         if: matrix.php-versions == '8.4' && matrix.deps == 'normal'
         run: composer lint

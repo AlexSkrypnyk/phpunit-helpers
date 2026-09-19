@@ -149,7 +149,9 @@ Benchmark subjects live in `benchmarks/` and cover the traits that do pure compu
 GitHub Actions workflows test across:
 
 - PHP versions: 8.3, 8.4, 8.5
-- Dependency preferences: `normal` and `lowest`, which between them cover the supported PHPUnit range
+- Dependency preferences: `normal` and `lowest`, which between them cover the supported PHPUnit and Symfony ranges
+
+Symfony 8 requires PHP 8.4, so only the `normal` legs on PHP 8.4 and 8.5 install it. A step in those legs fails when Composer resolves an older Symfony major, so the Symfony 8 coverage cannot drop out unnoticed.
 
 Key workflows:
 
