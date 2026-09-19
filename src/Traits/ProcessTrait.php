@@ -167,10 +167,13 @@ trait ProcessTrait {
 
     // The process inherits all system env vars. Setting a var to FALSE
     // removes it from the inherited environment.
-    foreach ($env as $env_value) {
+    $env_vars = [];
+    foreach ($env as $env_name => $env_value) {
       if (!is_scalar($env_value)) {
         throw new \InvalidArgumentException('All environment variables must be scalar values.');
       }
+
+      $env_vars[(string) $env_name] = $env_value === FALSE ? FALSE : (string) $env_value;
     }
 
     $full_command = array_merge([$base_command], $all_arguments);
@@ -185,7 +188,7 @@ trait ProcessTrait {
     $this->process = new Process(
       $full_command,
       $this->processCwd,
-      $env,
+      $env_vars,
       $inputs,
       $timeout
     );

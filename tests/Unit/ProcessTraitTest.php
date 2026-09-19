@@ -1127,6 +1127,12 @@ EOL;
     ]);
 
     $this->assertProcessSuccessful();
+    $this->assertProcessOutputContains([
+      'TEST_STRING=value',
+      'TEST_INT=123',
+      'TEST_BOOL=1',
+      'TEST_FLOAT=45.67',
+    ]);
   }
 
   public function testProcessRunWithEnvironmentVariableUnsetting(): void {
