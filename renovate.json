@@ -18,7 +18,7 @@
         },
         {
             "matchManagers": ["composer"],
-            "matchPackageNames": ["phpunit/phpunit"],
+            "matchPackageNames": ["phpunit/phpunit", "symfony/console", "symfony/filesystem", "symfony/finder", "symfony/process"],
             "rangeStrategy": "in-range-only"
         },
         {
