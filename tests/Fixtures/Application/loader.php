@@ -16,7 +16,7 @@ $application = new Application('Test Application', '1.0.0');
 $application->setAutoExit(FALSE);
 $application->setCatchExceptions(FALSE);
 
-$application->add(new GreetingCommand());
+$application->addCommands([new GreetingCommand()]);
 
 // Execute the application if this file is run directly.
 if (isset($_SERVER['SCRIPT_FILENAME']) && is_string($_SERVER['SCRIPT_FILENAME']) &&

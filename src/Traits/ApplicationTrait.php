@@ -143,7 +143,9 @@ trait ApplicationTrait {
       throw new \InvalidArgumentException('The provided object is not an instance of Command.');
     }
 
-    $application->add($instance);
+    // Console 8 has no add() and Console 6.4 to 7.3 have no addCommand().
+    // addCommands() exists in every supported version.
+    $application->addCommands([$instance]);
 
     $name = $instance->getName();
     if ($name === NULL) {
