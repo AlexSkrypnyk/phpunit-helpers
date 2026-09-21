@@ -145,8 +145,6 @@ jobs:
 
       - name: Upload test results to Codecov
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
-        # Failed tests are the results worth reporting, and the default
-        # success() would skip the upload for them.
         if: ${{ !cancelled() && matrix.php-versions == '8.4' && matrix.symfony == '8 highest' && env.CODECOV_TOKEN != '' }}
         with:
           files: .logs/junit.xml
