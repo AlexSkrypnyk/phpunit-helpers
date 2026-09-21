@@ -149,9 +149,9 @@ Benchmark subjects live in `benchmarks/` and cover the traits that do pure compu
 GitHub Actions workflows test across:
 
 - PHP versions: 8.3, 8.4, 8.5
-- Dependency preferences: `normal` and `lowest`, which between them cover the supported PHPUnit and Symfony ranges
+- Symfony versions: the floor and the ceiling of every supported major, as the legs `6.4 lowest`, `6.4 highest`, `7.2 lowest`, `7 highest`, `8.0 lowest` and `8 highest`
 
-Symfony 8 requires PHP 8.4, so only the `normal` legs on PHP 8.4 and 8.5 install it. A step in those legs fails when Composer resolves an older Symfony major, so the Symfony 8 coverage cannot drop out unnoticed.
+Symfony 8 requires PHP 8.4, so its 2 legs are excluded on PHP 8.3, which leaves 16 legs. A leg pins the 4 Symfony packages with `composer update --with`, except `6.4 lowest`, which takes the floor of every dependency through `--prefer-lowest` and so also covers the PHPUnit 11.4 end of the range. The `Check the installed Symfony version` step fails a leg whose installed version does not match its name. Linting, the coverage threshold and the Codecov uploads run on the `PHP 8.4, Symfony 8 highest` leg.
 
 Key workflows:
 
