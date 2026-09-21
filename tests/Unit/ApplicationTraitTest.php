@@ -208,7 +208,7 @@ final class ApplicationTraitTest extends UnitTestCase {
 
     };
 
-    $this->application->add($command);
+    $this->application->addCommands([$command]);
     $this->application->setDefaultCommand('test:exception');
     $this->application->setAutoExit(FALSE);
     $this->application->setCatchExceptions(FALSE);

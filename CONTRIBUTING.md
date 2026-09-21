@@ -69,4 +69,4 @@ Benchmark subjects live in `benchmarks/` and cover the traits that do pure compu
 
 ## Pull requests
 
-Continuous integration runs the linting and the test suite against PHP 8.3, 8.4 and 8.5, with both the newest and the lowest supported dependencies. Please make sure `composer lint` and `composer test` pass locally before opening a pull request.
+Continuous integration runs the test suite against PHP 8.3, 8.4 and 8.5, against Symfony 6, 7 and 8, and with both the newest and the lowest dependencies, which comes to 16 legs. The version each leg installs comes from the constraint in `composer.json` through `.github/scripts/symfony-constraint.php`, so the workflow itself names no Symfony version. Linting runs on the leg with PHP 8.4, Symfony 8 and the newest dependencies. Please make sure `composer lint` and `composer test` pass locally before opening a pull request.
