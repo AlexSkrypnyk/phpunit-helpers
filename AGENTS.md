@@ -149,9 +149,10 @@ Benchmark subjects live in `benchmarks/` and cover the traits that do pure compu
 GitHub Actions workflows test across:
 
 - PHP versions: 8.3, 8.4, 8.5
-- Symfony versions: the floor and the ceiling of every supported major, as the legs `6.4 lowest`, `6.4 highest`, `7.2 lowest`, `7 highest`, `8.0 lowest` and `8 highest`
+- Symfony majors: 6, 7, 8
+- Dependency preferences: `normal` and `lowest`
 
-Symfony 8 requires PHP 8.4, so its 2 legs are excluded on PHP 8.3, which leaves 16 legs. A leg names a major and an end of it, and `.github/scripts/symfony-constraint.php` turns that into the version to install by reading the constraint the Symfony packages share in `composer.json`, so the workflow names no Symfony version itself. A `lowest` leg pins the floor of its major, a `highest` leg installs the constraint and lets Composer resolve the newest release it allows, and `6.4 lowest` also carries `--prefer-lowest`, which covers the PHPUnit 11.4 end of the range. `Check the installed Symfony version` fails a leg whose resolved version does not match its name, and the resolver fails a leg naming a major the constraint no longer covers. Linting, the coverage threshold and the Codecov uploads run on `PHP 8.4, Symfony 8 highest`.
+Symfony 8 requires PHP 8.4, so it is excluded on PHP 8.3, which leaves 16 legs. `.github/scripts/symfony-constraint.php` turns a leg's major and preference into the version to install by reading the constraint the Symfony packages share in `composer.json`, so the workflow names no Symfony version itself. A `lowest` leg pins the floor of its major and resolves the rest of the tree at its floor too, which covers the PHPUnit 11.4 end of the range; a `normal` leg installs the major's constraint and lets Composer resolve the newest release it allows. `Check the installed Symfony version` fails a leg whose resolved version does not match what was asked for, and the resolver fails a leg naming a major the constraint no longer covers. Linting, the coverage threshold and the Codecov uploads run on `PHP 8.4, Symfony 8, Deps normal`.
 
 Key workflows:
 

@@ -41,29 +41,29 @@ final class SymfonyConstraintTest extends TestCase {
     exec(sprintf('rm -rf %s', escapeshellarg($this->workspace)));
   }
 
-  #[DataProvider('dataProviderResolvesEachBoundOfEachMajor')]
-  public function testResolvesEachBoundOfEachMajor(string $major, string $bound, string $version, string $expected): void {
+  #[DataProvider('dataProviderResolvesEachDepsPreferenceOfEachMajor')]
+  public function testResolvesEachDepsPreferenceOfEachMajor(string $major, string $deps, string $version, string $expected): void {
     $path = $this->createComposerJson('^6.4 || ^7.2 || ^8.0');
 
-    [$exit_code, $output] = $this->resolve(['--major=' . $major, '--bound=' . $bound, '--composer-json=' . $path]);
+    [$exit_code, $output] = $this->resolve(['--major=' . $major, '--deps=' . $deps, '--composer-json=' . $path]);
 
     $this->assertSame(0, $exit_code, 'Output: ' . $output);
     $this->assertSame(['SYMFONY_VERSION=' . $version, 'SYMFONY_EXPECTED=' . $expected], explode(PHP_EOL, $output));
   }
 
-  public static function dataProviderResolvesEachBoundOfEachMajor(): \Iterator {
+  public static function dataProviderResolvesEachDepsPreferenceOfEachMajor(): \Iterator {
     yield '6 lowest' => ['6', 'lowest', '6.4.0', 'v6.4.0'];
-    yield '6 highest' => ['6', 'highest', '^6.4', 'v6.'];
+    yield '6 normal' => ['6', 'normal', '^6.4', 'v6.'];
     yield '7 lowest' => ['7', 'lowest', '7.2.0', 'v7.2.0'];
-    yield '7 highest' => ['7', 'highest', '^7.2', 'v7.'];
+    yield '7 normal' => ['7', 'normal', '^7.2', 'v7.'];
     yield '8 lowest' => ['8', 'lowest', '8.0.0', 'v8.0.0'];
-    yield '8 highest' => ['8', 'highest', '^8.0', 'v8.'];
+    yield '8 normal' => ['8', 'normal', '^8.0', 'v8.'];
   }
 
   public function testFollowsTheConstraintWhenItMoves(): void {
     $path = $this->createComposerJson('^6.4 || ^7.3');
 
-    [, $output] = $this->resolve(['--major=7', '--bound=lowest', '--composer-json=' . $path]);
+    [, $output] = $this->resolve(['--major=7', '--deps=lowest', '--composer-json=' . $path]);
 
     $this->assertStringContainsString('SYMFONY_VERSION=7.3.0', $output);
   }
@@ -71,7 +71,7 @@ final class SymfonyConstraintTest extends TestCase {
   public function testFailsWhenTheConstraintCoversNoSuchMajor(): void {
     $path = $this->createComposerJson('^6.4 || ^7.2');
 
-    [$exit_code, $output] = $this->resolve(['--major=8', '--bound=lowest', '--composer-json=' . $path]);
+    [$exit_code, $output] = $this->resolve(['--major=8', '--deps=lowest', '--composer-json=' . $path]);
 
     $this->assertNotSame(0, $exit_code);
     $this->assertStringContainsString('covers no Symfony 8', $output);
@@ -83,7 +83,7 @@ final class SymfonyConstraintTest extends TestCase {
       'require' => ['symfony/finder' => '^6.4', 'symfony/process' => '^7.2'],
     ], JSON_THROW_ON_ERROR));
 
-    [$exit_code, $output] = $this->resolve(['--major=6', '--bound=lowest', '--composer-json=' . $path]);
+    [$exit_code, $output] = $this->resolve(['--major=6', '--deps=lowest', '--composer-json=' . $path]);
 
     $this->assertNotSame(0, $exit_code);
     $this->assertStringContainsString('do not share one constraint', $output);
@@ -99,10 +99,10 @@ final class SymfonyConstraintTest extends TestCase {
 
   public static function dataProviderReportsUsageForMalformedArguments(): \Iterator {
     yield 'no arguments' => [[]];
-    yield 'no bound' => [['--major=6']];
-    yield 'no major' => [['--bound=lowest']];
-    yield 'unknown bound' => [['--major=6', '--bound=middle']];
-    yield 'major is not a number' => [['--major=six', '--bound=lowest']];
+    yield 'no deps' => [['--major=6']];
+    yield 'no major' => [['--deps=lowest']];
+    yield 'unknown deps' => [['--major=6', '--deps=middle']];
+    yield 'major is not a number' => [['--major=six', '--deps=lowest']];
   }
 
   public function testReportsUsageForAnUnknownArgument(): void {

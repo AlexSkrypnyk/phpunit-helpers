@@ -4,13 +4,13 @@
  * @file
  * Resolves the Symfony version a CI leg installs from composer.json.
  *
- * A leg names a Symfony major and which end of it to test. The versions
+ * A leg names a Symfony major and a dependency preference. The versions
  * behind that come from the constraint the Symfony packages share, so the
  * workflow holds no copy of them, and a leg naming a major the constraint no
  * longer offers fails instead of testing something else.
  *
  * Usage:
- *   symfony-constraint.php --major=6 --bound=lowest [--composer-json=PATH]
+ *   symfony-constraint.php --major=6 --deps=lowest [--composer-json=PATH]
  *
  * Prints SYMFONY_VERSION and SYMFONY_EXPECTED as environment file lines.
  */
@@ -119,15 +119,15 @@ function symfony_constraint_floor(string $alternative): string {
  */
 function main(array $arguments): void {
   $major = '';
-  $bound = '';
+  $deps = '';
   $composer_json = dirname(__DIR__, 2) . '/composer.json';
 
   foreach (array_slice($arguments, 1) as $argument) {
     if (str_starts_with($argument, '--major=')) {
       $major = substr($argument, 8);
     }
-    elseif (str_starts_with($argument, '--bound=')) {
-      $bound = substr($argument, 8);
+    elseif (str_starts_with($argument, '--deps=')) {
+      $deps = substr($argument, 7);
     }
     elseif (str_starts_with($argument, '--composer-json=')) {
       $composer_json = substr($argument, 16);
@@ -138,17 +138,18 @@ function main(array $arguments): void {
     }
   }
 
-  if (preg_match('/^\d+$/', $major) !== 1 || !in_array($bound, ['lowest', 'highest'], TRUE)) {
-    fwrite(STDERR, 'Usage: symfony-constraint.php --major=6 --bound=lowest [--composer-json=PATH]' . PHP_EOL);
+  if (preg_match('/^\d+$/', $major) !== 1 || !in_array($deps, ['normal', 'lowest'], TRUE)) {
+    fwrite(STDERR, 'Usage: symfony-constraint.php --major=6 --deps=lowest [--composer-json=PATH]' . PHP_EOL);
     exit(EXIT_USAGE);
   }
 
   $alternative = symfony_constraint_alternative(symfony_constraint_read($composer_json), $major);
 
-  // The lowest end is pinned exactly, while the highest end is left to
-  // Composer, which resolves the newest release the alternative allows.
-  $version = $bound === 'lowest' ? symfony_constraint_floor($alternative) : $alternative;
-  $expected = $bound === 'lowest' ? 'v' . $version : 'v' . $major . '.';
+  // The lowest preference is pinned to the floor of the major, while the
+  // normal one is left to Composer, which resolves the newest release the
+  // alternative allows.
+  $version = $deps === 'lowest' ? symfony_constraint_floor($alternative) : $alternative;
+  $expected = $deps === 'lowest' ? 'v' . $version : 'v' . $major . '.';
 
   print 'SYMFONY_VERSION=' . $version . PHP_EOL;
   print 'SYMFONY_EXPECTED=' . $expected . PHP_EOL;
