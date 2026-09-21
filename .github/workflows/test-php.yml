@@ -20,39 +20,9 @@ permissions:
   contents: read
 
 jobs:
-  matrix:
-    name: Matrix
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-
-    outputs:
-      legs: ${{ steps.legs.outputs.legs }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          persist-credentials: false
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
-        with:
-          php-version: '8.4'
-          coverage: none
-
-      - name: Build the matrix from composer.json
-        id: legs
-        run: |
-          legs="$(php .github/scripts/symfony-matrix.php --php=8.3,8.4,8.5)"
-          echo "${legs}"
-          echo "legs=${legs}" >> "$GITHUB_OUTPUT"
-
   test-php:
     name: PHP ${{ matrix.php-versions }}, Symfony ${{ matrix.symfony }}
     runs-on: ubuntu-latest
-    needs: matrix
 
     permissions:
       contents: read
@@ -60,7 +30,41 @@ jobs:
 
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.matrix.outputs.legs) }}
+      matrix:
+        php-versions: ['8.3', '8.4', '8.5']
+        symfony: ['6.4 lowest', '6.4 highest', '7.2 lowest', '7 highest', '8.0 lowest', '8 highest']
+        exclude:
+          # Symfony 8 requires PHP 8.4.
+          - php-versions: '8.3'
+            symfony: '8.0 lowest'
+          - php-versions: '8.3'
+            symfony: '8 highest'
+        include:
+          - symfony: '6.4 lowest'
+            major: '6'
+            bound: 'lowest'
+            # The floor of the whole tree, which also covers PHPUnit 11.4.
+            flags: '--prefer-lowest --prefer-stable'
+          - symfony: '6.4 highest'
+            major: '6'
+            bound: 'highest'
+            flags: ''
+          - symfony: '7.2 lowest'
+            major: '7'
+            bound: 'lowest'
+            flags: ''
+          - symfony: '7 highest'
+            major: '7'
+            bound: 'highest'
+            flags: ''
+          - symfony: '8.0 lowest'
+            major: '8'
+            bound: 'lowest'
+            flags: ''
+          - symfony: '8 highest'
+            major: '8'
+            bound: 'highest'
+            flags: ''
 
     steps:
       - name: Checkout code
@@ -81,13 +85,11 @@ jobs:
           coverage: pcov
           ini-values: pcov.directory=.
 
+      - name: Resolve the Symfony version from composer.json
+        run: php .github/scripts/symfony-constraint.php --major=${{ matrix.major }} --bound=${{ matrix.bound }} >> "$GITHUB_ENV"
+
       - name: Install dependencies
-        run: |
-          pins=()
-          for package in ${{ matrix.packages }}; do
-            pins+=(--with "${package}:${{ matrix.constraint }}")
-          done
-          composer update "${pins[@]}" ${{ matrix.flags }} ${{ matrix.php-versions == '8.5' && '--ignore-platform-reqs' || '' }}
+        run: composer update --with "symfony/console:${SYMFONY_VERSION}" --with "symfony/filesystem:${SYMFONY_VERSION}" --with "symfony/finder:${SYMFONY_VERSION}" --with "symfony/process:${SYMFONY_VERSION}" ${{ matrix.flags }} ${{ matrix.php-versions == '8.5' && '--ignore-platform-reqs' || '' }}
 
       - name: Validate composer.json
         run: |
@@ -96,11 +98,11 @@ jobs:
 
       - name: Check the installed Symfony version
         run: |
-          for package in ${{ matrix.packages }}; do
+          for package in symfony/console symfony/filesystem symfony/finder symfony/process; do
             version=$(composer show "${package}" --format=json | jq -r '.versions[0]')
             echo "${package} ${version}"
-            if [[ "${version}" != "${{ matrix.expected }}"* ]]; then
-              echo "${package} ${version} is not ${{ matrix.expected }} for this leg."
+            if [[ "${version}" != "${SYMFONY_EXPECTED}"* ]]; then
+              echo "${package} ${version} is not ${SYMFONY_EXPECTED} for this leg."
               exit 1
             fi
           done

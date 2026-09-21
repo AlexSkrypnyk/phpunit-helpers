@@ -69,4 +69,4 @@ Benchmark subjects live in `benchmarks/` and cover the traits that do pure compu
 
 ## Pull requests
 
-Continuous integration runs the test suite against PHP 8.3, 8.4 and 8.5, and against the floor and the ceiling of every Symfony major the constraint in `composer.json` allows, which comes to 16 legs. `.github/scripts/symfony-matrix.php` derives that list from the constraint itself, so widening the constraint is enough to test another major. Linting runs on the leg with PHP 8.4 and the newest Symfony 8. Please make sure `composer lint` and `composer test` pass locally before opening a pull request.
+Continuous integration runs the test suite against PHP 8.3, 8.4 and 8.5, and against the floor and the ceiling of every supported Symfony major, which comes to 16 legs. The version each leg installs comes from the constraint in `composer.json` through `.github/scripts/symfony-constraint.php`, so the workflow itself names no Symfony version. Linting runs on the leg with PHP 8.4 and the newest Symfony 8. Please make sure `composer lint` and `composer test` pass locally before opening a pull request.

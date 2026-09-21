@@ -149,9 +149,9 @@ Benchmark subjects live in `benchmarks/` and cover the traits that do pure compu
 GitHub Actions workflows test across:
 
 - PHP versions: 8.3, 8.4, 8.5
-- Symfony versions: the floor and the ceiling of every alternative in the Symfony constraint, currently the legs `6.4 lowest`, `6 highest`, `7.2 lowest`, `7 highest`, `8.0 lowest` and `8 highest`
+- Symfony versions: the floor and the ceiling of every supported major, as the legs `6.4 lowest`, `6.4 highest`, `7.2 lowest`, `7 highest`, `8.0 lowest` and `8 highest`
 
-`.github/scripts/symfony-matrix.php` builds that list from `composer.json`. It reads the constraint the Symfony packages share, derives a floor leg and a ceiling leg per alternative, and keeps only the PHP versions that each Symfony release itself supports, which is why Symfony 8 has no PHP 8.3 legs. Widening the constraint is the only edit needed to test another major, and a required check has to be added for each leg it produces. A leg pins the Symfony packages with `composer update --with`; the oldest floor also carries `--prefer-lowest`, which covers the PHPUnit 11.4 end of the range. `Check the installed Symfony version` fails a leg whose resolved version does not match its name. Linting, the coverage threshold and the Codecov uploads run on `PHP 8.4, Symfony 8 highest`.
+Symfony 8 requires PHP 8.4, so its 2 legs are excluded on PHP 8.3, which leaves 16 legs. A leg names a major and an end of it, and `.github/scripts/symfony-constraint.php` turns that into the version to install by reading the constraint the Symfony packages share in `composer.json`, so the workflow names no Symfony version itself. A `lowest` leg pins the floor of its major, a `highest` leg installs the constraint and lets Composer resolve the newest release it allows, and `6.4 lowest` also carries `--prefer-lowest`, which covers the PHPUnit 11.4 end of the range. `Check the installed Symfony version` fails a leg whose resolved version does not match its name, and the resolver fails a leg naming a major the constraint no longer covers. Linting, the coverage threshold and the Codecov uploads run on `PHP 8.4, Symfony 8 highest`.
 
 Key workflows:
 
