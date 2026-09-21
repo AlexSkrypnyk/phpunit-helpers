@@ -149,9 +149,9 @@ Benchmark subjects live in `benchmarks/` and cover the traits that do pure compu
 GitHub Actions workflows test across:
 
 - PHP versions: 8.3, 8.4, 8.5
-- Symfony versions: the floor and the ceiling of every supported major, as the legs `6.4 lowest`, `6.4 highest`, `7.2 lowest`, `7 highest`, `8.0 lowest` and `8 highest`
+- Symfony versions: the floor and the ceiling of every alternative in the Symfony constraint, currently the legs `6.4 lowest`, `6 highest`, `7.2 lowest`, `7 highest`, `8.0 lowest` and `8 highest`
 
-Symfony 8 requires PHP 8.4, so its 2 legs are excluded on PHP 8.3, which leaves 16 legs. A leg pins the 4 Symfony packages with `composer update --with`, except `6.4 lowest`, which takes the floor of every dependency through `--prefer-lowest` and so also covers the PHPUnit 11.4 end of the range. The `Check the installed Symfony version` step fails a leg whose installed version does not match its name. Linting, the coverage threshold and the Codecov uploads run on the `PHP 8.4, Symfony 8 highest` leg.
+`.github/scripts/symfony-matrix.php` builds that list from `composer.json`. It reads the constraint the Symfony packages share, derives a floor leg and a ceiling leg per alternative, and keeps only the PHP versions that each Symfony release itself supports, which is why Symfony 8 has no PHP 8.3 legs. Widening the constraint is the only edit needed to test another major, and a required check has to be added for each leg it produces. A leg pins the Symfony packages with `composer update --with`; the oldest floor also carries `--prefer-lowest`, which covers the PHPUnit 11.4 end of the range. `Check the installed Symfony version` fails a leg whose resolved version does not match its name. Linting, the coverage threshold and the Codecov uploads run on `PHP 8.4, Symfony 8 highest`.
 
 Key workflows:
 
