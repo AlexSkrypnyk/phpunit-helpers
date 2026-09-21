@@ -90,6 +90,17 @@ final class SymfonyMatrixTest extends TestCase {
     $this->assertSame('symfony/console symfony/finder symfony/process', $by_bound['8 highest']['packages']);
   }
 
+  public function testFloorsTheTreeOnTheOldestAlternativeWhicheverOrderItIsWrittenIn(): void {
+    $path = $this->createComposerJson('^8.0 || ^6.4');
+
+    [, $output] = $this->build(['--php=8.4', '--composer-json=' . $path]);
+
+    $by_bound = array_column($this->decodeLegs($output), NULL, 'symfony');
+
+    $this->assertSame('--prefer-lowest --prefer-stable', $by_bound['6.4 lowest']['flags']);
+    $this->assertSame('', $by_bound['8.0 lowest']['flags']);
+  }
+
   public function testFailsWhenTheSymfonyPackagesDisagree(): void {
     $path = $this->workspace . '/composer.json';
     file_put_contents($path, json_encode([

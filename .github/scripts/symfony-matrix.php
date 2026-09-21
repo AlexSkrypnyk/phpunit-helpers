@@ -248,6 +248,12 @@ function symfony_matrix_legs(array $packages, string $constraint, array $php_ver
     throw new \RuntimeException(sprintf('Cannot read alternatives out of "%s".', $constraint));
   }
 
+  // The constraint does not have to list its alternatives in order, and the
+  // oldest floor is the one that carries the whole tree down.
+  usort($alternatives, function (string $a, string $b): int {
+    return version_compare(symfony_matrix_floor($a), symfony_matrix_floor($b));
+  });
+
   $lookup = $packages[0];
   $legs = [];
 
