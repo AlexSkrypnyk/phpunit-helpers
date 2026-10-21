@@ -29,7 +29,7 @@ const EXIT_USAGE = 64;
  *   Path to composer.json.
  *
  * @return string
- *   The shared constraint, such as '^6.4 || ^7.2 || ^8.0'.
+ *   The shared constraint, such as '^6.4 || ^7.0 || ^8.0'.
  */
 function symfony_constraint_read(string $path): string {
   $contents = file_get_contents($path);
@@ -67,7 +67,7 @@ function symfony_constraint_read(string $path): string {
  * Picks the alternative of a constraint that covers a major version.
  *
  * @param string $constraint
- *   The constraint to read, such as '^6.4 || ^7.2 || ^8.0'.
+ *   The constraint to read, such as '^6.4 || ^7.0 || ^8.0'.
  * @param string $major
  *   The major version to cover, such as '6'.
  *

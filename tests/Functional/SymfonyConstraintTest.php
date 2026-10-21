@@ -43,7 +43,7 @@ final class SymfonyConstraintTest extends TestCase {
 
   #[DataProvider('dataProviderResolvesEachDepsPreferenceOfEachMajor')]
   public function testResolvesEachDepsPreferenceOfEachMajor(string $major, string $deps, string $version, string $expected): void {
-    $path = $this->createComposerJson('^6.4 || ^7.2 || ^8.0');
+    $path = $this->createComposerJson('^6.4 || ^7.0 || ^8.0');
 
     [$exit_code, $output] = $this->resolve(['--major=' . $major, '--deps=' . $deps, '--composer-json=' . $path]);
 
@@ -54,8 +54,8 @@ final class SymfonyConstraintTest extends TestCase {
   public static function dataProviderResolvesEachDepsPreferenceOfEachMajor(): \Iterator {
     yield '6 lowest' => ['6', 'lowest', '6.4.0', 'v6.4.0'];
     yield '6 normal' => ['6', 'normal', '^6.4', 'v6.'];
-    yield '7 lowest' => ['7', 'lowest', '7.2.0', 'v7.2.0'];
-    yield '7 normal' => ['7', 'normal', '^7.2', 'v7.'];
+    yield '7 lowest' => ['7', 'lowest', '7.0.0', 'v7.0.0'];
+    yield '7 normal' => ['7', 'normal', '^7.0', 'v7.'];
     yield '8 lowest' => ['8', 'lowest', '8.0.0', 'v8.0.0'];
     yield '8 normal' => ['8', 'normal', '^8.0', 'v8.'];
   }
