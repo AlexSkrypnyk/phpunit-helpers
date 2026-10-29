@@ -30,8 +30,8 @@
         "ergebnis/composer-normalize": "^2.54.0",
         "laravel/serializable-closure": "^2.1.0",
         "phpbench/phpbench": "^1.7",
-        "phpstan/phpstan": "^2.3.3",
-        "rector/rector": "^2.8.2",
+        "phpstan/phpstan": "^2.3.4",
+        "rector/rector": "^2.8.3",
         "squizlabs/php_codesniffer": "^4.0.4",
         "symfony/console": "^6.4 || ^7.2 || ^8.0"
     },
