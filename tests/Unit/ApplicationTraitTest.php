@@ -84,6 +84,21 @@ final class ApplicationTraitTest extends UnitTestCase {
     $this->assertInstanceOf(ApplicationTester::class, $this->applicationTester);
   }
 
+  public function testApplicationTearDownRestoresCwd(): void {
+    $original_cwd = getcwd();
+    $this->applicationCwd = self::$tmp;
+
+    $this->applicationInitFromCommand(GreetingCommand::class);
+    $this->applicationRun([]);
+    $this->applicationRun([]);
+
+    $this->assertSame(realpath(self::$tmp), getcwd());
+
+    $this->applicationTearDown();
+
+    $this->assertSame($original_cwd, getcwd());
+  }
+
   public function testApplicationInitFromCommand(): void {
     $this->applicationInitFromCommand(GreetingCommand::class);
 
@@ -702,7 +717,7 @@ final class ApplicationTraitTest extends UnitTestCase {
 
     // Combined output is trimmed.
     $this->assertApplicationAnyOutputContainsOrNot([
-      '+ Output message' . "\n" . 'Test Error',
+      '+ Output message' . PHP_EOL . 'Test Error',
     ]);
   }
 
@@ -729,7 +744,7 @@ final class ApplicationTraitTest extends UnitTestCase {
 
     // Exact match works without a trailing \n.
     $this->assertApplicationOutputContainsOrNot([
-      '+ Line 1' . "\n" . 'Line 2' . "\n" . 'Line 3',
+      '+ Line 1' . PHP_EOL . 'Line 2' . PHP_EOL . 'Line 3',
     ]);
 
     $this->assertApplicationOutputContainsOrNot([

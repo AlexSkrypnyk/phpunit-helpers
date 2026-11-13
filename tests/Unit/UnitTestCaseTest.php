@@ -22,7 +22,7 @@ final class UnitTestCaseTest extends UnitTestCase {
     $this->assertDirectoryExists(self::$sut);
     $this->assertDirectoryExists(self::$tmp);
     $this->assertNotEmpty(self::$root);
-    $this->assertStringEndsWith('/phpunit-helpers', self::$root);
+    $this->assertFileExists(self::$root . DIRECTORY_SEPARATOR . 'composer.json');
     $this->assertNotNull(self::$fixtures);
     $this->assertDirectoryExists(self::$fixtures);
   }

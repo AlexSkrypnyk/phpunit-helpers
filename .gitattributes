@@ -1,3 +1,7 @@
+# Check out with LF on every platform, so shell scripts and fixtures compared
+# byte for byte stay unchanged on Windows.
+* text=auto eol=lf
+
 # Ignore files for distribution archives.
 
 /.editorconfig   export-ignore

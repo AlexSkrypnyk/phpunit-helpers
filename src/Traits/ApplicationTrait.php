@@ -38,6 +38,11 @@ trait ApplicationTrait {
   protected ?string $applicationCwd = NULL;
 
   /**
+   * The working directory in effect before the application changed it.
+   */
+  protected ?string $applicationOriginalCwd = NULL;
+
+  /**
    * Show output of the application.
    */
   protected bool $applicationShowOutput = FALSE;
@@ -77,11 +82,17 @@ trait ApplicationTrait {
   /**
    * Tears down the application.
    *
-   * Resets the application and tester variables.
+   * Resets the application and tester variables and restores the working
+   * directory the application changed.
    */
   protected function applicationTearDown(): void {
     $this->application = NULL;
     $this->applicationTester = NULL;
+
+    if ($this->applicationOriginalCwd !== NULL) {
+      chdir($this->applicationOriginalCwd);
+      $this->applicationOriginalCwd = NULL;
+    }
   }
 
   /**
@@ -167,7 +178,8 @@ trait ApplicationTrait {
   /**
    * Change into the configured application working directory.
    *
-   * The directory in effect before the switch is restored on shutdown.
+   * The directory in effect before the first switch is restored on teardown
+   * and on shutdown.
    */
   protected function applicationChdir(): void {
     if ($this->applicationCwd === NULL) {
@@ -177,6 +189,7 @@ trait ApplicationTrait {
     $original_cwd = getcwd();
 
     if ($original_cwd !== FALSE) {
+      $this->applicationOriginalCwd ??= $original_cwd;
       chdir($this->applicationCwd);
 
       // @codeCoverageIgnoreStart

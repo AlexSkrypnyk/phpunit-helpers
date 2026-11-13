@@ -27,8 +27,10 @@ class LocationsTraitTest extends TestCase {
     $this->testTmp = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('locations_trait_test_tmp_', TRUE);
     mkdir($this->testTmp, 0777, TRUE);
 
-    $this->testCwd = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('locations_trait_test_cwd_', TRUE);
-    mkdir($this->testCwd, 0777, TRUE);
+    $test_cwd = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('locations_trait_test_cwd_', TRUE);
+    mkdir($test_cwd, 0777, TRUE);
+    // The temp dir can be a Windows 8.3 short path, which the trait expands.
+    $this->testCwd = (string) realpath($test_cwd);
 
     $this->testFixtures = $this->testCwd . DIRECTORY_SEPARATOR . self::locationsFixturesDir();
     mkdir($this->testFixtures, 0777, TRUE);
