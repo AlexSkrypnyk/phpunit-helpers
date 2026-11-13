@@ -21,7 +21,7 @@ permissions:
 
 jobs:
   test-php:
-    name: ${{ matrix.os }}, PHP ${{ matrix.php-versions }}, Symfony ${{ matrix.symfony }}, Deps ${{ matrix.deps }}
+    name: PHP ${{ matrix.php-versions }}, Symfony ${{ matrix.symfony }}, Deps ${{ matrix.deps }}, ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
 
     permissions:
