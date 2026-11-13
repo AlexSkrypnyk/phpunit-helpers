@@ -272,6 +272,100 @@ class LocationsTraitTest extends TestCase {
     $this->assertDirectoryDoesNotExist(self::$workspace, 'Workspace with restricted permissions should be removed.');
   }
 
+  #[DataProvider('dataProviderLocationsTearDownLeavesWorkspace')]
+  public function testLocationsTearDownLeavesWorkspace(string $subdir): void {
+    $original_cwd = (string) getcwd();
+    $this->locationsInit($this->testCwd);
+    chdir(self::locationsMkdir(self::$workspace . DIRECTORY_SEPARATOR . $subdir));
+
+    try {
+      $this->locationsTearDown();
+
+      $this->assertDirectoryDoesNotExist(self::$workspace, 'Workspace should be removed.');
+      $this->assertSame($original_cwd, getcwd(), 'Working directory should be restored.');
+    }
+    finally {
+      chdir($original_cwd);
+    }
+  }
+
+  public static function dataProviderLocationsTearDownLeavesWorkspace(): \Iterator {
+    yield 'workspace' => [''];
+    yield 'sut' => ['sut'];
+    yield 'nested_in_sut' => ['sut' . DIRECTORY_SEPARATOR . 'nested'];
+  }
+
+  #[DataProvider('dataProviderLocationsTearDownKeepsCwdOutsideWorkspace')]
+  public function testLocationsTearDownKeepsCwdOutsideWorkspace(bool $is_sibling): void {
+    $original_cwd = (string) getcwd();
+    $this->locationsInit($this->testCwd);
+    $outside = $is_sibling ? self::locationsMkdir(self::$workspace . '-sibling') : self::locationsRealpath($this->testTmp);
+    chdir($outside);
+
+    try {
+      $this->locationsTearDown();
+
+      $this->assertDirectoryDoesNotExist(self::$workspace, 'Workspace should be removed.');
+      $this->assertSame($outside, getcwd(), 'Working directory outside the workspace should be kept.');
+    }
+    finally {
+      chdir($original_cwd);
+
+      if ($is_sibling) {
+        rmdir($outside);
+      }
+    }
+  }
+
+  public static function dataProviderLocationsTearDownKeepsCwdOutsideWorkspace(): \Iterator {
+    yield 'unrelated' => [FALSE];
+    yield 'sibling_with_workspace_prefix' => [TRUE];
+  }
+
+  #[DataProvider('dataProviderLocationsTearDownLeavesWorkspaceToParent')]
+  public function testLocationsTearDownLeavesWorkspaceToParent(?string $recorded_cwd): void {
+    $original_cwd = (string) getcwd();
+    $this->locationsInit($this->testCwd);
+    $this->locationsOriginalCwd = $recorded_cwd;
+    chdir(self::$sut);
+
+    try {
+      $this->locationsTearDown();
+
+      $this->assertDirectoryDoesNotExist(self::$workspace, 'Workspace should be removed.');
+      $this->assertSame(dirname(self::$workspace), getcwd(), 'Working directory should be the parent of the workspace.');
+    }
+    finally {
+      chdir($original_cwd);
+    }
+  }
+
+  public static function dataProviderLocationsTearDownLeavesWorkspaceToParent(): \Iterator {
+    yield 'not_recorded' => [NULL];
+    yield 'recorded_missing' => [sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'locations_trait_test_missing_cwd'];
+  }
+
+  public function testLocationsTearDownRestoresDeletedCwd(): void {
+    if (DIRECTORY_SEPARATOR === '\\') {
+      $this->markTestSkipped('Requires removing the working directory, which Windows refuses.');
+    }
+
+    $original_cwd = (string) getcwd();
+    $this->locationsInit($this->testCwd);
+    chdir(self::$sut);
+    rmdir(self::$sut);
+
+    try {
+      $this->locationsTearDown();
+
+      $this->assertDirectoryDoesNotExist(self::$workspace, 'Workspace should be removed.');
+      $this->assertSame($original_cwd, getcwd(), 'Working directory should be restored.');
+    }
+    finally {
+      chdir($original_cwd);
+    }
+  }
+
   #[DataProvider('dataProviderLocationsCopy')]
   public function testLocationsCopy(array $source_files, array $include_files, array $exclude_dirs, bool $use_before_callback, int $expected_count): void {
     $this->locationsInit($this->testCwd);
