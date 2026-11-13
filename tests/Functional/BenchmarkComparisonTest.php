@@ -30,6 +30,10 @@ final class BenchmarkComparisonTest extends TestCase {
 
   #[\Override]
   protected function setUp(): void {
+    if (DIRECTORY_SEPARATOR === '\\') {
+      $this->markTestSkipped('Requires POSIX utilities.');
+    }
+
     $this->root = dirname(__DIR__, 2);
     $this->workspace = $this->root . '/.artifacts/tmp/benchmark-comparison-' . uniqid();
     $this->assertDirectoryDoesNotExist($this->workspace);
@@ -38,6 +42,10 @@ final class BenchmarkComparisonTest extends TestCase {
 
   #[\Override]
   protected function tearDown(): void {
+    if (!isset($this->workspace)) {
+      return;
+    }
+
     exec(sprintf('rm -rf %s', escapeshellarg($this->workspace)));
   }
 
