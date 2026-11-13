@@ -79,7 +79,7 @@ final class LoggerTraitTest extends UnitTestCase {
     self::log('Test message');
 
     $output = $this->getCapturedOutput();
-    $this->assertSame("\nTest message\n", $output);
+    $this->assertSame(PHP_EOL . 'Test message' . PHP_EOL, $output);
   }
 
   public function testLogSection(): void {
@@ -137,6 +137,10 @@ final class LoggerTraitTest extends UnitTestCase {
   }
 
   public function testLogFileWithUnreadableFile(): void {
+    if (DIRECTORY_SEPARATOR === '\\') {
+      $this->markTestSkipped('Requires POSIX file permissions.');
+    }
+
     self::logSetVerbose(TRUE);
 
     $temp_file = tempnam(sys_get_temp_dir(), 'logger_test');
@@ -540,7 +544,7 @@ final class LoggerTraitTest extends UnitTestCase {
 
     rewind($custom_buffer);
     $output = stream_get_contents($custom_buffer);
-    $this->assertSame("\nCustom stream test\n", $output);
+    $this->assertSame(PHP_EOL . 'Custom stream test' . PHP_EOL, $output);
 
     fclose($custom_buffer);
   }
@@ -817,7 +821,7 @@ final class LoggerTraitTest extends UnitTestCase {
     $info = $this->logInfo();
 
     $this->assertStringContainsString('STEP SUMMARY', $info);
-    $this->assertSame("STEP SUMMARY\n", $info);
+    $this->assertSame('STEP SUMMARY' . PHP_EOL, $info);
   }
 
   protected function recreateLogBuffer(): void {

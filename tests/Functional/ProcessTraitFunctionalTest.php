@@ -84,6 +84,10 @@ final class ProcessTraitFunctionalTest extends UnitTestCase {
   }
 
   protected function runPhpunit(bool $with_debug): array {
+    if (DIRECTORY_SEPARATOR === '\\') {
+      $this->markTestSkipped('Requires POSIX utilities.');
+    }
+
     $vendor_dir = dirname(__DIR__, 2) . '/vendor';
     $phpunit_bin = $vendor_dir . '/bin/phpunit';
 

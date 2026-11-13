@@ -30,6 +30,10 @@ final class ProcessTraitTest extends UnitTestCase {
 
   #[DataProvider('dataProviderProcessRunWithShellCommand')]
   public function testProcessRunWithShellCommand(array $options, array $args, array $inputs, array $env, array $expected): void {
+    if (DIRECTORY_SEPARATOR === '\\') {
+      $this->markTestSkipped('Requires POSIX utilities.');
+    }
+
     if (!self::$fixtures) {
       throw new \RuntimeException('Fixtures directory is not set.');
     }
@@ -277,6 +281,10 @@ final class ProcessTraitTest extends UnitTestCase {
   }
 
   public function testProcessOutputContainsOrNotExactMatch(): void {
+    if (DIRECTORY_SEPARATOR === '\\') {
+      $this->markTestSkipped('Requires POSIX utilities.');
+    }
+
     $this->processRun('echo', ['Hello World']);
 
     $this->assertProcessSuccessful();
@@ -404,6 +412,10 @@ final class ProcessTraitTest extends UnitTestCase {
    * receives the output through pipes, not a bug in the streaming callback.
    */
   public function testProcessStreamingOutput(): void {
+    if (DIRECTORY_SEPARATOR === '\\') {
+      $this->markTestSkipped('Requires POSIX utilities.');
+    }
+
     if (!self::$fixtures) {
       throw new \RuntimeException('Fixtures directory is not set.');
     }
@@ -535,6 +547,10 @@ EOL;
   }
 
   public function testProcessRunWithCustomCwd(): void {
+    if (DIRECTORY_SEPARATOR === '\\') {
+      $this->markTestSkipped('Requires POSIX utilities.');
+    }
+
     $temp_dir = sys_get_temp_dir();
     $this->processCwd = $temp_dir;
 
