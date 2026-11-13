@@ -68,6 +68,11 @@ trait LocationsTrait {
   protected static string $tmp;
 
   /**
+   * Working directory at the time the locations were initialized.
+   */
+  protected ?string $locationsOriginalCwd = NULL;
+
+  /**
    * Path to the fixtures directory from the repository root.
    *
    * This method should be overridden in the child class to provide a custom
@@ -91,6 +96,8 @@ trait LocationsTrait {
    *   class where this trait is used.
    */
   public function locationsInit(?string $cwd = NULL, ?\Closure $after = NULL): void {
+    $this->locationsOriginalCwd = getcwd() ?: NULL;
+
     static::$root = static::locationsRealpath($cwd ?? (string) getcwd());
     static::$workspace = static::locationsMkdir(rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'workspace-' . microtime(TRUE) . '-' . getmypid());
     static::$repo = static::locationsMkdir(static::$workspace . DIRECTORY_SEPARATOR . 'repo');
@@ -110,9 +117,13 @@ trait LocationsTrait {
   /**
    * Tear down the locations.
    *
-   * Removes the workspace directory and everything below it.
+   * Removes the workspace directory and everything below it. If the working
+   * directory is inside the workspace, changes to the working directory
+   * recorded by locationsInit() first.
    */
   public function locationsTearDown(): void {
+    $this->locationsLeaveWorkspace();
+
     $fs = new Filesystem();
     try {
       $fs->chmod(static::$workspace, 0777, 0000, TRUE);
@@ -122,6 +133,29 @@ trait LocationsTrait {
     }
 
     $fs->remove(static::$workspace);
+  }
+
+  /**
+   * Change the working directory out of the workspace.
+   *
+   * Windows cannot remove a directory that is the working directory of a
+   * process. A working directory that no longer exists is also replaced.
+   *
+   * The target is the working directory recorded by locationsInit(), or the
+   * parent of the workspace when none was recorded or it no longer exists.
+   */
+  protected function locationsLeaveWorkspace(): void {
+    $cwd = getcwd();
+    $cwd = $cwd === FALSE ? FALSE : realpath($cwd);
+    $workspace = realpath(static::$workspace);
+
+    if ($cwd !== FALSE && ($workspace === FALSE || !str_starts_with($cwd . DIRECTORY_SEPARATOR, $workspace . DIRECTORY_SEPARATOR))) {
+      return;
+    }
+
+    $target = $this->locationsOriginalCwd !== NULL && is_dir($this->locationsOriginalCwd) ? $this->locationsOriginalCwd : dirname(static::$workspace);
+
+    chdir($target);
   }
 
   /**
