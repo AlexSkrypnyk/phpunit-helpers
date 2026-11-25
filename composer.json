@@ -31,7 +31,7 @@
         "laravel/serializable-closure": "^2.2.0",
         "phpbench/phpbench": "^1.7.1",
         "phpstan/phpstan": "^2.3.7",
-        "rector/rector": "^2.8.5",
+        "rector/rector": "^2.9.2",
         "squizlabs/php_codesniffer": "^4.0.4",
         "symfony/console": "^6.4 || ^7.2 || ^8.0"
     },
